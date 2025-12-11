@@ -1,5 +1,3 @@
-{ secrets }:
-
 { config, pkgs, lib, ... }:
 
 {
@@ -31,7 +29,7 @@
     '';
     shellAliases = {
       la = "ls -lah";
-      rebuild = "sudo nixos-rebuild switch";
+      rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#terminus";
     };
   };
 
@@ -42,11 +40,10 @@
 
   programs.git = {
     enable = true;
+    includes = [{
+      path = "~/.config/git/identity";
+    }];
     settings = {
-      user = {
-        name = secrets.git.name;
-        email = secrets.git.email;
-      };
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;

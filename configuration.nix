@@ -1,13 +1,22 @@
 { config, lib, pkgs, ... }:
 
 let
-  secrets = import ./secrets.nix;
+  hostConfig = import ./hosts/terminus.nix;
 in
 {
   imports = [
     ./hardware-configuration.nix
-    <home-manager/nixos>
   ];
+
+  age.secrets = {
+    git-identity = {
+      file = ./secrets/git-identity.age;
+      path = "/home/dan/.config/git/identity";
+      owner = "dan";
+      group = "users";
+      mode = "0600";
+    };
+  };
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -20,16 +29,16 @@ in
   networking.useDHCP = false;
   networking.interfaces.eth0 = {
     ipv4.addresses = [{
-      address = secrets.networking.ipv4Address;
-      prefixLength = secrets.networking.ipv4PrefixLength;
+      address = hostConfig.networking.ipv4Address;
+      prefixLength = hostConfig.networking.ipv4PrefixLength;
     }];
     ipv6.addresses = [{
-      address = secrets.networking.ipv6Address;
-      prefixLength = secrets.networking.ipv6PrefixLength;
+      address = hostConfig.networking.ipv6Address;
+      prefixLength = hostConfig.networking.ipv6PrefixLength;
     }];
   };
-  networking.nameservers = secrets.networking.nameservers;
-  networking.defaultGateway = secrets.networking.ipv4Gateway;
+  networking.nameservers = hostConfig.networking.nameservers;
+  networking.defaultGateway = hostConfig.networking.ipv4Gateway;
   networking.defaultGateway6 = { address = "fe80::1"; interface = "eth0"; };
   networking.firewall = {
     enable = true;
@@ -55,11 +64,15 @@ in
     };
   };
 
-  users.users.root.openssh.authorizedKeys.keys = [ secrets.sshKeys.root ];
+  users.users.root.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGkRaEkD++/3Zkd2PsqmQtZ0t8CA16rQgyOs/J7zBj0D"
+  ];
   users.users.dan = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" "kvm" "libvirtd" ];
-    openssh.authorizedKeys.keys = [ secrets.sshKeys.dan ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHifaRXUcEaoTkf8dJF4qB7V9+VTjYX++fRbOKoCCpC2"
+    ];
   };
 
   environment.systemPackages = with pkgs; [
@@ -69,12 +82,15 @@ in
     wget
     zellij
     nodejs_24
+    age
   ];
 
   virtualisation.libvirtd.enable = true;
   virtualisation.libvirtd.allowedBridges = [ "virbr0" ];
 
   programs.nix-ld.enable = true;
+
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   nix.gc = {
     automatic = true;
@@ -86,14 +102,15 @@ in
     enable = true;
     allowReboot = true;
     dates = "04:00";
+    flake = "github:djvcom/nixos-config#terminus";
   };
 
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "backup";
-    users.dan = { config, pkgs, lib, ... }: {
-      imports = [ (import ./home.nix { inherit secrets; }) ];
+    users.dan = { ... }: {
+      imports = [ ./home.nix ];
     };
   };
 

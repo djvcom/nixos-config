@@ -1,3 +1,2 @@
-# Private files - DO NOT COMMIT
+# Old unencrypted secrets (can be removed after confirming agenix works)
 secrets.nix
-hardware-configuration.nix

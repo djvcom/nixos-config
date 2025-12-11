@@ -7,14 +7,4 @@
     ipv6PrefixLength = 64;
     nameservers = [ "DNS_SERVER_1" "DNS_SERVER_2" ];
   };
-
-  sshKeys = {
-    root = "ssh-ed25519 YOUR_ROOT_PUBLIC_KEY";
-    dan = "ssh-ed25519 YOUR_USER_PUBLIC_KEY";
-  };
-
-  git = {
-    name = "Your Name";
-    email = "your.email@example.com";
-  };
 }
