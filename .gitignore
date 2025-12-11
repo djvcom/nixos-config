@@ -1,0 +1,3 @@
+# Private files - DO NOT COMMIT
+secrets.nix
+hardware-configuration.nix
