@@ -10,7 +10,7 @@
     eza
     jq
     gh
-    rust-analyzer
+    rustup
   ];
 
   home.file.".npm-global/.keep".text = "";
