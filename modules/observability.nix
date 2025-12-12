@@ -65,6 +65,10 @@ in
               processes = {};
             };
           };
+          journald = {
+            units = [ "sshd" "nginx" "docker" "podman" "systemd-*" ];
+            priority = "info";
+          };
         };
         processors = {
           batch.timeout = "10s";
@@ -80,6 +84,7 @@ in
 
     systemd.services.opentelemetry-collector.serviceConfig = lib.mkIf (cfg.tokenSecretPath != null) {
       EnvironmentFile = cfg.tokenSecretPath;
+      SupplementaryGroups = [ "systemd-journal" ];
     };
   };
 }

@@ -38,8 +38,8 @@
     peers = [];
   };
 
-  age.secrets.axiom-token = {
-    file = ../../secrets/axiom-token.age;
+  age.secrets.datadog-api-key = {
+    file = ../../secrets/datadog-api-key.age;
     owner = "root";
     group = "root";
     mode = "0600";
@@ -47,39 +47,27 @@
 
   modules.observability = {
     enable = true;
-    tokenSecretPath = config.age.secrets.axiom-token.path;
+    tokenSecretPath = config.age.secrets.datadog-api-key.path;
     exporters = {
-      otlphttp = {
-        endpoint = "https://api.axiom.co";
-        headers = {
-          authorization = "Bearer \${env:AXIOM_TOKEN}";
-          x-axiom-dataset = "terminus";
-        };
-      };
-      "otlphttp/metrics" = {
-        compression = "zstd";
-        endpoint = "https://api.axiom.co";
-        headers = {
-          authorization = "Bearer \${env:AXIOM_TOKEN}";
-          x-axiom-metrics-dataset = "terminus-m";
-        };
+      datadog = {
+        api.key = "\${env:DD_API_KEY}";
       };
     };
     pipelines = {
       metrics = {
         receivers = [ "otlp" "hostmetrics" ];
         processors = [ "resourcedetection" "batch" ];
-        exporters = [ "otlphttp/metrics" ];
+        exporters = [ "datadog" ];
       };
       traces = {
         receivers = [ "otlp" ];
         processors = [ "resourcedetection" "batch" ];
-        exporters = [ "otlphttp" ];
+        exporters = [ "datadog" ];
       };
       logs = {
-        receivers = [ "otlp" ];
+        receivers = [ "otlp" "journald" ];
         processors = [ "resourcedetection" "batch" ];
-        exporters = [ "otlphttp" ];
+        exporters = [ "datadog" ];
       };
     };
   };
