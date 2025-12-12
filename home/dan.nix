@@ -71,7 +71,6 @@
     vimAlias = true;
 
     plugins = with pkgs.vimPlugins; [
-      nvim-lspconfig
       nvim-cmp
       cmp-nvim-lsp
       cmp-buffer
@@ -116,10 +115,12 @@
         highlight = { enable = true },
       })
 
-      local lspconfig = require("lspconfig")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      lspconfig.rust_analyzer.setup({
+      vim.lsp.config("rust_analyzer", {
+        cmd = { "rust-analyzer" },
+        filetypes = { "rust" },
+        root_markers = { "Cargo.toml", "rust-project.json" },
         capabilities = capabilities,
         settings = {
           ["rust-analyzer"] = {
@@ -127,6 +128,8 @@
           },
         },
       })
+
+      vim.lsp.enable("rust_analyzer")
 
       vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
       vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Find references" })
