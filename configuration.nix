@@ -22,6 +22,12 @@ in
       group = "root";
       mode = "0600";
     };
+    axiom-token = {
+      file = ./secrets/axiom-token.age;
+      owner = "root";
+      group = "root";
+      mode = "0600";
+    };
   };
 
   boot.loader.systemd-boot.enable = true;
@@ -48,7 +54,7 @@ in
   networking.defaultGateway6 = { address = "fe80::1"; interface = "eth0"; };
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 22 ];
+    allowedTCPPorts = [ 22 4317 4318 ];
     allowedUDPPorts = [ 51820 ];
     allowPing = true;
   };
@@ -84,6 +90,82 @@ in
       KbdInteractiveAuthentication = false;
     };
   };
+
+  services.opentelemetry-collector = {
+    enable = true;
+    package = pkgs.opentelemetry-collector-contrib;
+    settings = {
+      receivers = {
+        otlp = {
+          protocols = {
+            grpc.endpoint = "0.0.0.0:4317";
+            http.endpoint = "0.0.0.0:4318";
+          };
+        };
+        hostmetrics = {
+          collection_interval = "60s";
+          scrapers = {
+            cpu = {};
+            disk = {};
+            filesystem = {};
+            load = {};
+            memory = {};
+            network = {};
+            processes = {};
+          };
+        };
+      };
+      processors = {
+        batch = {
+          timeout = "10s";
+        };
+        resourcedetection = {
+          detectors = [ "system" ];
+          system = {
+            hostname_sources = [ "os" ];
+          };
+        };
+      };
+      exporters = {
+        otlphttp = {
+          endpoint = "https://api.axiom.co";
+          headers = {
+            authorization = "Bearer \${env:AXIOM_TOKEN}";
+            x-axiom-dataset = "terminus";
+          };
+        };
+        "otlphttp/metrics" = {
+          compression = "zstd";
+          endpoint = "https://api.axiom.co";
+          headers = {
+            authorization = "Bearer \${env:AXIOM_TOKEN}";
+            x-axiom-metrics-dataset = "terminus-m";
+          };
+        };
+      };
+      service = {
+        pipelines = {
+          metrics = {
+            receivers = [ "otlp" "hostmetrics" ];
+            processors = [ "resourcedetection" "batch" ];
+            exporters = [ "otlphttp/metrics" ];
+          };
+          traces = {
+            receivers = [ "otlp" ];
+            processors = [ "resourcedetection" "batch" ];
+            exporters = [ "otlphttp" ];
+          };
+          logs = {
+            receivers = [ "otlp" ];
+            processors = [ "resourcedetection" "batch" ];
+            exporters = [ "otlphttp" ];
+          };
+        };
+      };
+    };
+  };
+
+  systemd.services.opentelemetry-collector.serviceConfig.EnvironmentFile = config.age.secrets.axiom-token.path;
 
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGkRaEkD++/3Zkd2PsqmQtZ0t8CA16rQgyOs/J7zBj0D"

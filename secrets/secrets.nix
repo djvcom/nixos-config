@@ -6,4 +6,5 @@ in
 {
   "git-identity.age".publicKeys = allKeys;
   "wireguard-private.age".publicKeys = allKeys;
+  "axiom-token.age".publicKeys = allKeys;
 }
