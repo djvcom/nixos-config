@@ -93,6 +93,8 @@
       ]))
 
       gruvbox-nvim
+      nvim-tree-lua
+      nvim-web-devicons
     ];
 
     extraLuaConfig = ''
@@ -110,6 +112,12 @@
       vim.g.mapleader = " "
 
       vim.cmd.colorscheme("gruvbox")
+
+      require("nvim-tree").setup({
+        view = { width = 30 },
+        filters = { dotfiles = false },
+      })
+      vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { desc = "Toggle file tree" })
 
       require("nvim-treesitter.configs").setup({
         highlight = { enable = true },
