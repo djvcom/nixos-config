@@ -11,6 +11,7 @@
     jq
     gh
     rustup
+    gcc
   ];
 
   home.file.".npm-global/.keep".text = "";
@@ -130,11 +131,6 @@
         filetypes = { "rust" },
         root_markers = { "Cargo.toml", "rust-project.json" },
         capabilities = capabilities,
-        settings = {
-          ["rust-analyzer"] = {
-            checkOnSave = { command = "clippy" },
-          },
-        },
       })
 
       vim.lsp.enable("rust_analyzer")
