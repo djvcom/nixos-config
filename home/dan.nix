@@ -22,6 +22,7 @@
   };
 
   programs.bash = {
+    enableCompletion = true;
     enable = true;
     initExtra = ''
       export PATH="$HOME/.npm-global/bin:$PATH"
@@ -35,6 +36,20 @@
       la = "ls -lah";
       rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#terminus";
       vim = "nvim";
+      # Git aliases (oh-my-zsh style)
+      g = "git";
+      gst = "git status";
+      ga = "git add";
+      gaa = "git add --all";
+      gc = "git commit";
+      gcm = "git commit -m";
+      gco = "git checkout";
+      gp = "git push";
+      gl = "git pull";
+      gd = "git diff";
+      gds = "git diff --staged";
+      gb = "git branch";
+      glog = "git log --oneline --graph --decorate";
     };
   };
 
