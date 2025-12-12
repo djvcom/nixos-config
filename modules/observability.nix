@@ -54,14 +54,23 @@ in
             http.endpoint = "0.0.0.0:4318";
           };
           hostmetrics = {
-            collection_interval = "60s";
+            collection_interval = "10s";
             scrapers = {
-              cpu = {};
+              cpu.metrics = {
+                "system.cpu.utilization".enabled = true;
+                "system.cpu.physical.count".enabled = true;
+                "system.cpu.logical.count".enabled = true;
+              };
               disk = {};
-              filesystem = {};
+              filesystem.metrics = {
+                "system.filesystem.utilization".enabled = true;
+              };
               load = {};
               memory = {};
               network = {};
+              paging.metrics = {
+                "system.paging.utilization".enabled = true;
+              };
               processes = {};
             };
           };
@@ -81,18 +90,14 @@ in
               {
                 context = "log";
                 statements = [
-                  # Flatten all body fields into attributes (preserves everything)
                   ''merge_maps(attributes, body, "insert")''
-                  # Set Datadog-specific fields
                   ''set(attributes["message"], body["MESSAGE"])''
                   ''set(attributes["service"], body["SYSLOG_IDENTIFIER"])''
-                  # Set severity (syslog: 3=err, 4=warn, 5=notice, 6=info, 7=debug)
                   ''set(severity_number, SEVERITY_NUMBER_ERROR) where body["PRIORITY"] == "3"''
                   ''set(severity_number, SEVERITY_NUMBER_WARN) where body["PRIORITY"] == "4"''
                   ''set(severity_number, SEVERITY_NUMBER_INFO) where body["PRIORITY"] == "5"''
                   ''set(severity_number, SEVERITY_NUMBER_INFO) where body["PRIORITY"] == "6"''
                   ''set(severity_number, SEVERITY_NUMBER_DEBUG) where body["PRIORITY"] == "7"''
-                  # Set body to just the message string
                   ''set(body, body["MESSAGE"])''
                 ];
               }
