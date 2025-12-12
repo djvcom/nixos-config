@@ -50,6 +50,8 @@
       gds = "git diff --staged";
       gb = "git branch";
       glog = "git log --oneline --graph --decorate";
+      # Tree view using eza
+      tree = "eza --tree";
     };
   };
 
