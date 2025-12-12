@@ -64,13 +64,11 @@
         processors = [ "resourcedetection" "batch" ];
         exporters = [ "datadog" ];
       };
-      # Application logs via OTLP (already formatted)
       logs = {
         receivers = [ "otlp" ];
         processors = [ "resourcedetection" "batch" ];
         exporters = [ "datadog" ];
       };
-      # System logs from journald (need transform)
       "logs/system" = {
         receivers = [ "journald" ];
         processors = [ "transform/logs" "resourcedetection" "batch" ];
@@ -109,6 +107,20 @@
 
   virtualisation.libvirtd.enable = true;
   virtualisation.libvirtd.allowedBridges = [ "virbr0" ];
+
+  services.postgresql = {
+    enable = true;
+    ensureUsers = [{
+      name = "dan";
+      ensureClauses.superuser = true;
+      ensureClauses.login = true;
+    }];
+    authentication = lib.mkForce ''
+      local all all trust
+      host all all 127.0.0.1/32 trust
+      host all all ::1/128 trust
+    '';
+  };
 
   system.autoUpgrade = {
     enable = true;
