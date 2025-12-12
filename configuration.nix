@@ -16,6 +16,12 @@ in
       group = "users";
       mode = "0600";
     };
+    wireguard-private = {
+      file = ./secrets/wireguard-private.age;
+      owner = "root";
+      group = "root";
+      mode = "0600";
+    };
   };
 
   boot.loader.systemd-boot.enable = true;
@@ -43,7 +49,15 @@ in
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 ];
+    allowedUDPPorts = [ 51820 ];
     allowPing = true;
+  };
+
+  networking.wireguard.interfaces.wg0 = {
+    ips = [ "10.100.0.1/24" ];
+    listenPort = 51820;
+    privateKeyFile = config.age.secrets.wireguard-private.path;
+    peers = [];
   };
 
   security.sudo.extraRules = [{
@@ -90,6 +104,7 @@ in
     zellij
     nodejs_24
     age
+    wireguard-tools
   ];
 
   virtualisation.libvirtd.enable = true;

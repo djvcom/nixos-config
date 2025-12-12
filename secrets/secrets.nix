@@ -4,7 +4,6 @@ let
   allKeys = [ terminus dan ];
 in
 {
-  "ssh-key-root.age".publicKeys = allKeys;
-  "ssh-key-dan.age".publicKeys = allKeys;
   "git-identity.age".publicKeys = allKeys;
+  "wireguard-private.age".publicKeys = allKeys;
 }
