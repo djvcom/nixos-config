@@ -10,12 +10,13 @@
     eza
     jq
     gh
+    rust-analyzer
   ];
 
   home.file.".npm-global/.keep".text = "";
 
   home.sessionVariables = {
-    EDITOR = "vim";
+    EDITOR = "nvim";
     NPM_CONFIG_PREFIX = "$HOME/.npm-global";
   };
 
@@ -32,12 +33,149 @@
     shellAliases = {
       la = "ls -lah";
       rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#terminus";
+      vim = "nvim";
     };
   };
 
   programs.zellij = {
     enable = true;
     enableBashIntegration = false;
+  };
+
+  programs.starship = {
+    enable = true;
+    enableBashIntegration = true;
+    settings = {
+      add_newline = false;
+      character = {
+        success_symbol = "[❯](green)";
+        error_symbol = "[❯](red)";
+      };
+      directory.truncation_length = 3;
+      git_branch.symbol = " ";
+      rust.symbol = " ";
+      nodejs.symbol = " ";
+      package.disabled = true;
+    };
+  };
+
+  programs.zoxide = {
+    enable = true;
+    enableBashIntegration = true;
+  };
+
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+
+    plugins = with pkgs.vimPlugins; [
+      nvim-lspconfig
+      nvim-cmp
+      cmp-nvim-lsp
+      cmp-buffer
+      cmp-path
+      luasnip
+      cmp_luasnip
+
+      telescope-nvim
+      plenary-nvim
+
+      (nvim-treesitter.withPlugins (p: [
+        p.rust
+        p.toml
+        p.lua
+        p.nix
+        p.bash
+        p.json
+        p.yaml
+        p.markdown
+      ]))
+
+      gruvbox-nvim
+    ];
+
+    extraLuaConfig = ''
+      vim.opt.number = true
+      vim.opt.relativenumber = true
+      vim.opt.expandtab = true
+      vim.opt.shiftwidth = 2
+      vim.opt.tabstop = 2
+      vim.opt.smartindent = true
+      vim.opt.termguicolors = true
+      vim.opt.signcolumn = "yes"
+      vim.opt.updatetime = 250
+      vim.opt.clipboard = "unnamedplus"
+
+      vim.g.mapleader = " "
+
+      vim.cmd.colorscheme("gruvbox")
+
+      require("nvim-treesitter.configs").setup({
+        highlight = { enable = true },
+      })
+
+      local lspconfig = require("lspconfig")
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+      lspconfig.rust_analyzer.setup({
+        capabilities = capabilities,
+        settings = {
+          ["rust-analyzer"] = {
+            checkOnSave = { command = "clippy" },
+          },
+        },
+      })
+
+      vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
+      vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Find references" })
+      vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover info" })
+      vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
+      vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol" })
+      vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev diagnostic" })
+      vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
+
+      local cmp = require("cmp")
+      local luasnip = require("luasnip")
+
+      cmp.setup({
+        snippet = {
+          expand = function(args)
+            luasnip.lsp_expand(args.body)
+          end,
+        },
+        mapping = cmp.mapping.preset.insert({
+          ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+          ["<C-f>"] = cmp.mapping.scroll_docs(4),
+          ["<C-Space>"] = cmp.mapping.complete(),
+          ["<C-e>"] = cmp.mapping.abort(),
+          ["<CR>"] = cmp.mapping.confirm({ select = true }),
+          ["<Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then
+              luasnip.expand_or_jump()
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+        }),
+        sources = cmp.config.sources({
+          { name = "nvim_lsp" },
+          { name = "luasnip" },
+        }, {
+          { name = "buffer" },
+          { name = "path" },
+        }),
+      })
+
+      local telescope = require("telescope.builtin")
+      vim.keymap.set("n", "<leader>ff", telescope.find_files, { desc = "Find files" })
+      vim.keymap.set("n", "<leader>fg", telescope.live_grep, { desc = "Live grep" })
+      vim.keymap.set("n", "<leader>fb", telescope.buffers, { desc = "Buffers" })
+      vim.keymap.set("n", "<leader>fh", telescope.help_tags, { desc = "Help tags" })
+    '';
   };
 
   programs.git = {
