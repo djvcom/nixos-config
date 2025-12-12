@@ -64,9 +64,16 @@
         processors = [ "resourcedetection" "batch" ];
         exporters = [ "datadog" ];
       };
+      # Application logs via OTLP (already formatted)
       logs = {
-        receivers = [ "otlp" "journald" ];
+        receivers = [ "otlp" ];
         processors = [ "resourcedetection" "batch" ];
+        exporters = [ "datadog" ];
+      };
+      # System logs from journald (need transform)
+      "logs/system" = {
+        receivers = [ "journald" ];
+        processors = [ "transform/logs" "resourcedetection" "batch" ];
         exporters = [ "datadog" ];
       };
     };

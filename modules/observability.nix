@@ -76,6 +76,28 @@ in
             detectors = [ "system" ];
             system.hostname_sources = [ "os" ];
           };
+          "transform/logs" = {
+            log_statements = [
+              {
+                context = "log";
+                statements = [
+                  # Flatten all body fields into attributes (preserves everything)
+                  ''merge_maps(attributes, body, "insert")''
+                  # Set Datadog-specific fields
+                  ''set(attributes["message"], body["MESSAGE"])''
+                  ''set(attributes["service"], body["SYSLOG_IDENTIFIER"])''
+                  # Set severity (syslog: 3=err, 4=warn, 5=notice, 6=info, 7=debug)
+                  ''set(severity_number, SEVERITY_NUMBER_ERROR) where body["PRIORITY"] == "3"''
+                  ''set(severity_number, SEVERITY_NUMBER_WARN) where body["PRIORITY"] == "4"''
+                  ''set(severity_number, SEVERITY_NUMBER_INFO) where body["PRIORITY"] == "5"''
+                  ''set(severity_number, SEVERITY_NUMBER_INFO) where body["PRIORITY"] == "6"''
+                  ''set(severity_number, SEVERITY_NUMBER_DEBUG) where body["PRIORITY"] == "7"''
+                  # Set body to just the message string
+                  ''set(body, body["MESSAGE"])''
+                ];
+              }
+            ];
+          };
         };
         exporters = cfg.exporters;
         service.pipelines = cfg.pipelines;
