@@ -14,18 +14,15 @@
     gcc
   ];
 
-  home.file.".npm-global/.keep".text = "";
 
   home.sessionVariables = {
     EDITOR = "nvim";
-    NPM_CONFIG_PREFIX = "$HOME/.npm-global";
   };
 
   programs.bash = {
     enableCompletion = true;
     enable = true;
     initExtra = ''
-      export PATH="$HOME/.npm-global/bin:$PATH"
       export PATH="$HOME/.local/bin:$PATH"
 
       if [ -f "$HOME/.cargo/env" ]; then
