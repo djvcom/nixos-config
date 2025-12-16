@@ -108,6 +108,12 @@
   virtualisation.libvirtd.enable = true;
   virtualisation.libvirtd.allowedBridges = [ "virbr0" ];
 
+  virtualisation.podman = {
+    enable = true;
+    dockerCompat = true;
+    defaultNetwork.settings.dns_enabled = true;
+  };
+
   services.postgresql = {
     enable = true;
     ensureUsers = [{
