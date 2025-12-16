@@ -12,6 +12,7 @@
     gh
     rustup
     gcc
+    yarn
   ];
 
 
