@@ -13,6 +13,7 @@
     rustup
     gcc
     yarn
+    nodePackages.typescript-language-server
   ];
 
 
@@ -106,6 +107,8 @@
         p.json
         p.yaml
         p.markdown
+        p.typescript
+        p.tsx
       ]))
 
       gruvbox-nvim
@@ -160,6 +163,15 @@
       })
 
       vim.lsp.enable("rust_analyzer")
+
+      vim.lsp.config("ts_ls", {
+        cmd = { "typescript-language-server", "--stdio" },
+        filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
+        root_markers = { "tsconfig.json", "package.json" },
+        capabilities = capabilities,
+      })
+
+      vim.lsp.enable("ts_ls")
 
       vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
       vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Find references" })
