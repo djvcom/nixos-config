@@ -94,7 +94,7 @@
 
   users.users.dan = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "kvm" "libvirtd" ];
+    extraGroups = [ "wheel" "networkmanager" "kvm" "libvirtd" "podman" ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHifaRXUcEaoTkf8dJF4qB7V9+VTjYX++fRbOKoCCpC2"
     ];
@@ -111,6 +111,7 @@
   virtualisation.podman = {
     enable = true;
     dockerCompat = true;
+    dockerSocket.enable = true;
     defaultNetwork.settings.dns_enabled = true;
   };
 
