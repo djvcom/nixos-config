@@ -18,9 +18,14 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    dagger = {
+      url = "github:dagger/nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, agenix, disko, ... }: {
+  outputs = { self, nixpkgs, home-manager, agenix, disko, dagger, ... }: {
     nixosConfigurations.terminus = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
@@ -29,7 +34,10 @@
         agenix.nixosModules.default
         disko.nixosModules.disko
         {
-          environment.systemPackages = [ agenix.packages.x86_64-linux.default ];
+          environment.systemPackages = [
+            agenix.packages.x86_64-linux.default
+            dagger.packages.x86_64-linux.dagger
+          ];
         }
       ];
     };
