@@ -26,6 +26,11 @@
     enableCompletion = true;
     enable = true;
     initExtra = ''
+      # Source home-manager session vars for SSH sessions
+      if [ -f "/etc/profiles/per-user/dan/etc/profile.d/hm-session-vars.sh" ]; then
+        . "/etc/profiles/per-user/dan/etc/profile.d/hm-session-vars.sh"
+      fi
+
       export PATH="$HOME/.local/bin:$PATH"
 
       if [ -f "$HOME/.cargo/env" ]; then
