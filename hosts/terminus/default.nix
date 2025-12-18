@@ -27,7 +27,7 @@
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 22 ];
+    allowedTCPPorts = [ 22 443 ];
     allowPing = true;
   };
 
@@ -127,6 +127,58 @@
       local all all trust
       host all all 127.0.0.1/32 trust
       host all all ::1/128 trust
+    '';
+  };
+
+  services.sslh = {
+    listenAddresses = [];
+    enable = true;
+    settings = {
+      listen = [{ host = "0.0.0.0"; port = "443"; is_udp = false; }];
+      protocols = [
+        { name = "ssh"; host = "127.0.0.1"; port = "22"; }
+        { name = "tls"; host = "127.0.0.1"; port = "8443"; }
+      ];
+    };
+  };
+
+  services.nginx = {
+    enable = true;
+    recommendedGzipSettings = true;
+    recommendedOptimisation = true;
+    recommendedProxySettings = true;
+    recommendedTlsSettings = true;
+    virtualHosts."_" = {
+      listen = [{ addr = "127.0.0.1"; port = 8443; ssl = true; }];
+      onlySSL = true;
+      sslCertificate = "/var/lib/nginx/selfsigned.crt";
+      sslCertificateKey = "/var/lib/nginx/selfsigned.key";
+      locations."/" = {
+        return = "200 'terminus is running'";
+        extraConfig = "add_header Content-Type text/plain;";
+      };
+    };
+  };
+
+  systemd.services.nginx-selfsigned-cert = {
+    description = "Generate self-signed certificate for nginx";
+    wantedBy = [ "nginx.service" ];
+    before = [ "nginx.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      if [ ! -f /var/lib/nginx/selfsigned.crt ]; then
+        mkdir -p /var/lib/nginx
+        ${pkgs.openssl}/bin/openssl req -x509 -nodes -days 365 \
+          -newkey rsa:2048 \
+          -keyout /var/lib/nginx/selfsigned.key \
+          -out /var/lib/nginx/selfsigned.crt \
+          -subj "/CN=terminus"
+        chown nginx:nginx /var/lib/nginx/selfsigned.*
+        chmod 600 /var/lib/nginx/selfsigned.key
+      fi
     '';
   };
 
