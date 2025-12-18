@@ -85,7 +85,7 @@
     mode = "0600";
   };
 
-  boot.kernelModules = [ "kvm-intel" "kvm-amd" ];
+  boot.kernelModules = [ "kvm-intel" "kvm-amd" "iptable_nat" "iptable_filter" ];
   boot.swraid.mdadmConf = "MAILADDR root";
 
   users.users.root.openssh.authorizedKeys.keys = [
