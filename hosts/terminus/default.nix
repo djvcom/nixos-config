@@ -25,10 +25,19 @@
   networking.defaultGateway = "88.99.1.129";
   networking.defaultGateway6 = { address = "fe80::1"; interface = "eth0"; };
 
+
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 443 ];
     allowPing = true;
+    extraCommands = ''
+      iptables -I nixos-fw 5 -p tcp -s 10.88.0.0/16 --dport 14317 -j nixos-fw-accept
+      iptables -I nixos-fw 5 -p tcp -s 10.88.0.0/16 --dport 14318 -j nixos-fw-accept
+    '';
+    extraStopCommands = ''
+      iptables -D nixos-fw -p tcp -s 10.88.0.0/16 --dport 14317 -j nixos-fw-accept 2>/dev/null || true
+      iptables -D nixos-fw -p tcp -s 10.88.0.0/16 --dport 14318 -j nixos-fw-accept 2>/dev/null || true
+    '';
   };
 
   modules.wireguard = {
@@ -103,6 +112,7 @@
 
   environment.systemPackages = with pkgs; [
     zellij
+    nftables
     nodejs_24
   ];
 
