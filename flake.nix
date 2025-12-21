@@ -25,20 +25,46 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, agenix, disko, dagger, ... }: {
-    nixosConfigurations.terminus = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
+  outputs = { self, nixpkgs, home-manager, agenix, disko, dagger, ... }@inputs:
+  let
+    system = "x86_64-linux";
+    pkgs = nixpkgs.legacyPackages.${system};
+
+    # Helper for creating NixOS configurations
+    mkHost = hostname: nixpkgs.lib.nixosSystem {
+      inherit system;
+      specialArgs = { inherit inputs; };
       modules = [
-        ./hosts/terminus
+        ./hosts/${hostname}
         home-manager.nixosModules.home-manager
         agenix.nixosModules.default
         disko.nixosModules.disko
         {
           environment.systemPackages = [
-            agenix.packages.x86_64-linux.default
-            dagger.packages.x86_64-linux.dagger
+            agenix.packages.${system}.default
+            dagger.packages.${system}.dagger
           ];
         }
+      ];
+    };
+  in
+  {
+    nixosConfigurations.terminus = mkHost "terminus";
+
+    # Formatter for `nix fmt`
+    formatter.${system} = pkgs.nixfmt-rfc-style;
+
+    # Checks for CI
+    checks.${system} = {
+      terminus = self.nixosConfigurations.terminus.config.system.build.toplevel;
+    };
+
+    # Development shell for working on this repo
+    devShells.${system}.default = pkgs.mkShell {
+      packages = with pkgs; [
+        nil
+        nixfmt-rfc-style
+        agenix.packages.${system}.default
       ];
     };
   };

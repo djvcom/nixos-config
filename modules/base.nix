@@ -1,4 +1,17 @@
-{ config, pkgs, ... }:
+/**
+  Base system configuration shared across all hosts.
+
+  Configures:
+  - systemd-boot with secure defaults
+  - SSH hardening (key-only auth, no root login)
+  - Fail2ban brute-force protection
+  - Automatic garbage collection
+
+  References:
+  - SSH: <https://nvlpubs.nist.gov/nistpubs/ir/2015/NIST.IR.7966.pdf>
+  - CIS Benchmarks: <https://www.cisecurity.org/cis-benchmarks>
+*/
+{ config, lib, pkgs, ... }:
 
 {
   boot.loader.systemd-boot.enable = true;
@@ -15,6 +28,7 @@
   }];
   security.protectKernelImage = true;
 
+  # Brute-force protection - see <https://www.fail2ban.org/>
   services.fail2ban = {
     enable = true;
     maxretry = 5;
@@ -22,6 +36,7 @@
     bantime-increment.enable = true;
   };
 
+  # SSH hardening per NIST IR 7966 and CIS benchmarks
   services.openssh = {
     enable = true;
     settings = {

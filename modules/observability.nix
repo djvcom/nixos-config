@@ -1,3 +1,18 @@
+/**
+  OpenTelemetry observability module for metrics, traces, and logs collection.
+
+  Configures the OpenTelemetry Collector with:
+  - OTLP receivers (gRPC/HTTP) bound to localhost by default
+  - Host metrics scraping (CPU, memory, disk, network)
+  - Journald log collection
+  - Configurable exporters and pipelines
+
+  Security: Receivers bind to localhost only. Use firewall rules to allow
+  specific networks (e.g. container networks) access to ports 4317/4318.
+
+  References:
+  - OpenTelemetry: <https://opentelemetry.io/docs/collector/>
+*/
 { config, lib, pkgs, ... }:
 
 let
@@ -7,14 +22,31 @@ in
   options.modules.observability = {
     enable = lib.mkEnableOption "OpenTelemetry observability";
 
+    listenAddress = lib.mkOption {
+      type = lib.types.str;
+      default = "127.0.0.1";
+      description = ''
+        Address to bind OTLP receivers. Defaults to localhost for security.
+        Use 0.0.0.0 only with appropriate firewall rules.
+      '';
+      example = "0.0.0.0";
+    };
+
     exporters = lib.mkOption {
-      type = lib.types.attrs;
-      description = "OTEL exporter configuration";
+      type = lib.types.attrsOf lib.types.anything;
+      description = "Exporter configurations keyed by exporter name";
+      example = lib.literalExpression ''
+        {
+          datadog = {
+            api.key = "\''${env:DD_API_KEY}";
+          };
+        }
+      '';
     };
 
     pipelines = lib.mkOption {
-      type = lib.types.attrs;
-      description = "OTEL pipeline configuration";
+      type = lib.types.attrsOf lib.types.anything;
+      description = "Pipeline configurations defining data flow from receivers through processors to exporters";
       default = {
         metrics = {
           receivers = [ "otlp" "hostmetrics" ];
@@ -37,21 +69,20 @@ in
     tokenSecretPath = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
-      description = "Path to agenix secret for API token";
+      description = "Path to agenix-managed secret file containing API tokens as environment variables";
+      example = lib.literalExpression "config.age.secrets.datadog-api-key.path";
     };
   };
 
   config = lib.mkIf cfg.enable {
-    networking.firewall.allowedTCPPorts = [ 4317 4318 ];
-
     services.opentelemetry-collector = {
       enable = true;
       package = pkgs.opentelemetry-collector-contrib;
       settings = {
         receivers = {
           otlp.protocols = {
-            grpc.endpoint = "0.0.0.0:4317";
-            http.endpoint = "0.0.0.0:4318";
+            grpc.endpoint = "${cfg.listenAddress}:4317";
+            http.endpoint = "${cfg.listenAddress}:4318";
           };
           hostmetrics = {
             collection_interval = "10s";
