@@ -16,6 +16,7 @@
     eza
     jq
     gh
+    glab
     rustup
     gcc
     yarn
