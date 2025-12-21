@@ -5,6 +5,7 @@
     ./dan/neovim.nix
     ./dan/shell.nix
     ./dan/git.nix
+    ./dan/gitlab.nix
   ];
 
   home.username = "dan";
