@@ -67,6 +67,13 @@
     mode = "0400";
   };
 
+  age.secrets.cloudflare-dns-token = {
+    file = ../../secrets/cloudflare-dns-token.age;
+    owner = "acme";
+    group = "acme";
+    mode = "0400";
+  };
+
   modules.observability = {
     enable = true;
     tokenSecretPath = config.age.secrets.datadog-api-key.path;
@@ -162,6 +169,29 @@
     listenAddress = "127.0.0.1:9000";
   };
 
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = "djverrall@gmail.com";
+
+    certs."djv.sh" = {
+      dnsProvider = "cloudflare";
+      environmentFile = config.age.secrets.cloudflare-dns-token.path;
+      group = "nginx";
+    };
+
+    certs."state.djv.sh" = {
+      dnsProvider = "cloudflare";
+      environmentFile = config.age.secrets.cloudflare-dns-token.path;
+      group = "nginx";
+    };
+
+    certs."minio.djv.sh" = {
+      dnsProvider = "cloudflare";
+      environmentFile = config.age.secrets.cloudflare-dns-token.path;
+      group = "nginx";
+    };
+  };
+
   services.sslh = {
     listenAddresses = [];
     enable = true;
@@ -180,38 +210,58 @@
     recommendedOptimisation = true;
     recommendedProxySettings = true;
     recommendedTlsSettings = true;
-    virtualHosts."_" = {
-      listen = [{ addr = "127.0.0.1"; port = 8443; ssl = true; }];
-      onlySSL = true;
-      sslCertificate = "/var/lib/nginx/selfsigned.crt";
-      sslCertificateKey = "/var/lib/nginx/selfsigned.key";
+
+    virtualHosts."djv.sh" = {
+      listen = [
+        { addr = "127.0.0.1"; port = 8443; ssl = true; }
+      ];
+      useACMEHost = "djv.sh";
+      addSSL = true;
       locations."/" = {
-        return = "200 'terminus is running'";
+        return = "200 'Welcome to djv.sh'";
         extraConfig = "add_header Content-Type text/plain;";
       };
     };
-  };
 
-  systemd.services.nginx-selfsigned-cert = {
-    description = "Generate self-signed certificate for nginx";
-    wantedBy = [ "nginx.service" ];
-    before = [ "nginx.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
+    virtualHosts."state.djv.sh" = {
+      listen = [
+        { addr = "127.0.0.1"; port = 8443; ssl = true; }
+      ];
+      useACMEHost = "state.djv.sh";
+      addSSL = true;
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:9000";
+        extraConfig = ''
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          
+          # MinIO specific
+          proxy_buffering off;
+          proxy_request_buffering off;
+          client_max_body_size 0;
+        '';
+      };
     };
-    script = ''
-      if [ ! -f /var/lib/nginx/selfsigned.crt ]; then
-        mkdir -p /var/lib/nginx
-        ${pkgs.openssl}/bin/openssl req -x509 -nodes -days 365 \
-          -newkey rsa:2048 \
-          -keyout /var/lib/nginx/selfsigned.key \
-          -out /var/lib/nginx/selfsigned.crt \
-          -subj "/CN=terminus"
-        chown nginx:nginx /var/lib/nginx/selfsigned.*
-        chmod 600 /var/lib/nginx/selfsigned.key
-      fi
-    '';
+
+    virtualHosts."minio.djv.sh" = {
+      listen = [
+        { addr = "127.0.0.1"; port = 8443; ssl = true; }
+      ];
+      useACMEHost = "minio.djv.sh";
+      addSSL = true;
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:9001";
+        proxyWebsockets = true;
+        extraConfig = ''
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+        '';
+      };
+    };
   };
 
   system.autoUpgrade = {

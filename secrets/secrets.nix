@@ -9,4 +9,5 @@ in
   "datadog-api-key.age".publicKeys = allKeys;
   "datadog-app-key.age".publicKeys = allKeys;
   "minio-credentials.age".publicKeys = allKeys;
+  "cloudflare-dns-token.age".publicKeys = allKeys;
 }

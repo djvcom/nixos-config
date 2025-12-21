@@ -22,6 +22,7 @@
     gcc
     yarn
     nodePackages.typescript-language-server
+    dnsutils
   ];
 
   home.sessionVariables = {
