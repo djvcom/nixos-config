@@ -4,8 +4,14 @@
   Configures the OpenTelemetry Collector with:
   - OTLP receivers (gRPC/HTTP) bound to localhost by default
   - Host metrics scraping (CPU, memory, disk, network)
-  - Journald log collection
+  - Journald log collection (sshd, nginx, nixos-upgrade, etc.)
   - Configurable exporters and pipelines
+
+  Log severity detection:
+  - Syslog PRIORITY mapped to OTEL severity (ERROR/WARN/INFO/DEBUG)
+  - Message content scanned for "warning|deprecated" -> WARN
+  - Message content scanned for "error|failed|failure" -> ERROR
+  - Attributes: nixos.upgrade_warning, nixos.build_error
 
   Security: Receivers bind to localhost only. Use firewall rules to allow
   specific networks (e.g. container networks) access to ports 4317/4318.
@@ -106,7 +112,7 @@ in
             };
           };
           journald = {
-            units = [ "sshd" "nginx" "docker" "podman" "systemd-*" ];
+            units = [ "sshd" "nginx" "docker" "podman" "systemd-*" "nixos-upgrade" "nixos-upgrade-preflight" ];
             priority = "info";
           };
         };
@@ -124,11 +130,18 @@ in
                   ''merge_maps(attributes, body, "insert")''
                   ''set(attributes["message"], body["MESSAGE"])''
                   ''set(attributes["service"], body["SYSLOG_IDENTIFIER"])''
+                  # Set severity based on syslog PRIORITY first
                   ''set(severity_number, SEVERITY_NUMBER_ERROR) where body["PRIORITY"] == "3"''
                   ''set(severity_number, SEVERITY_NUMBER_WARN) where body["PRIORITY"] == "4"''
                   ''set(severity_number, SEVERITY_NUMBER_INFO) where body["PRIORITY"] == "5"''
                   ''set(severity_number, SEVERITY_NUMBER_INFO) where body["PRIORITY"] == "6"''
                   ''set(severity_number, SEVERITY_NUMBER_DEBUG) where body["PRIORITY"] == "7"''
+                  # Override: flag warnings/deprecations in message content (e.g. nix build output)
+                  ''set(attributes["nixos.upgrade_warning"], true) where IsMatch(body["MESSAGE"], "(?i)warning|deprecated")''
+                  ''set(severity_number, SEVERITY_NUMBER_WARN) where IsMatch(body["MESSAGE"], "(?i)warning|deprecated")''
+                  # Override: flag errors in message content (errors take precedence over warnings)
+                  ''set(attributes["nixos.build_error"], true) where IsMatch(body["MESSAGE"], "(?i)\\berror\\b|\\bfailed\\b|\\bfailure\\b")''
+                  ''set(severity_number, SEVERITY_NUMBER_ERROR) where IsMatch(body["MESSAGE"], "(?i)\\berror\\b|\\bfailed\\b|\\bfailure\\b")''
                   ''set(body, body["MESSAGE"])''
                 ];
               }
