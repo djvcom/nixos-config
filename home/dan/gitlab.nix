@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, ... }:
 
 {
   home.file.".local/bin/rotate-gitlab-token" = {

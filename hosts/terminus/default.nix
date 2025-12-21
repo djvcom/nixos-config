@@ -1,9 +1,18 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   # Helper for ACME certs - all use same Cloudflare DNS-01 config
-  acmeDomains = [ "djv.sh" "state.djv.sh" "minio.djv.sh" ];
-  mkAcmeCert = domain: {
+  acmeDomains = [
+    "djv.sh"
+    "state.djv.sh"
+    "minio.djv.sh"
+  ];
+  mkAcmeCert = _: {
     dnsProvider = "cloudflare";
     environmentFile = config.age.secrets.cloudflare-dns-token.path;
     group = "nginx";
@@ -20,29 +29,45 @@ let
   '';
 
   # Helper for nginx virtual hosts
-  mkVhost = { acmeHost, proxyTo ? null, extraLocationConfig ? "" }: {
-    listen = [{ addr = "127.0.0.1"; port = 8443; ssl = true; }];
-    useACMEHost = acmeHost;
-    addSSL = true;
-    locations."/" = if proxyTo != null then {
-      proxyPass = proxyTo;
-      proxyWebsockets = true;
-      extraConfig = ''
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        ${securityHeaders}
-        ${extraLocationConfig}
-      '';
-    } else {
-      return = "200 'Welcome to djv.sh'";
-      extraConfig = ''
-        default_type text/plain;
-        ${securityHeaders}
-      '';
+  mkVhost =
+    {
+      acmeHost,
+      proxyTo ? null,
+      extraLocationConfig ? "",
+    }:
+    {
+      listen = [
+        {
+          addr = "127.0.0.1";
+          port = 8443;
+          ssl = true;
+        }
+      ];
+      useACMEHost = acmeHost;
+      addSSL = true;
+      locations."/" =
+        if proxyTo != null then
+          {
+            proxyPass = proxyTo;
+            proxyWebsockets = true;
+            extraConfig = ''
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+              ${securityHeaders}
+              ${extraLocationConfig}
+            '';
+          }
+        else
+          {
+            return = "200 'Welcome to djv.sh'";
+            extraConfig = ''
+              default_type text/plain;
+              ${securityHeaders}
+            '';
+          };
     };
-  };
 in
 {
   imports = [
@@ -51,112 +76,130 @@ in
     ../../modules/observability.nix
   ];
 
-  networking.hostName = "terminus";
-
-  networking.useDHCP = false;
-  networking.interfaces.eth0 = {
-    ipv4.addresses = [{
-      address = "88.99.1.188";
-      prefixLength = 24;
-    }];
-    ipv6.addresses = [{
-      address = "2a01:4f8:173:28ab::2";
-      prefixLength = 64;
-    }];
-  };
-  networking.nameservers = [ "185.12.64.1" "185.12.64.2" ];
-  networking.defaultGateway = "88.99.1.129";
-  networking.defaultGateway6 = { address = "fe80::1"; interface = "eth0"; };
-
-  networking.firewall = {
-    enable = true;
-    allowedTCPPorts = [ 22 443 ];
-    allowPing = true;
-    logRefusedConnections = true;
-    # Allow OTEL ports only from Podman network
-    extraCommands = ''
-      iptables -I nixos-fw 5 -p tcp -s 10.88.0.0/16 --dport 4317 -j nixos-fw-accept
-      iptables -I nixos-fw 5 -p tcp -s 10.88.0.0/16 --dport 4318 -j nixos-fw-accept
-    '';
-    extraStopCommands = ''
-      iptables -D nixos-fw -p tcp -s 10.88.0.0/16 --dport 4317 -j nixos-fw-accept 2>/dev/null || true
-      iptables -D nixos-fw -p tcp -s 10.88.0.0/16 --dport 4318 -j nixos-fw-accept 2>/dev/null || true
-    '';
+  networking = {
+    hostName = "terminus";
+    useDHCP = false;
+    interfaces.eth0 = {
+      ipv4.addresses = [
+        {
+          address = "88.99.1.188";
+          prefixLength = 24;
+        }
+      ];
+      ipv6.addresses = [
+        {
+          address = "2a01:4f8:173:28ab::2";
+          prefixLength = 64;
+        }
+      ];
+    };
+    nameservers = [
+      "185.12.64.1"
+      "185.12.64.2"
+    ];
+    defaultGateway = "88.99.1.129";
+    defaultGateway6 = {
+      address = "fe80::1";
+      interface = "eth0";
+    };
+    firewall = {
+      enable = true;
+      allowedTCPPorts = [
+        22
+        443
+      ];
+      allowPing = true;
+      logRefusedConnections = true;
+      # Allow OTEL ports only from Podman network
+      extraCommands = ''
+        iptables -I nixos-fw 5 -p tcp -s 10.88.0.0/16 --dport 4317 -j nixos-fw-accept
+        iptables -I nixos-fw 5 -p tcp -s 10.88.0.0/16 --dport 4318 -j nixos-fw-accept
+      '';
+      extraStopCommands = ''
+        iptables -D nixos-fw -p tcp -s 10.88.0.0/16 --dport 4317 -j nixos-fw-accept 2>/dev/null || true
+        iptables -D nixos-fw -p tcp -s 10.88.0.0/16 --dport 4318 -j nixos-fw-accept 2>/dev/null || true
+      '';
+    };
   };
 
   # Kernel and network hardening - see SECURITY.md for CIS/NIST references
-  boot.kernelModules = [ "kvm-intel" "kvm-amd" "iptable_nat" "iptable_filter" ];
-  boot.swraid.mdadmConf = "MAILADDR root";
-  boot.kernel.sysctl = {
-    # Prevent SYN flood attacks
-    "net.ipv4.tcp_syncookies" = 1;
+  boot = {
+    kernelModules = [
+      "kvm-intel"
+      "kvm-amd"
+      "iptable_nat"
+      "iptable_filter"
+    ];
+    swraid.mdadmConf = "MAILADDR root";
+    kernel.sysctl = {
+      # Prevent SYN flood attacks
+      "net.ipv4.tcp_syncookies" = 1;
 
-    # Disable ICMP redirects
-    "net.ipv4.conf.all.accept_redirects" = 0;
-    "net.ipv4.conf.default.accept_redirects" = 0;
-    "net.ipv6.conf.all.accept_redirects" = 0;
-    "net.ipv6.conf.default.accept_redirects" = 0;
+      # Disable ICMP redirects
+      "net.ipv4.conf.all.accept_redirects" = 0;
+      "net.ipv4.conf.default.accept_redirects" = 0;
+      "net.ipv6.conf.all.accept_redirects" = 0;
+      "net.ipv6.conf.default.accept_redirects" = 0;
 
-    # Don't send ICMP redirects
-    "net.ipv4.conf.all.send_redirects" = 0;
-    "net.ipv4.conf.default.send_redirects" = 0;
+      # Don't send ICMP redirects
+      "net.ipv4.conf.all.send_redirects" = 0;
+      "net.ipv4.conf.default.send_redirects" = 0;
 
-    # Enable reverse path filtering
-    "net.ipv4.conf.all.rp_filter" = 1;
-    "net.ipv4.conf.default.rp_filter" = 1;
+      # Enable reverse path filtering
+      "net.ipv4.conf.all.rp_filter" = 1;
+      "net.ipv4.conf.default.rp_filter" = 1;
 
-    # Log martian packets
-    "net.ipv4.conf.all.log_martians" = 1;
+      # Log martian packets
+      "net.ipv4.conf.all.log_martians" = 1;
 
-    # Restrict kernel pointer exposure
-    "kernel.kptr_restrict" = 2;
+      # Restrict kernel pointer exposure
+      "kernel.kptr_restrict" = 2;
 
-    # Restrict dmesg to root
-    "kernel.dmesg_restrict" = 1;
+      # Restrict dmesg to root
+      "kernel.dmesg_restrict" = 1;
 
-    # Restrict perf_event_open
-    "kernel.perf_event_paranoid" = 3;
+      # Restrict perf_event_open
+      "kernel.perf_event_paranoid" = 3;
 
-    # Restrict BPF
-    "kernel.unprivileged_bpf_disabled" = 1;
-    "net.core.bpf_jit_harden" = 2;
+      # Restrict BPF
+      "kernel.unprivileged_bpf_disabled" = 1;
+      "net.core.bpf_jit_harden" = 2;
+    };
   };
 
   # Secrets - with proper permissions
-  age.secrets.datadog-api-key = {
-    file = ../../secrets/datadog-api-key.age;
-    owner = "root";
-    group = "root";
-    mode = "0400";
-  };
-
-  age.secrets.datadog-app-key = {
-    file = ../../secrets/datadog-app-key.age;
-    owner = "root";
-    group = "root";
-    mode = "0400";
-  };
-
-  age.secrets.minio-credentials = {
-    file = ../../secrets/minio-credentials.age;
-    owner = "minio";
-    group = "minio";
-    mode = "0400";
-  };
-
-  age.secrets.cloudflare-dns-token = {
-    file = ../../secrets/cloudflare-dns-token.age;
-    owner = "acme";
-    group = "acme";
-    mode = "0400";
-  };
-
-  age.secrets.git-identity = {
-    file = ../../secrets/git-identity.age;
-    path = "/home/dan/.config/git/identity";
-    owner = "dan";
-    group = "users";
-    mode = "0440";
+  age.secrets = {
+    datadog-api-key = {
+      file = ../../secrets/datadog-api-key.age;
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+    datadog-app-key = {
+      file = ../../secrets/datadog-app-key.age;
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+    minio-credentials = {
+      file = ../../secrets/minio-credentials.age;
+      owner = "minio";
+      group = "minio";
+      mode = "0400";
+    };
+    cloudflare-dns-token = {
+      file = ../../secrets/cloudflare-dns-token.age;
+      owner = "acme";
+      group = "acme";
+      mode = "0400";
+    };
+    git-identity = {
+      file = ../../secrets/git-identity.age;
+      path = "/home/dan/.config/git/identity";
+      owner = "dan";
+      group = "users";
+      mode = "0440";
+    };
   };
 
   modules.observability = {
@@ -169,23 +212,39 @@ in
     };
     pipelines = {
       metrics = {
-        receivers = [ "otlp" "hostmetrics" ];
-        processors = [ "resourcedetection" "batch" ];
+        receivers = [
+          "otlp"
+          "hostmetrics"
+        ];
+        processors = [
+          "resourcedetection"
+          "batch"
+        ];
         exporters = [ "datadog" ];
       };
       traces = {
         receivers = [ "otlp" ];
-        processors = [ "resourcedetection" "batch" ];
+        processors = [
+          "resourcedetection"
+          "batch"
+        ];
         exporters = [ "datadog" ];
       };
       logs = {
         receivers = [ "otlp" ];
-        processors = [ "resourcedetection" "batch" ];
+        processors = [
+          "resourcedetection"
+          "batch"
+        ];
         exporters = [ "datadog" ];
       };
       "logs/system" = {
         receivers = [ "journald" ];
-        processors = [ "transform/logs" "resourcedetection" "batch" ];
+        processors = [
+          "transform/logs"
+          "resourcedetection"
+          "batch"
+        ];
         exporters = [ "datadog" ];
       };
     };
@@ -194,7 +253,13 @@ in
   # User configuration (removed root SSH keys - PermitRootLogin is "no" anyway)
   users.users.dan = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "kvm" "libvirtd" "podman" ];
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+      "kvm"
+      "libvirtd"
+      "podman"
+    ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHifaRXUcEaoTkf8dJF4qB7V9+VTjYX++fRbOKoCCpC2"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN3DO7MvH49txkJjxZDZb4S3IWdeuEvN3UzPGbkvEtbE"
@@ -208,42 +273,173 @@ in
     minio-client
   ];
 
-  virtualisation.libvirtd.enable = true;
-  virtualisation.libvirtd.allowedBridges = [ "virbr0" ];
-
-  virtualisation.podman = {
-    enable = true;
-    dockerCompat = true;
-    dockerSocket.enable = true;
-    defaultNetwork.settings.dns_enabled = true;
-  };
-
-  # PostgreSQL with proper authentication
-  services.postgresql = {
-    enable = true;
-    ensureUsers = [{
-      name = "dan";
-      ensureClauses.superuser = true;
-      ensureClauses.login = true;
-    }];
-    settings = {
-      password_encryption = "scram-sha-256";
+  virtualisation = {
+    libvirtd = {
+      enable = true;
+      allowedBridges = [ "virbr0" ];
     };
-    authentication = lib.mkForce ''
-      # Local connections use peer authentication (matches OS user)
-      local all all peer
-      # Network connections require password (scram-sha-256)
-      host all all 127.0.0.1/32 scram-sha-256
-      host all all ::1/128 scram-sha-256
-    '';
+    podman = {
+      enable = true;
+      dockerCompat = true;
+      dockerSocket.enable = true;
+      defaultNetwork.settings.dns_enabled = true;
+    };
   };
 
-  services.minio = {
-    enable = true;
-    dataDir = [ "/var/lib/minio/data" ];
-    rootCredentialsFile = config.age.secrets.minio-credentials.path;
-    consoleAddress = "127.0.0.1:9001";
-    listenAddress = "127.0.0.1:9000";
+  services = {
+    # PostgreSQL with proper authentication
+    postgresql = {
+      enable = true;
+      ensureUsers = [
+        {
+          name = "dan";
+          ensureClauses.superuser = true;
+          ensureClauses.login = true;
+        }
+      ];
+      settings = {
+        password_encryption = "scram-sha-256";
+      };
+      authentication = lib.mkForce ''
+        # Local connections use peer authentication (matches OS user)
+        local all all peer
+        # Network connections require password (scram-sha-256)
+        host all all 127.0.0.1/32 scram-sha-256
+        host all all ::1/128 scram-sha-256
+      '';
+    };
+
+    minio = {
+      enable = true;
+      dataDir = [ "/var/lib/minio/data" ];
+      rootCredentialsFile = config.age.secrets.minio-credentials.path;
+      consoleAddress = "127.0.0.1:9001";
+      listenAddress = "127.0.0.1:9000";
+    };
+
+    sslh = {
+      listenAddresses = [ ];
+      enable = true;
+      settings = {
+        listen = [
+          {
+            host = "0.0.0.0";
+            port = "443";
+            is_udp = false;
+          }
+        ];
+        protocols = [
+          {
+            name = "ssh";
+            host = "127.0.0.1";
+            port = "22";
+          }
+          {
+            name = "tls";
+            host = "127.0.0.1";
+            port = "8443";
+          }
+        ];
+      };
+    };
+
+    nginx = {
+      enable = true;
+      recommendedGzipSettings = true;
+      recommendedOptimisation = true;
+      recommendedProxySettings = true;
+      recommendedTlsSettings = true;
+      recommendedBrotliSettings = true;
+
+      # OpenTelemetry tracing
+      otel = {
+        enable = true;
+        serviceName = "terminus-nginx";
+      };
+
+      # Worker processes - use all available CPU cores
+      appendConfig = ''
+        worker_processes auto;
+      '';
+
+      # HTTP-level configuration
+      appendHttpConfig = ''
+        # Security headers (inherited by locations without their own add_header)
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+
+        # OCSP stapling for faster TLS handshakes
+        ssl_stapling on;
+        ssl_stapling_verify on;
+        resolver 185.12.64.1 185.12.64.2 valid=300s;
+        resolver_timeout 5s;
+
+        # Fix proxy_headers_hash warning
+        proxy_headers_hash_max_size 1024;
+        proxy_headers_hash_bucket_size 128;
+      '';
+
+      # Virtual hosts configuration
+      virtualHosts = {
+        # Default server - reject requests with unknown Host header
+        "_" = {
+          default = true;
+          listen = [
+            {
+              addr = "127.0.0.1";
+              port = 8443;
+              ssl = true;
+            }
+          ];
+          useACMEHost = "djv.sh";
+          addSSL = true;
+          locations."/" = {
+            return = "444";
+          };
+        };
+
+        "djv.sh" = mkVhost { acmeHost = "djv.sh"; };
+
+        # stub_status for OpenTelemetry nginx receiver
+        "stub_status" = {
+          listen = [
+            {
+              addr = "127.0.0.1";
+              port = 9145;
+            }
+          ];
+          locations."/stub_status" = {
+            extraConfig = ''
+              stub_status;
+              allow 127.0.0.1;
+              deny all;
+            '';
+          };
+          locations."/" = {
+            return = "404";
+          };
+        };
+
+        "state.djv.sh" = mkVhost {
+          acmeHost = "state.djv.sh";
+          proxyTo = "http://127.0.0.1:9000";
+          extraLocationConfig = ''
+            # MinIO specific
+            proxy_buffering off;
+            proxy_request_buffering off;
+            client_max_body_size 0;
+          '';
+        };
+
+        "minio.djv.sh" = mkVhost {
+          acmeHost = "minio.djv.sh";
+          proxyTo = "http://127.0.0.1:9001";
+        };
+      };
+    };
   };
 
   # ACME certificates - deduplicated with helper
@@ -251,81 +447,6 @@ in
     acceptTerms = true;
     defaults.email = "djverrall@gmail.com";
     certs = lib.genAttrs acmeDomains mkAcmeCert;
-  };
-
-  services.sslh = {
-    listenAddresses = [];
-    enable = true;
-    settings = {
-      listen = [{ host = "0.0.0.0"; port = "443"; is_udp = false; }];
-      protocols = [
-        { name = "ssh"; host = "127.0.0.1"; port = "22"; }
-        { name = "tls"; host = "127.0.0.1"; port = "8443"; }
-      ];
-    };
-  };
-
-  services.nginx = {
-    enable = true;
-    recommendedGzipSettings = true;
-    recommendedOptimisation = true;
-    recommendedProxySettings = true;
-    recommendedTlsSettings = true;
-    recommendedBrotliSettings = true;
-
-    # Worker processes - use all available CPU cores
-    appendConfig = ''
-      worker_processes auto;
-    '';
-
-    # HTTP-level configuration
-    appendHttpConfig = ''
-      # Security headers (inherited by locations without their own add_header)
-      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-      add_header X-Frame-Options "SAMEORIGIN" always;
-      add_header X-Content-Type-Options "nosniff" always;
-      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-      add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
-
-      # OCSP stapling for faster TLS handshakes
-      ssl_stapling on;
-      ssl_stapling_verify on;
-      resolver 185.12.64.1 185.12.64.2 valid=300s;
-      resolver_timeout 5s;
-
-      # Fix proxy_headers_hash warning
-      proxy_headers_hash_max_size 1024;
-      proxy_headers_hash_bucket_size 128;
-    '';
-
-    # Default server - reject requests with unknown Host header
-    virtualHosts."_" = {
-      default = true;
-      listen = [{ addr = "127.0.0.1"; port = 8443; ssl = true; }];
-      useACMEHost = "djv.sh";
-      addSSL = true;
-      locations."/" = {
-        return = "444";
-      };
-    };
-
-    virtualHosts."djv.sh" = mkVhost { acmeHost = "djv.sh"; };
-
-    virtualHosts."state.djv.sh" = mkVhost {
-      acmeHost = "state.djv.sh";
-      proxyTo = "http://127.0.0.1:9000";
-      extraLocationConfig = ''
-        # MinIO specific
-        proxy_buffering off;
-        proxy_request_buffering off;
-        client_max_body_size 0;
-      '';
-    };
-
-    virtualHosts."minio.djv.sh" = mkVhost {
-      acmeHost = "minio.djv.sh";
-      proxyTo = "http://127.0.0.1:9001";
-    };
   };
 
   # Nix store optimisation
@@ -340,7 +461,7 @@ in
     dates = "04:00";
     flake = "github:djvcom/nixos-config#terminus";
     flags = [
-      "-L"  # Show full build logs for better debugging
+      "-L" # Show full build logs for better debugging
     ];
     rebootWindow = {
       lower = "04:00";
@@ -350,98 +471,109 @@ in
   };
 
   # Upgrade monitoring - notify on failure via OTEL (only if observability enabled)
-  systemd.services.nixos-upgrade = lib.mkIf config.modules.observability.enable {
-    serviceConfig = {
-      OnFailure = [ "nixos-upgrade-notify-failure.service" ];
-    };
-  };
+  systemd = {
+    services = {
+      nixos-upgrade = lib.mkIf config.modules.observability.enable {
+        serviceConfig = {
+          OnFailure = [ "nixos-upgrade-notify-failure.service" ];
+        };
+      };
 
-  systemd.services.nixos-upgrade-notify-failure = lib.mkIf config.modules.observability.enable {
-    description = "Notify on NixOS upgrade failure";
-    serviceConfig.Type = "oneshot";
-    path = [ pkgs.curl pkgs.jq ];
-    script = ''
-      LOGS=$(journalctl -u nixos-upgrade.service -n 100 --no-pager | tail -50)
-      ESCAPED_LOGS=$(echo "$LOGS" | jq -Rs .)
+      nixos-upgrade-notify-failure = lib.mkIf config.modules.observability.enable {
+        description = "Notify on NixOS upgrade failure";
+        serviceConfig.Type = "oneshot";
+        path = [
+          pkgs.curl
+          pkgs.jq
+        ];
+        script = ''
+          LOGS=$(journalctl -u nixos-upgrade.service -n 100 --no-pager | tail -50)
+          ESCAPED_LOGS=$(echo "$LOGS" | jq -Rs .)
 
-      # Send error log to OTEL collector
-      curl -sf -X POST http://127.0.0.1:4318/v1/logs \
-        -H "Content-Type: application/json" \
-        -d "{
-          \"resourceLogs\": [{
-            \"resource\": {
-              \"attributes\": [
-                {\"key\": \"service.name\", \"value\": {\"stringValue\": \"nixos-upgrade\"}},
-                {\"key\": \"host.name\", \"value\": {\"stringValue\": \"terminus\"}}
-              ]
-            },
-            \"scopeLogs\": [{
-              \"logRecords\": [{
-                \"severityNumber\": 17,
-                \"severityText\": \"ERROR\",
-                \"body\": {\"stringValue\": \"NixOS auto-upgrade failed on terminus\"},
-                \"attributes\": [
-                  {\"key\": \"upgrade.status\", \"value\": {\"stringValue\": \"failed\"}},
-                  {\"key\": \"upgrade.logs\", \"value\": {\"stringValue\": $ESCAPED_LOGS}}
-                ]
+          # Send error log to OTEL collector
+          curl -sf -X POST http://127.0.0.1:4318/v1/logs \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"resourceLogs\": [{
+                \"resource\": {
+                  \"attributes\": [
+                    {\"key\": \"service.name\", \"value\": {\"stringValue\": \"nixos-upgrade\"}},
+                    {\"key\": \"host.name\", \"value\": {\"stringValue\": \"terminus\"}}
+                  ]
+                },
+                \"scopeLogs\": [{
+                  \"logRecords\": [{
+                    \"severityNumber\": 17,
+                    \"severityText\": \"ERROR\",
+                    \"body\": {\"stringValue\": \"NixOS auto-upgrade failed on terminus\"},
+                    \"attributes\": [
+                      {\"key\": \"upgrade.status\", \"value\": {\"stringValue\": \"failed\"}},
+                      {\"key\": \"upgrade.logs\", \"value\": {\"stringValue\": $ESCAPED_LOGS}}
+                    ]
+                  }]
+                }]
               }]
-            }]
-          }]
-        }" || echo "Failed to send notification to OTEL"
-    '';
-  };
+            }" || echo "Failed to send notification to OTEL"
+        '';
+      };
 
-  # Pre-flight check - runs 30 min before upgrade to catch issues early
-  systemd.services.nixos-upgrade-preflight = {
-    description = "Pre-flight check for NixOS upgrade";
-    unitConfig = lib.optionalAttrs config.modules.observability.enable {
-      OnFailure = [ "nixos-upgrade-notify-failure.service" ];
+      # Pre-flight check - runs 30 min before upgrade to catch issues early
+      nixos-upgrade-preflight = {
+        description = "Pre-flight check for NixOS upgrade";
+        unitConfig = lib.optionalAttrs config.modules.observability.enable {
+          OnFailure = [ "nixos-upgrade-notify-failure.service" ];
+        };
+        serviceConfig.Type = "oneshot";
+        path = [
+          pkgs.nix
+          pkgs.git
+          pkgs.gnugrep
+        ];
+        script = ''
+          set -euo pipefail
+          echo "Starting NixOS upgrade pre-flight check..."
+
+          # Force evaluation to catch warnings (eval always runs, unlike cached builds)
+          echo "Evaluating flake..."
+          nix eval github:djvcom/nixos-config#nixosConfigurations.terminus.config.system.build.toplevel.drvPath \
+            --refresh \
+            2>&1 | tee /var/tmp/nixos-preflight.log
+
+          # Then build to ensure it actually works
+          echo "Building configuration..."
+          nix build github:djvcom/nixos-config#nixosConfigurations.terminus.config.system.build.toplevel \
+            --no-link \
+            -L 2>&1 | tee -a /var/tmp/nixos-preflight.log
+
+          # Check for errors and echo them (so they appear in journal)
+          if grep -qi "\berror\b\|\bfailed\b\|\bfailure\b" /var/tmp/nixos-preflight.log; then
+            echo "Errors detected in build output:"
+            grep -iE "\berror\b|\bfailed\b|\bfailure\b" /var/tmp/nixos-preflight.log | while read -r line; do
+              echo "BUILD ERROR: $line"
+            done
+          fi
+
+          # Check for deprecation warnings and echo them (so they appear in journal)
+          if grep -qi "warning\|deprecated" /var/tmp/nixos-preflight.log; then
+            echo "Warnings detected in build output:"
+            grep -i "warning\|deprecated" /var/tmp/nixos-preflight.log | while read -r line; do
+              echo "BUILD WARNING: $line"
+            done
+          fi
+
+          echo "Pre-flight check completed successfully"
+        '';
+      };
     };
-    serviceConfig.Type = "oneshot";
-    path = [ pkgs.nix pkgs.git pkgs.gnugrep ];
-    script = ''
-      set -euo pipefail
-      echo "Starting NixOS upgrade pre-flight check..."
 
-      # Force evaluation to catch warnings (eval always runs, unlike cached builds)
-      echo "Evaluating flake..."
-      nix eval github:djvcom/nixos-config#nixosConfigurations.terminus.config.system.build.toplevel.drvPath \
-        --refresh \
-        2>&1 | tee /var/tmp/nixos-preflight.log
-
-      # Then build to ensure it actually works
-      echo "Building configuration..."
-      nix build github:djvcom/nixos-config#nixosConfigurations.terminus.config.system.build.toplevel \
-        --no-link \
-        -L 2>&1 | tee -a /var/tmp/nixos-preflight.log
-
-      # Check for errors and echo them (so they appear in journal)
-      if grep -qi "\berror\b\|\bfailed\b\|\bfailure\b" /var/tmp/nixos-preflight.log; then
-        echo "Errors detected in build output:"
-        grep -iE "\berror\b|\bfailed\b|\bfailure\b" /var/tmp/nixos-preflight.log | while read -r line; do
-          echo "BUILD ERROR: $line"
-        done
-      fi
-
-      # Check for deprecation warnings and echo them (so they appear in journal)
-      if grep -qi "warning\|deprecated" /var/tmp/nixos-preflight.log; then
-        echo "Warnings detected in build output:"
-        grep -i "warning\|deprecated" /var/tmp/nixos-preflight.log | while read -r line; do
-          echo "BUILD WARNING: $line"
-        done
-      fi
-
-      echo "Pre-flight check completed successfully"
-    '';
-  };
-
-  systemd.timers.nixos-upgrade-preflight = {
-    description = "Timer for NixOS upgrade pre-flight check";
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "03:30";  # 30 min before upgrade
-      Persistent = true;
-      RandomizedDelaySec = 60;
+    timers.nixos-upgrade-preflight = {
+      description = "Timer for NixOS upgrade pre-flight check";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "03:30"; # 30 min before upgrade
+        Persistent = true;
+        RandomizedDelaySec = 60;
+      };
     };
   };
 
@@ -449,9 +581,11 @@ in
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "backup";
-    users.dan = { ... }: {
-      imports = [ ../../home/dan.nix ];
-    };
+    users.dan =
+      { ... }:
+      {
+        imports = [ ../../home/dan.nix ];
+      };
   };
 
   system.stateVersion = "25.05";

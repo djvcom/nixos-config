@@ -1,14 +1,16 @@
 /**
   Git configuration with identity from agenix-managed secret.
 */
-{ ... }:
+_:
 
 {
   programs.git = {
     enable = true;
-    includes = [{
-      path = "~/.config/git/identity";
-    }];
+    includes = [
+      {
+        path = "~/.config/git/identity";
+      }
+    ];
     settings = {
       init.defaultBranch = "main";
       pull.rebase = true;

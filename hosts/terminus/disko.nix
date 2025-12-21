@@ -1,4 +1,4 @@
-{ lib, ... }:
+_:
 
 {
   disko.devices = {
@@ -16,7 +16,10 @@
                 type = "filesystem";
                 format = "vfat";
                 mountpoint = "/boot";
-                mountOptions = [ "fmask=0077" "dmask=0077" ];
+                mountOptions = [
+                  "fmask=0077"
+                  "dmask=0077"
+                ];
               };
             };
             swap = {

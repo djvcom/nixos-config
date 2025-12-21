@@ -10,7 +10,12 @@
   - WireGuard: <https://www.wireguard.com/>
   - Key generation: {command}`wg genkey` and {command}`wg pubkey`
 */
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.modules.wireguard;
@@ -39,32 +44,34 @@ in
     };
 
     peers = lib.mkOption {
-      type = lib.types.listOf (lib.types.submodule {
-        options = {
-          publicKey = lib.mkOption {
-            type = lib.types.str;
-            description = "Base64-encoded public key generated with {command}`wg pubkey`";
+      type = lib.types.listOf (
+        lib.types.submodule {
+          options = {
+            publicKey = lib.mkOption {
+              type = lib.types.str;
+              description = "Base64-encoded public key generated with {command}`wg pubkey`";
+            };
+            allowedIPs = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              description = "IP ranges this peer is allowed to use as source";
+              example = lib.literalExpression ''[ "10.100.0.2/32" ]'';
+            };
+            endpoint = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              description = "Peer endpoint in host:port format (optional for clients behind NAT)";
+              example = "vpn.example.com:51820";
+            };
+            persistentKeepalive = lib.mkOption {
+              type = lib.types.nullOr lib.types.int;
+              default = null;
+              description = "Keepalive interval in seconds (useful for NAT traversal)";
+              example = 25;
+            };
           };
-          allowedIPs = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            description = "IP ranges this peer is allowed to use as source";
-            example = lib.literalExpression ''[ "10.100.0.2/32" ]'';
-          };
-          endpoint = lib.mkOption {
-            type = lib.types.nullOr lib.types.str;
-            default = null;
-            description = "Peer endpoint in host:port format (optional for clients behind NAT)";
-            example = "vpn.example.com:51820";
-          };
-          persistentKeepalive = lib.mkOption {
-            type = lib.types.nullOr lib.types.int;
-            default = null;
-            description = "Keepalive interval in seconds (useful for NAT traversal)";
-            example = 25;
-          };
-        };
-      });
-      default = [];
+        }
+      );
+      default = [ ];
       description = "List of WireGuard peers";
     };
   };
@@ -83,15 +90,20 @@ in
 
     networking.wireguard.interfaces.wg0 = {
       ips = [ cfg.address ];
-      listenPort = cfg.listenPort;
+      inherit (cfg) listenPort;
       privateKeyFile = config.age.secrets.wireguard-private.path;
-      peers = map (peer: {
-        inherit (peer) publicKey allowedIPs;
-      } // lib.optionalAttrs (peer.endpoint != null) {
-        inherit (peer) endpoint;
-      } // lib.optionalAttrs (peer.persistentKeepalive != null) {
-        inherit (peer) persistentKeepalive;
-      }) cfg.peers;
+      peers = map (
+        peer:
+        {
+          inherit (peer) publicKey allowedIPs;
+        }
+        // lib.optionalAttrs (peer.endpoint != null) {
+          inherit (peer) endpoint;
+        }
+        // lib.optionalAttrs (peer.persistentKeepalive != null) {
+          inherit (peer) persistentKeepalive;
+        }
+      ) cfg.peers;
     };
   };
 }

@@ -34,6 +34,9 @@
       gruvbox-nvim
       nvim-tree-lua
       nvim-web-devicons
+
+      conform-nvim
+      nvim-lint
     ];
 
     extraLuaConfig = ''
@@ -93,11 +96,49 @@
 
       vim.lsp.enable("ts_ls")
 
+      vim.lsp.config("nil_ls", {
+        cmd = { "nil" },
+        filetypes = { "nix" },
+        root_markers = { "flake.nix", "default.nix", ".git" },
+        capabilities = capabilities,
+        settings = {
+          ["nil"] = {
+            formatting = { command = { "nixfmt" } },
+          },
+        },
+      })
+
+      vim.lsp.enable("nil_ls")
+
+      -- Formatting with conform.nvim
+      require("conform").setup({
+        formatters_by_ft = {
+          nix = { "nixfmt" },
+          rust = { "rustfmt" },
+        },
+        format_on_save = {
+          timeout_ms = 500,
+          lsp_fallback = true,
+        },
+      })
+
+      -- Linting with nvim-lint
+      require("lint").linters_by_ft = {
+        nix = { "statix", "deadnix" },
+      }
+
+      vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost" }, {
+        callback = function()
+          require("lint").try_lint()
+        end,
+      })
+
       vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
       vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Find references" })
       vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover info" })
       vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
       vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol" })
+      vim.keymap.set("n", "<leader>cf", function() require("conform").format() end, { desc = "Format buffer" })
       vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev diagnostic" })
       vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
 

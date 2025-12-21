@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -8,29 +8,34 @@
     ./dan/gitlab.nix
   ];
 
-  home.username = "dan";
-  home.homeDirectory = "/home/dan";
+  home = {
+    username = "dan";
+    homeDirectory = "/home/dan";
+    packages = with pkgs; [
+      ripgrep
+      fd
+      eza
+      jq
+      gh
+      glab
+      rustup
+      gcc
+      yarn
+      nodePackages.typescript-language-server
+      dnsutils
 
-  home.packages = with pkgs; [
-    ripgrep
-    fd
-    eza
-    jq
-    gh
-    glab
-    rustup
-    gcc
-    yarn
-    nodePackages.typescript-language-server
-    dnsutils
-  ];
-
-  home.sessionVariables = {
-    DOCKER_HOST = "unix:///run/podman/podman.sock";
-    EDITOR = "nvim";
+      # Nix tooling
+      nil # LSP
+      nixfmt-rfc-style # Formatter (official nixpkgs standard)
+      statix # Linter
+      deadnix # Find unused code
+    ];
+    sessionVariables = {
+      DOCKER_HOST = "unix:///run/podman/podman.sock";
+      EDITOR = "nvim";
+    };
+    stateVersion = "25.05";
   };
 
   programs.home-manager.enable = true;
-
-  home.stateVersion = "25.05";
 }

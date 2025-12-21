@@ -11,7 +11,11 @@
   - Restic: <https://restic.readthedocs.io/>
   - PostgreSQL backup: <https://www.postgresql.org/docs/current/backup-dump.html>
 */
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  ...
+}:
 
 let
   cfg = config.modules.backup;
@@ -28,7 +32,7 @@ in
 
     paths = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [];
+      default = [ ];
       description = "Filesystem paths to include in backup";
       example = lib.literalExpression ''[ "/home" "/var/lib/important" ]'';
     };
@@ -47,7 +51,7 @@ in
 
     postgresqlDatabases = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [];
+      default = [ ];
       description = "PostgreSQL databases to dump before backup";
       example = lib.literalExpression ''[ "myapp" "nextcloud" ]'';
     };
@@ -80,7 +84,7 @@ in
           };
         };
       };
-      default = {};
+      default = { };
     };
 
     environmentFile = lib.mkOption {
@@ -102,12 +106,12 @@ in
         message = "modules.backup.environmentFile must be set";
       }
       {
-        assertion = cfg.paths != [] || cfg.postgresqlDatabases != [];
+        assertion = cfg.paths != [ ] || cfg.postgresqlDatabases != [ ];
         message = "modules.backup: either paths or postgresqlDatabases must be set";
       }
     ];
 
-    services.postgresqlBackup = lib.mkIf (cfg.postgresqlDatabases != []) {
+    services.postgresqlBackup = lib.mkIf (cfg.postgresqlDatabases != [ ]) {
       enable = true;
       databases = cfg.postgresqlDatabases;
       location = "/var/backup/postgresql";
@@ -116,10 +120,9 @@ in
 
     services.restic.backups.main = {
       initialize = true;
-      paths = cfg.paths ++ lib.optional (cfg.postgresqlDatabases != []) "/var/backup/postgresql";
-      repository = cfg.repository;
-      environmentFile = cfg.environmentFile;
-      
+      paths = cfg.paths ++ lib.optional (cfg.postgresqlDatabases != [ ]) "/var/backup/postgresql";
+      inherit (cfg) repository environmentFile;
+
       timerConfig = {
         OnCalendar = cfg.schedule;
         Persistent = true;
@@ -140,10 +143,10 @@ in
         echo "Backup completed at $(date)"
       '';
 
-      exclude = cfg.exclude;
+      inherit (cfg) exclude;
     };
 
-    systemd.tmpfiles.rules = lib.mkIf (cfg.postgresqlDatabases != []) [
+    systemd.tmpfiles.rules = lib.mkIf (cfg.postgresqlDatabases != [ ]) [
       "d /var/backup/postgresql 0700 postgres postgres -"
     ];
   };

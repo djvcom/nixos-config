@@ -4,6 +4,7 @@
   Configures the OpenTelemetry Collector with:
   - OTLP receivers (gRPC/HTTP) bound to localhost by default
   - Host metrics scraping (CPU, memory, disk, network)
+  - nginx metrics via stub_status (requires nginx stub_status on port 9145)
   - Journald log collection (sshd, nginx, nixos-upgrade, etc.)
   - Configurable exporters and pipelines
 
@@ -19,7 +20,12 @@
   References:
   - OpenTelemetry: <https://opentelemetry.io/docs/collector/>
 */
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.modules.observability;
@@ -55,18 +61,31 @@ in
       description = "Pipeline configurations defining data flow from receivers through processors to exporters";
       default = {
         metrics = {
-          receivers = [ "otlp" "hostmetrics" ];
-          processors = [ "resourcedetection" "batch" ];
+          receivers = [
+            "otlp"
+            "hostmetrics"
+            "nginx"
+          ];
+          processors = [
+            "resourcedetection"
+            "batch"
+          ];
           exporters = lib.attrNames cfg.exporters;
         };
         traces = {
           receivers = [ "otlp" ];
-          processors = [ "resourcedetection" "batch" ];
+          processors = [
+            "resourcedetection"
+            "batch"
+          ];
           exporters = lib.attrNames cfg.exporters;
         };
         logs = {
           receivers = [ "otlp" ];
-          processors = [ "resourcedetection" "batch" ];
+          processors = [
+            "resourcedetection"
+            "batch"
+          ];
           exporters = lib.attrNames cfg.exporters;
         };
       };
@@ -98,22 +117,43 @@ in
                 "system.cpu.physical.count".enabled = true;
                 "system.cpu.logical.count".enabled = true;
               };
-              disk = {};
-              filesystem.metrics = {
-                "system.filesystem.utilization".enabled = true;
+              disk = { };
+              filesystem = {
+                exclude_mount_points = {
+                  mount_points = [
+                    "/var/lib/containers/*"
+                    "/run/containers/*"
+                  ];
+                  match_type = "regexp";
+                };
+                metrics = {
+                  "system.filesystem.utilization".enabled = true;
+                };
               };
-              load = {};
-              memory = {};
-              network = {};
+              load = { };
+              memory = { };
+              network = { };
               paging.metrics = {
                 "system.paging.utilization".enabled = true;
               };
-              processes = {};
+              processes = { };
             };
           };
           journald = {
-            units = [ "sshd" "nginx" "docker" "podman" "systemd-*" "nixos-upgrade" "nixos-upgrade-preflight" ];
+            units = [
+              "sshd"
+              "nginx"
+              "docker"
+              "podman"
+              "systemd-*"
+              "nixos-upgrade"
+              "nixos-upgrade-preflight"
+            ];
             priority = "info";
+          };
+          nginx = {
+            endpoint = "http://127.0.0.1:9145/stub_status";
+            collection_interval = "10s";
           };
         };
         processors = {
@@ -148,7 +188,7 @@ in
             ];
           };
         };
-        exporters = cfg.exporters;
+        inherit (cfg) exporters;
         service.pipelines = cfg.pipelines;
       };
     };
