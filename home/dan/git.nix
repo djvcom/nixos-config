@@ -1,3 +1,6 @@
+/**
+  Git configuration with identity from agenix-managed secret.
+*/
 { ... }:
 
 {
@@ -10,6 +13,7 @@
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
+      safe.directory = "/etc/nixos";
     };
   };
 }
