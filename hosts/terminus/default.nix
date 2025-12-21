@@ -25,7 +25,6 @@
   networking.defaultGateway = "88.99.1.129";
   networking.defaultGateway6 = { address = "fe80::1"; interface = "eth0"; };
 
-
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 443 ];
@@ -59,6 +58,13 @@
     owner = "root";
     group = "users";
     mode = "0440";
+  };
+
+  age.secrets.minio-credentials = {
+    file = ../../secrets/minio-credentials.age;
+    owner = "minio";
+    group = "minio";
+    mode = "0400";
   };
 
   modules.observability = {
@@ -121,6 +127,7 @@
     zellij
     nftables
     nodejs_24
+    minio-client
   ];
 
   virtualisation.libvirtd.enable = true;
@@ -145,6 +152,14 @@
       host all all 127.0.0.1/32 trust
       host all all ::1/128 trust
     '';
+  };
+
+  services.minio = {
+    enable = true;
+    dataDir = [ "/var/lib/minio/data" ];
+    rootCredentialsFile = config.age.secrets.minio-credentials.path;
+    consoleAddress = "127.0.0.1:9001";
+    listenAddress = "127.0.0.1:9000";
   };
 
   services.sslh = {

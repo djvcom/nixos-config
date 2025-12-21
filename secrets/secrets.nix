@@ -8,4 +8,5 @@ in
   "wireguard-private.age".publicKeys = allKeys;
   "datadog-api-key.age".publicKeys = allKeys;
   "datadog-app-key.age".publicKeys = allKeys;
+  "minio-credentials.age".publicKeys = allKeys;
 }
