@@ -9,12 +9,14 @@ let
     group = "nginx";
   };
 
-  # Common security headers to include in all locations with add_header
+  # Security headers for all responses - see SECURITY.md for OWASP references
+  # Must be included in any location block that uses add_header (nginx inheritance quirk)
   securityHeaders = ''
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
-    add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
   '';
 
   # Helper for nginx virtual hosts
@@ -30,6 +32,7 @@ let
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        ${securityHeaders}
         ${extraLocationConfig}
       '';
     } else {
@@ -268,14 +271,43 @@ in
     recommendedOptimisation = true;
     recommendedProxySettings = true;
     recommendedTlsSettings = true;
+    recommendedBrotliSettings = true;
 
-    # Security headers at http level for locations without their own add_header
+    # Worker processes - use all available CPU cores
+    appendConfig = ''
+      worker_processes auto;
+    '';
+
+    # HTTP-level configuration
     appendHttpConfig = ''
+      # Security headers (inherited by locations without their own add_header)
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
       add_header X-Frame-Options "SAMEORIGIN" always;
       add_header X-Content-Type-Options "nosniff" always;
-      add_header X-XSS-Protection "1; mode=block" always;
       add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+
+      # OCSP stapling for faster TLS handshakes
+      ssl_stapling on;
+      ssl_stapling_verify on;
+      resolver 185.12.64.1 185.12.64.2 valid=300s;
+      resolver_timeout 5s;
+
+      # Fix proxy_headers_hash warning
+      proxy_headers_hash_max_size 1024;
+      proxy_headers_hash_bucket_size 128;
     '';
+
+    # Default server - reject requests with unknown Host header
+    virtualHosts."_" = {
+      default = true;
+      listen = [{ addr = "127.0.0.1"; port = 8443; ssl = true; }];
+      useACMEHost = "djv.sh";
+      addSSL = true;
+      locations."/" = {
+        return = "444";
+      };
+    };
 
     virtualHosts."djv.sh" = mkVhost { acmeHost = "djv.sh"; };
 

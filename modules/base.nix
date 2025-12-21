@@ -34,6 +34,26 @@
     maxretry = 5;
     bantime = "1h";
     bantime-increment.enable = true;
+    jails = {
+      # Protect against HTTP authentication brute-force
+      nginx-http-auth.settings = {
+        enabled = true;
+        filter = "nginx-http-auth";
+        maxretry = 5;
+      };
+      # Protect against bots scanning for vulnerabilities
+      nginx-botsearch.settings = {
+        enabled = true;
+        filter = "nginx-botsearch";
+        maxretry = 5;
+      };
+      # Protect against excessive 4xx errors (scanners, bad bots)
+      nginx-bad-request.settings = {
+        enabled = true;
+        filter = "nginx-bad-request";
+        maxretry = 10;
+      };
+    };
   };
 
   # SSH hardening per NIST IR 7966 and CIS benchmarks
