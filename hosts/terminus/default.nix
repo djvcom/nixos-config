@@ -54,6 +54,13 @@
     mode = "0440";
   };
 
+  age.secrets.datadog-app-key = {
+    file = ../../secrets/datadog-app-key.age;
+    owner = "root";
+    group = "users";
+    mode = "0440";
+  };
+
   modules.observability = {
     enable = true;
     tokenSecretPath = config.age.secrets.datadog-api-key.path;

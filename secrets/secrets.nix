@@ -7,4 +7,5 @@ in
   "git-identity.age".publicKeys = allKeys;
   "wireguard-private.age".publicKeys = allKeys;
   "datadog-api-key.age".publicKeys = allKeys;
+  "datadog-app-key.age".publicKeys = allKeys;
 }
