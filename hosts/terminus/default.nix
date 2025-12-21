@@ -50,8 +50,8 @@
   age.secrets.datadog-api-key = {
     file = ../../secrets/datadog-api-key.age;
     owner = "root";
-    group = "root";
-    mode = "0600";
+    group = "users";
+    mode = "0440";
   };
 
   modules.observability = {
@@ -91,7 +91,7 @@
     path = "/home/dan/.config/git/identity";
     owner = "dan";
     group = "users";
-    mode = "0600";
+    mode = "0440";
   };
 
   boot.kernelModules = [ "kvm-intel" "kvm-amd" "iptable_nat" "iptable_filter" ];
