@@ -20,7 +20,7 @@
     };
 
     dagger = {
-      url = "github:djvcom/nix/fix/deprecated-system-attribute";
+      url = "github:djvcom/dagger-nix/fix/deprecated-system-attribute";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
