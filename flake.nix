@@ -20,7 +20,7 @@
     };
 
     dagger = {
-      url = "github:dagger/nix";
+      url = "github:djvcom/nix/fix/deprecated-system-attribute";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -49,7 +49,6 @@
       mkHost =
         hostname:
         nixpkgs.lib.nixosSystem {
-          inherit system;
           specialArgs = { inherit inputs; };
           modules = [
             ./hosts/${hostname}
@@ -57,12 +56,15 @@
             agenix.nixosModules.default
             disko.nixosModules.disko
             nginx-otel.nixosModules.default
-            {
-              environment.systemPackages = [
-                agenix.packages.${system}.default
-                dagger.packages.${system}.dagger
-              ];
-            }
+            (
+              { pkgs, ... }:
+              {
+                environment.systemPackages = [
+                  agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
+                  dagger.packages.${pkgs.stdenv.hostPlatform.system}.dagger
+                ];
+              }
+            )
           ];
         };
     in
