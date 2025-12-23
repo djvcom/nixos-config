@@ -108,11 +108,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1766433572,
-        "narHash": "sha256-Lqp0AAz2zlJS5fSBnodS/a7wNWTlt8/jpzBbu9FFZ3s=",
+        "lastModified": 1766485923,
+        "narHash": "sha256-xI9eHNVHJ3urEUODwLnPlaltYViptXGcDum4gbJFoBY=",
         "owner": "djvcom",
         "repo": "djv",
-        "rev": "08a69f45914d142330bf8f6771b2382984151f03",
+        "rev": "8925d825ba75c4813d92339602a9a528d2f85d4d",
         "type": "github"
       },
       "original": {
