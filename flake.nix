@@ -24,11 +24,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nginx-otel = {
-      url = "github:djvcom/nix-nginx-otel";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     djv = {
       url = "github:djvcom/djv/stable";
       # Don't follow nixpkgs - djv needs specific wasm-bindgen-cli version
@@ -43,7 +38,6 @@
       agenix,
       disko,
       dagger,
-      nginx-otel,
       djv,
       ...
     }@inputs:
@@ -61,7 +55,6 @@
             home-manager.nixosModules.home-manager
             agenix.nixosModules.default
             disko.nixosModules.disko
-            nginx-otel.nixosModules.default
             djv.nixosModules.default
             (
               { pkgs, ... }:

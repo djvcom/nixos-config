@@ -108,11 +108,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1766485923,
-        "narHash": "sha256-xI9eHNVHJ3urEUODwLnPlaltYViptXGcDum4gbJFoBY=",
+        "lastModified": 1766506186,
+        "narHash": "sha256-DoYxlx0IAPbdL5FfTHKNCLJLeU/o/ikL4is+46CdrQY=",
         "owner": "djvcom",
         "repo": "djv",
-        "rev": "8925d825ba75c4813d92339602a9a528d2f85d4d",
+        "rev": "94c71803cf94ef1f5659583854719d4f1e09e662",
         "type": "github"
       },
       "original": {
@@ -185,26 +185,6 @@
         "type": "github"
       }
     },
-    "nginx-otel": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1766410802,
-        "narHash": "sha256-I+bqWhRg1m+MD4y3dYPFi/AXpXODfS0B3a3xKpvC5jw=",
-        "owner": "djvcom",
-        "repo": "nix-nginx-otel",
-        "rev": "dd2fd41dcf2b5fa475a1fc94ea572a7b6ae4780a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "djvcom",
-        "repo": "nix-nginx-otel",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1766309749,
@@ -244,7 +224,6 @@
         "disko": "disko",
         "djv": "djv",
         "home-manager": "home-manager_2",
-        "nginx-otel": "nginx-otel",
         "nixpkgs": "nixpkgs_2"
       }
     },

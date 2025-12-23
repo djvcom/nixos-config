@@ -6,12 +6,26 @@
 }:
 
 let
+  # Domain configuration - used by both Traefik and ACME
+  domains = {
+    djv = {
+      host = "djv.sh";
+      backend = "http://127.0.0.1:3000";
+    };
+    minioApi = {
+      host = "state.djv.sh";
+      backend = "http://127.0.0.1:9000";
+    };
+    minioConsole = {
+      host = "minio.djv.sh";
+      backend = "http://127.0.0.1:9001";
+    };
+  };
+
+  allDomains = lib.mapAttrsToList (_: v: v.host) domains;
+
   # Helper for ACME certs - all use same Cloudflare DNS-01 config
-  acmeDomains = [
-    "djv.sh"
-    "state.djv.sh"
-    "minio.djv.sh"
-  ];
+  acmeDomains = allDomains;
   mkAcmeCert = _: {
     dnsProvider = "cloudflare";
     environmentFile = config.age.secrets.cloudflare-dns-token.path;
@@ -190,8 +204,8 @@ in
     cloudflare-dns-token = {
       file = ../../secrets/cloudflare-dns-token.age;
       owner = "acme";
-      group = "acme";
-      mode = "0400";
+      group = "traefik";
+      mode = "0440";
     };
     git-identity = {
       file = ../../secrets/git-identity.age;
@@ -349,18 +363,12 @@ in
     };
 
     nginx = {
-      enable = true;
+      enable = false; # Replaced by Traefik
       recommendedGzipSettings = true;
       recommendedOptimisation = true;
       recommendedProxySettings = true;
       recommendedTlsSettings = true;
       recommendedBrotliSettings = true;
-
-      # OpenTelemetry tracing
-      otel = {
-        enable = true;
-        serviceName = "terminus-nginx";
-      };
 
       # Worker processes - use all available CPU cores
       appendConfig = ''
@@ -448,7 +456,126 @@ in
         };
       };
     };
+
+    # Traefik reverse proxy (testing on port 8444, will replace nginx)
+    traefik = {
+      enable = true;
+
+      environmentFiles = [ config.age.secrets.cloudflare-dns-token.path ];
+
+      staticConfigOptions = {
+        # Enable experimental OTLP logging
+        experimental.otlpLogs = true;
+
+        # Entry point for TLS traffic from sslh
+        entryPoints.websecure = {
+          address = "127.0.0.1:8443";
+        };
+
+        # ACME certificate resolver using Cloudflare DNS-01
+        certificatesResolvers.letsencrypt.acme = {
+          email = "djverrall@gmail.com";
+          storage = "/var/lib/traefik/acme.json";
+          dnsChallenge = {
+            provider = "cloudflare";
+            # Use Hetzner DNS servers (external DNS blocked on this host)
+            resolvers = [
+              "185.12.64.1:53"
+              "185.12.64.2:53"
+            ];
+          };
+        };
+
+        # OpenTelemetry tracing
+        tracing.otlp.http.endpoint = "http://127.0.0.1:4318/v1/traces";
+
+        # OpenTelemetry metrics
+        metrics.otlp.http.endpoint = "http://127.0.0.1:4318/v1/metrics";
+
+        # Access logging - dual output for observability and Fail2ban
+        accessLog = {
+          # OTLP export for Datadog observability
+          otlp.http.endpoint = "http://127.0.0.1:4318/v1/logs";
+          # File output for Fail2ban parsing
+          filePath = "/var/log/traefik/access.log";
+          format = "common";
+        };
+      };
+
+      dynamicConfigOptions = {
+        http = {
+          # Security headers middleware
+          middlewares.security-headers.headers = {
+            stsSeconds = 31536000;
+            stsIncludeSubdomains = true;
+            frameDeny = true;
+            contentTypeNosniff = true;
+            referrerPolicy = "strict-origin-when-cross-origin";
+            customResponseHeaders = {
+              Permissions-Policy = "geolocation=(), microphone=(), camera=()";
+            };
+          };
+
+          # Routers for each domain
+          routers = {
+            djv = {
+              rule = "Host(`${domains.djv.host}`)";
+              service = "djv";
+              middlewares = [ "security-headers" ];
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
+            };
+
+            minio-api = {
+              rule = "Host(`${domains.minioApi.host}`)";
+              service = "minio-api";
+              middlewares = [ "security-headers" ];
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
+            };
+
+            minio-console = {
+              rule = "Host(`${domains.minioConsole.host}`)";
+              service = "minio-console";
+              middlewares = [ "security-headers" ];
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
+            };
+
+            # Catch-all router for unknown hosts (lowest priority)
+            catch-all = {
+              rule = "HostRegexp(`.*`)";
+              priority = 1;
+              service = "noop@internal";
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
+            };
+          };
+
+          # Backend services
+          services = {
+            djv.loadBalancer.servers = [ { url = domains.djv.backend; } ];
+
+            minio-api.loadBalancer = {
+              servers = [ { url = domains.minioApi.backend; } ];
+              passHostHeader = true;
+              responseForwarding.flushInterval = "100ms";
+            };
+
+            minio-console.loadBalancer = {
+              servers = [ { url = domains.minioConsole.backend; } ];
+              passHostHeader = true;
+            };
+          };
+        };
+      };
+    };
   };
+
+  # Create log directory for Traefik access logs (for Fail2ban)
+  systemd.tmpfiles.rules = [
+    "d /var/log/traefik 0750 traefik traefik -"
+  ];
 
   # ACME certificates - deduplicated with helper
   security.acme = {

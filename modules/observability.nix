@@ -4,8 +4,7 @@
   Configures the OpenTelemetry Collector with:
   - OTLP receivers (gRPC/HTTP) bound to localhost by default
   - Host metrics scraping (CPU, memory, disk, network)
-  - nginx metrics via stub_status (requires nginx stub_status on port 9145)
-  - Journald log collection (sshd, nginx, nixos-upgrade, etc.)
+  - Journald log collection (sshd, traefik, djv, nixos-upgrade, etc.)
   - Configurable exporters and pipelines
 
   Log severity detection:
@@ -64,7 +63,6 @@ in
           receivers = [
             "otlp"
             "hostmetrics"
-            "nginx"
           ];
           processors = [
             "resourcedetection"
@@ -142,7 +140,8 @@ in
           journald = {
             units = [
               "sshd"
-              "nginx"
+              "traefik"
+              "djv"
               "docker"
               "podman"
               "systemd-*"
@@ -150,10 +149,6 @@ in
               "nixos-upgrade-preflight"
             ];
             priority = "info";
-          };
-          nginx = {
-            endpoint = "http://127.0.0.1:9145/stub_status";
-            collection_interval = "10s";
           };
         };
         processors = {
