@@ -286,6 +286,11 @@ in
     };
   };
 
+  services.djv = {
+    enable = true;
+    environment = "production";
+  };
+
   services = {
     # PostgreSQL with proper authentication
     postgresql = {
@@ -401,7 +406,10 @@ in
           };
         };
 
-        "djv.sh" = mkVhost { acmeHost = "djv.sh"; };
+        "djv.sh" = mkVhost {
+          acmeHost = "djv.sh";
+          proxyTo = "http://unix:/run/djv/djv.sock";
+        };
 
         # stub_status for OpenTelemetry nginx receiver
         "stub_status" = {
