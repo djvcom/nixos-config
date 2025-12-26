@@ -10,7 +10,7 @@ let
   domains = {
     djv = {
       host = "djv.sh";
-      backend = "http://127.0.0.1:3000";
+      backend = "http://127.0.0.1:7823";
     };
     minioApi = {
       host = "state.djv.sh";
@@ -303,6 +303,7 @@ in
   services.djv = {
     enable = true;
     environment = "production";
+    listenAddress = "127.0.0.1:7823";
     database.enable = true;
     sync = {
       enable = true;
