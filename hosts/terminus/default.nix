@@ -303,17 +303,23 @@ in
   services.djv = {
     enable = true;
     environment = "production";
+    database.enable = true;
   };
 
   services = {
     # PostgreSQL with proper authentication
     postgresql = {
       enable = true;
+      ensureDatabases = [ "djv" ];
       ensureUsers = [
         {
           name = "dan";
           ensureClauses.superuser = true;
           ensureClauses.login = true;
+        }
+        {
+          name = "djv";
+          ensureDBOwnership = true;
         }
       ];
       settings = {
@@ -357,6 +363,8 @@ in
             name = "tls";
             host = "127.0.0.1";
             port = "8443";
+            # Send PROXY protocol header so Traefik knows original client IP/port
+            send_proxy = true;
           }
         ];
       };
@@ -470,6 +478,10 @@ in
         # Entry point for TLS traffic from sslh
         entryPoints.websecure = {
           address = "127.0.0.1:8443";
+          # Accept PROXY protocol from sslh to get real client IP and port
+          proxyProtocol.trustedIPs = [ "127.0.0.1/32" ];
+          # Trust X-Forwarded-* headers from trusted sources
+          forwardedHeaders.trustedIPs = [ "127.0.0.1/32" ];
         };
 
         # ACME certificate resolver using Cloudflare DNS-01
@@ -487,7 +499,13 @@ in
         };
 
         # OpenTelemetry tracing
-        tracing.otlp.http.endpoint = "http://127.0.0.1:4318/v1/traces";
+        tracing = {
+          otlp.http.endpoint = "http://127.0.0.1:4318/v1/traces";
+          resourceAttributes = {
+            "deployment.environment.name" = "production";
+            "service.name" = "traefik";
+          };
+        };
 
         # OpenTelemetry metrics
         metrics.otlp.http.endpoint = "http://127.0.0.1:4318/v1/metrics";
