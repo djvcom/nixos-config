@@ -304,6 +304,11 @@ in
     enable = true;
     environment = "production";
     database.enable = true;
+    sync = {
+      enable = true;
+      github.user = "djvcom";
+      cratesIo.user = "djvcom";
+    };
   };
 
   services = {
