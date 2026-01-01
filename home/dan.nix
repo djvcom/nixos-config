@@ -31,7 +31,6 @@
       deadnix # Find unused code
     ];
     sessionVariables = {
-      DOCKER_HOST = "unix:///run/podman/podman.sock";
       EDITOR = "nvim";
     };
     stateVersion = "25.05";

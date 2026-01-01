@@ -124,14 +124,14 @@ in
       ];
       allowPing = true;
       logRefusedConnections = true;
-      # Allow OTEL ports only from Podman network
+      # Allow OTEL ports only from Docker network
       extraCommands = ''
-        iptables -I nixos-fw 5 -p tcp -s 10.88.0.0/16 --dport 4317 -j nixos-fw-accept
-        iptables -I nixos-fw 5 -p tcp -s 10.88.0.0/16 --dport 4318 -j nixos-fw-accept
+        iptables -I nixos-fw 5 -p tcp -s 172.17.0.0/16 --dport 4317 -j nixos-fw-accept
+        iptables -I nixos-fw 5 -p tcp -s 172.17.0.0/16 --dport 4318 -j nixos-fw-accept
       '';
       extraStopCommands = ''
-        iptables -D nixos-fw -p tcp -s 10.88.0.0/16 --dport 4317 -j nixos-fw-accept 2>/dev/null || true
-        iptables -D nixos-fw -p tcp -s 10.88.0.0/16 --dport 4318 -j nixos-fw-accept 2>/dev/null || true
+        iptables -D nixos-fw -p tcp -s 172.17.0.0/16 --dport 4317 -j nixos-fw-accept 2>/dev/null || true
+        iptables -D nixos-fw -p tcp -s 172.17.0.0/16 --dport 4318 -j nixos-fw-accept 2>/dev/null || true
       '';
     };
   };
@@ -272,7 +272,7 @@ in
       "networkmanager"
       "kvm"
       "libvirtd"
-      "podman"
+      "docker"
     ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHifaRXUcEaoTkf8dJF4qB7V9+VTjYX++fRbOKoCCpC2"
@@ -292,11 +292,8 @@ in
       enable = true;
       allowedBridges = [ "virbr0" ];
     };
-    podman = {
+    docker = {
       enable = true;
-      dockerCompat = true;
-      dockerSocket.enable = true;
-      defaultNetwork.settings.dns_enabled = true;
     };
   };
 
@@ -309,6 +306,8 @@ in
       enable = true;
       github.user = "djvcom";
       cratesIo.user = "djvcom";
+      npm.user = "djverrall";
+      gitlab.user = "djverrall";
     };
   };
 
