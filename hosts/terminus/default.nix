@@ -217,8 +217,8 @@ in
       file = ../../secrets/git-identity.age;
       path = "/home/dan/.config/git/identity";
       owner = "dan";
-      group = "users";
-      mode = "0440";
+      group = "dan";
+      mode = "0400";
     };
     kanidm-admin-password = {
       file = ../../secrets/kanidm-admin-password.age;
@@ -259,8 +259,8 @@ in
     dan-mail-password = {
       file = ../../secrets/dan-mail-password.age;
       owner = "root";
-      group = "root";
-      mode = "0444";
+      group = "mail-secrets";
+      mode = "0440";
     };
     openbao-keys = {
       file = ../../secrets/openbao-keys.age;
@@ -318,20 +318,32 @@ in
     };
   };
 
-  # User configuration (removed root SSH keys - PermitRootLogin is "no" anyway)
-  users.users.dan = {
-    isNormalUser = true;
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-      "kvm"
-      "libvirtd"
-      "docker"
-    ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHifaRXUcEaoTkf8dJF4qB7V9+VTjYX++fRbOKoCCpC2"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN3DO7MvH49txkJjxZDZb4S3IWdeuEvN3UzPGbkvEtbE"
-    ];
+  # User and group configuration
+  users = {
+    # Shared group for services needing mail credentials
+    groups.mail-secrets = { };
+
+    users = {
+      # Primary user (removed root SSH keys - PermitRootLogin is "no" anyway)
+      dan = {
+        isNormalUser = true;
+        extraGroups = [
+          "wheel"
+          "networkmanager"
+          "kvm"
+          "libvirtd"
+          "docker"
+        ];
+        openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHifaRXUcEaoTkf8dJF4qB7V9+VTjYX++fRbOKoCCpC2"
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN3DO7MvH49txkJjxZDZb4S3IWdeuEvN3UzPGbkvEtbE"
+        ];
+      };
+
+      # Add service users to mail-secrets group for shared credential access
+      stalwart-mail.extraGroups = [ "mail-secrets" ];
+      vaultwarden.extraGroups = [ "mail-secrets" ];
+    };
   };
 
   environment.systemPackages = with pkgs; [
@@ -606,8 +618,9 @@ in
         ];
 
         # Authentication settings
+        # SCRAM-SHA-256 preferred; PLAIN fallback for legacy clients (over TLS)
         session.auth = {
-          mechanisms = "[plain]";
+          mechanisms = "[scram-sha-256, plain]";
           directory = "'memory'";
         };
 
@@ -950,7 +963,9 @@ in
           };
 
           # Server transport for Kanidm backend TLS
-          serversTransports.kanidm-transport.insecureSkipVerify = true;
+          # Kanidm uses ACME cert for auth.djv.sh but listens on 127.0.0.1
+          # serverName tells Traefik which hostname to verify in the certificate
+          serversTransports.kanidm-transport.serverName = "auth.djv.sh";
         };
       };
     };
