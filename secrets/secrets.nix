@@ -26,4 +26,7 @@ in
   "dkim-rsa-key.age".publicKeys = allKeys;
   "dkim-ed25519-key.age".publicKeys = allKeys;
   "dan-mail-password.age".publicKeys = allKeys;
+
+  # OpenBao secrets management
+  "openbao-keys.age".publicKeys = allKeys;
 }

@@ -262,6 +262,12 @@ in
       group = "root";
       mode = "0444";
     };
+    openbao-keys = {
+      file = ../../secrets/openbao-keys.age;
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
   };
 
   modules.observability = {
@@ -412,7 +418,6 @@ in
           displayName = "OpenBao Secrets";
           originUrl = "https://bao.djv.sh/";
           originLanding = "https://bao.djv.sh/ui/";
-          public = true; # Enforces PKCE, no client secret needed
           preferShortUsername = true;
           scopeMaps.openbao_admins = [
             "openid"
