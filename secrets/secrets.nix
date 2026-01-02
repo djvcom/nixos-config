@@ -13,4 +13,14 @@ in
   "datadog-app-key.age".publicKeys = allKeys;
   "minio-credentials.age".publicKeys = allKeys;
   "cloudflare-dns-token.age".publicKeys = allKeys;
+
+  # Kanidm identity provider
+  "kanidm-admin-password.age".publicKeys = allKeys;
+  "kanidm-idm-admin-password.age".publicKeys = allKeys;
+
+  # Vaultwarden password manager
+  "vaultwarden-admin-token.age".publicKeys = allKeys;
+
+  # Stalwart mail server
+  "stalwart-admin-password.age".publicKeys = allKeys;
 }

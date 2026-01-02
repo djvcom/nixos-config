@@ -20,16 +20,22 @@ let
       host = "minio.djv.sh";
       backend = "http://127.0.0.1:9001";
     };
-  };
-
-  allDomains = lib.mapAttrsToList (_: v: v.host) domains;
-
-  # Helper for ACME certs - all use same Cloudflare DNS-01 config
-  acmeDomains = allDomains;
-  mkAcmeCert = _: {
-    dnsProvider = "cloudflare";
-    environmentFile = config.age.secrets.cloudflare-dns-token.path;
-    group = "nginx";
+    kanidm = {
+      host = "auth.djv.sh";
+      backend = "https://127.0.0.1:8444";
+    };
+    vaultwarden = {
+      host = "vault.djv.sh";
+      backend = "http://127.0.0.1:8222";
+    };
+    openbao = {
+      host = "bao.djv.sh";
+      backend = "http://127.0.0.1:8200";
+    };
+    stalwart = {
+      host = "mail.djv.sh";
+      backend = "http://127.0.0.1:8082";
+    };
   };
 
   # Security headers for all responses - see SECURITY.md for OWASP references
@@ -214,6 +220,30 @@ in
       group = "users";
       mode = "0440";
     };
+    kanidm-admin-password = {
+      file = ../../secrets/kanidm-admin-password.age;
+      owner = "kanidm";
+      group = "kanidm";
+      mode = "0400";
+    };
+    kanidm-idm-admin-password = {
+      file = ../../secrets/kanidm-idm-admin-password.age;
+      owner = "kanidm";
+      group = "kanidm";
+      mode = "0400";
+    };
+    vaultwarden-admin-token = {
+      file = ../../secrets/vaultwarden-admin-token.age;
+      owner = "vaultwarden";
+      group = "vaultwarden";
+      mode = "0400";
+    };
+    stalwart-admin-password = {
+      file = ../../secrets/stalwart-admin-password.age;
+      owner = "stalwart-mail";
+      group = "stalwart-mail";
+      mode = "0400";
+    };
   };
 
   modules.observability = {
@@ -297,25 +327,215 @@ in
     };
   };
 
-  services.djv = {
-    enable = true;
-    environment = "production";
-    listenAddress = "127.0.0.1:7823";
-    database.enable = true;
-    sync = {
-      enable = true;
-      github.user = "djvcom";
-      cratesIo.user = "djvcom";
-      npm.user = "djverrall";
-      gitlab.user = "djverrall";
-    };
-  };
-
   services = {
+    # djv portfolio site
+    djv = {
+      enable = true;
+      environment = "production";
+      listenAddress = "127.0.0.1:7823";
+      database.enable = true;
+      sync = {
+        enable = true;
+        github.user = "djvcom";
+        cratesIo.user = "djvcom";
+        npm.user = "djverrall";
+        gitlab.user = "djverrall";
+      };
+    };
+
+    # Kanidm identity provider with passkey support
+    kanidm = {
+      enableServer = true;
+      package = pkgs.kanidm_1_8.withSecretProvisioning;
+
+      serverSettings = {
+        domain = "auth.djv.sh";
+        origin = "https://auth.djv.sh";
+        bindaddress = "127.0.0.1:8444";
+
+        # TLS certificates from ACME
+        tls_chain = "/var/lib/acme/auth.djv.sh/fullchain.pem";
+        tls_key = "/var/lib/acme/auth.djv.sh/key.pem";
+
+        # Online backups
+        online_backup = {
+          path = "/var/backup/kanidm";
+          schedule = "00 22 * * *";
+          versions = 7;
+        };
+      };
+
+      # Declarative provisioning
+      provision = {
+        enable = true;
+        adminPasswordFile = config.age.secrets.kanidm-admin-password.path;
+        idmAdminPasswordFile = config.age.secrets.kanidm-idm-admin-password.path;
+
+        # Groups for service access
+        groups = {
+          vaultwarden_users = { };
+          openbao_admins = { };
+          infrastructure_admins = { };
+        };
+
+        # Initial admin user
+        persons.dan = {
+          displayName = "Dan";
+          mailAddresses = [ "dan@djv.sh" ];
+          groups = [
+            "vaultwarden_users"
+            "openbao_admins"
+            "infrastructure_admins"
+          ];
+        };
+
+        # OAuth2/OIDC clients for SSO
+        systems.oauth2.openbao = {
+          displayName = "OpenBao Secrets";
+          originUrl = "https://bao.djv.sh/";
+          originLanding = "https://bao.djv.sh/ui/";
+          public = true; # Enforces PKCE, no client secret needed
+          preferShortUsername = true;
+          scopeMaps.openbao_admins = [
+            "openid"
+            "profile"
+            "email"
+            "groups"
+          ];
+        };
+      };
+    };
+
+    # Vaultwarden password manager (Bitwarden-compatible)
+    vaultwarden = {
+      enable = true;
+      dbBackend = "postgresql";
+      config = {
+        DOMAIN = "https://vault.djv.sh";
+        ROCKET_ADDRESS = "127.0.0.1";
+        ROCKET_PORT = 8222;
+        SIGNUPS_ALLOWED = false;
+        INVITATIONS_ALLOWED = true;
+        WEBSOCKET_ENABLED = true;
+        ADMIN_TOKEN_FILE = config.age.secrets.vaultwarden-admin-token.path;
+        DATABASE_URL = "postgresql://vaultwarden@/vaultwarden?host=/run/postgresql";
+      };
+    };
+
+    # OpenBao secrets management (Vault fork)
+    openbao = {
+      enable = true;
+      settings = {
+        ui = true;
+        api_addr = "https://bao.djv.sh";
+        cluster_addr = "http://127.0.0.1:8201";
+
+        # Listen on localhost only, Traefik handles TLS
+        listener.tcp = {
+          type = "tcp";
+          address = "127.0.0.1:8200";
+          tls_disable = true;
+        };
+
+        # Raft storage for single-node deployment
+        storage.raft = {
+          path = "/var/lib/openbao";
+          node_id = "terminus";
+        };
+      };
+    };
+
+    # Stalwart all-in-one mail server (SMTP, IMAP, JMAP)
+    stalwart-mail = {
+      enable = true;
+      openFirewall = true;
+
+      settings = {
+        server = {
+          hostname = "mail.djv.sh";
+
+          tls = {
+            enable = true;
+            implicit = true;
+          };
+
+          listener = {
+            # SMTP submission (authenticated users)
+            smtp-submission = {
+              bind = [ "[::]:587" ];
+              protocol = "smtp";
+            };
+
+            # SMTPS (implicit TLS)
+            smtps = {
+              bind = [ "[::]:465" ];
+              protocol = "smtp";
+              tls.implicit = true;
+            };
+
+            # IMAPS (implicit TLS)
+            imaps = {
+              bind = [ "[::]:993" ];
+              protocol = "imap";
+              tls.implicit = true;
+            };
+
+            # HTTP for JMAP/admin API (behind Traefik)
+            http = {
+              bind = [ "127.0.0.1:8082" ];
+              protocol = "http";
+            };
+          };
+        };
+
+        # Use ACME certificates
+        certificate.default = {
+          cert = "%{file:/var/lib/acme/mail.djv.sh/fullchain.pem}%";
+          private-key = "%{file:/var/lib/acme/mail.djv.sh/key.pem}%";
+          default = true;
+        };
+
+        # Storage configuration - single RocksDB store for all data
+        store.data = {
+          type = "rocksdb";
+          path = "/var/lib/stalwart-mail/data";
+        };
+
+        storage = {
+          data = "data";
+          blob = "data";
+          fts = "data";
+          lookup = "data";
+          directory = "internal";
+        };
+
+        # Internal directory for user management
+        directory.internal = {
+          type = "internal";
+          store = "data";
+        };
+
+        # Authentication settings
+        session.auth = {
+          mechanisms = "[plain]";
+          directory = "'internal'";
+        };
+
+        # Admin fallback account
+        authentication.fallback-admin = {
+          user = "admin";
+          secret = "%{file:${config.age.secrets.stalwart-admin-password.path}}%";
+        };
+      };
+    };
+
     # PostgreSQL with proper authentication
     postgresql = {
       enable = true;
-      ensureDatabases = [ "djv" ];
+      ensureDatabases = [
+        "djv"
+        "vaultwarden"
+      ];
       ensureUsers = [
         {
           name = "dan";
@@ -324,6 +544,10 @@ in
         }
         {
           name = "djv";
+          ensureDBOwnership = true;
+        }
+        {
+          name = "vaultwarden";
           ensureDBOwnership = true;
         }
       ];
@@ -565,6 +789,38 @@ in
               entryPoints = [ "websecure" ];
             };
 
+            kanidm = {
+              rule = "Host(`${domains.kanidm.host}`)";
+              service = "kanidm";
+              middlewares = [ "security-headers" ];
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
+            };
+
+            vaultwarden = {
+              rule = "Host(`${domains.vaultwarden.host}`)";
+              service = "vaultwarden";
+              middlewares = [ "security-headers" ];
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
+            };
+
+            openbao = {
+              rule = "Host(`${domains.openbao.host}`)";
+              service = "openbao";
+              middlewares = [ "security-headers" ];
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
+            };
+
+            stalwart = {
+              rule = "Host(`${domains.stalwart.host}`)";
+              service = "stalwart";
+              middlewares = [ "security-headers" ];
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
+            };
+
             # Catch-all router for unknown hosts (lowest priority)
             catch-all = {
               rule = "HostRegexp(`.*`)";
@@ -589,22 +845,52 @@ in
               servers = [ { url = domains.minioConsole.backend; } ];
               passHostHeader = true;
             };
+
+            # Kanidm handles TLS itself, so we need serversTransport
+            kanidm.loadBalancer = {
+              servers = [ { url = domains.kanidm.backend; } ];
+              serversTransport = "kanidm-transport";
+            };
+
+            vaultwarden.loadBalancer.servers = [ { url = domains.vaultwarden.backend; } ];
+
+            openbao.loadBalancer.servers = [ { url = domains.openbao.backend; } ];
+
+            stalwart.loadBalancer.servers = [ { url = domains.stalwart.backend; } ];
           };
+
+          # Server transport for Kanidm backend TLS
+          serversTransports.kanidm-transport.insecureSkipVerify = true;
         };
       };
     };
   };
 
-  # Create log directory for Traefik access logs (for Fail2ban)
+  # Create directories for services
   systemd.tmpfiles.rules = [
     "d /var/log/traefik 0750 traefik traefik -"
+    "d /var/backup/kanidm 0750 kanidm kanidm -"
   ];
 
-  # ACME certificates - deduplicated with helper
+  # ACME certificates for services that handle their own TLS
+  # (Traefik manages its own certs via certificatesResolvers)
   security.acme = {
     acceptTerms = true;
     defaults.email = "djverrall@gmail.com";
-    certs = lib.genAttrs acmeDomains mkAcmeCert;
+    certs = {
+      # Kanidm terminates TLS itself, needs cert files
+      "auth.djv.sh" = {
+        dnsProvider = "cloudflare";
+        environmentFile = config.age.secrets.cloudflare-dns-token.path;
+        group = "kanidm";
+      };
+      # Stalwart mail server TLS
+      "mail.djv.sh" = {
+        dnsProvider = "cloudflare";
+        environmentFile = config.age.secrets.cloudflare-dns-token.path;
+        group = "stalwart-mail";
+      };
+    };
   };
 
   # Nix store optimisation
