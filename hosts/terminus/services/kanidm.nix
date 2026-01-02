@@ -48,17 +48,32 @@
       };
 
       # OAuth2/OIDC clients for SSO
-      systems.oauth2.openbao = {
-        displayName = "OpenBao Secrets";
-        originUrl = "https://bao.djv.sh/";
-        originLanding = "https://bao.djv.sh/ui/";
-        preferShortUsername = true;
-        scopeMaps.openbao_admins = [
-          "openid"
-          "profile"
-          "email"
-          "groups"
-        ];
+      systems.oauth2 = {
+        openbao = {
+          displayName = "OpenBao Secrets";
+          originUrl = "https://bao.djv.sh/";
+          originLanding = "https://bao.djv.sh/ui/";
+          preferShortUsername = true;
+          scopeMaps.openbao_admins = [
+            "openid"
+            "profile"
+            "email"
+            "groups"
+          ];
+        };
+
+        vaultwarden = {
+          displayName = "Vaultwarden";
+          originUrl = "https://vault.djv.sh/";
+          originLanding = "https://vault.djv.sh/";
+          preferShortUsername = true;
+          # PKCE is enabled by default in Kanidm; Vaultwarden uses SSO_PKCE=true
+          scopeMaps.vaultwarden_users = [
+            "openid"
+            "profile"
+            "email"
+          ];
+        };
       };
     };
   };

@@ -423,6 +423,92 @@ Use a shared group:
 
 ---
 
+## SSO with Kanidm
+
+Kanidm provides OIDC authentication for services. OIDC clients are configured declaratively in `services/kanidm.nix`.
+
+### Adding an OIDC client
+
+```nix
+# In services/kanidm.nix
+systems.oauth2.myservice = {
+  displayName = "My Service";
+  originUrl = "https://myservice.djv.sh/";
+  originLanding = "https://myservice.djv.sh/";
+  preferShortUsername = true;
+  # PKCE is enabled by default in Kanidm
+  scopeMaps.infrastructure_admins = [
+    "openid"
+    "profile"
+    "email"
+  ];
+};
+```
+
+### Retrieving OIDC client secrets
+
+After rebuild, get the client secret:
+
+```bash
+kanidm system oauth2 show-basic-secret myservice
+```
+
+Store in agenix and reference via environment file.
+
+### Vaultwarden SSO
+
+Vaultwarden uses environment variables for SSO. The Kanidm client is already configured.
+
+After rebuild, update the secret:
+
+```bash
+# Get the client secret
+kanidm system oauth2 show-basic-secret vaultwarden
+
+# Update the secret (creates new encrypted file)
+cd /etc/nixos/secrets
+echo "SSO_CLIENT_SECRET=<secret-from-above>" | agenix -e vaultwarden-sso.age
+
+# Restart Vaultwarden to pick up new secret
+sudo systemctl restart vaultwarden
+```
+
+### OpenBao OIDC
+
+OpenBao requires CLI configuration after unsealing (cannot be declarative).
+
+```bash
+# Ensure OpenBao is unsealed first
+bao status
+
+# Enable OIDC auth method
+bao auth enable oidc
+
+# Get client secret from Kanidm
+kanidm system oauth2 show-basic-secret openbao
+
+# Configure OIDC
+bao write auth/oidc/config \
+    oidc_discovery_url="https://auth.djv.sh/oauth2/openid/openbao" \
+    oidc_client_id="openbao" \
+    oidc_client_secret="<secret-from-kanidm>" \
+    default_role="admin"
+
+# Create admin role
+bao write auth/oidc/role/admin \
+    role_type="oidc" \
+    user_claim="preferred_username" \
+    groups_claim="groups" \
+    policies="admin,default" \
+    oidc_scopes="openid,profile,email,groups" \
+    allowed_redirect_uris="https://bao.djv.sh/ui/vault/auth/oidc/oidc/callback"
+
+# Test login via UI at https://bao.djv.sh
+# Select "OIDC" method and click "Sign in with OIDC Provider"
+```
+
+---
+
 ## Useful Commands
 
 ```bash

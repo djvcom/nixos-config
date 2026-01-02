@@ -20,6 +20,7 @@ in
 
   # Vaultwarden password manager
   "vaultwarden-admin-token.age".publicKeys = allKeys;
+  "vaultwarden-sso.age".publicKeys = allKeys;
 
   # Stalwart mail server
   "stalwart-admin-password.age".publicKeys = allKeys;

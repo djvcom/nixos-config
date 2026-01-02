@@ -52,6 +52,12 @@ _:
       group = "vaultwarden";
       mode = "0400";
     };
+    vaultwarden-sso = {
+      file = ../../secrets/vaultwarden-sso.age;
+      owner = "vaultwarden";
+      group = "vaultwarden";
+      mode = "0400";
+    };
     stalwart-admin-password = {
       file = ../../secrets/stalwart-admin-password.age;
       owner = "stalwart-mail";
