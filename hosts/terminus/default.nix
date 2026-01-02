@@ -244,6 +244,24 @@ in
       group = "stalwart-mail";
       mode = "0400";
     };
+    dkim-rsa-key = {
+      file = ../../secrets/dkim-rsa-key.age;
+      owner = "stalwart-mail";
+      group = "stalwart-mail";
+      mode = "0400";
+    };
+    dkim-ed25519-key = {
+      file = ../../secrets/dkim-ed25519-key.age;
+      owner = "stalwart-mail";
+      group = "stalwart-mail";
+      mode = "0400";
+    };
+    dan-mail-password = {
+      file = ../../secrets/dan-mail-password.age;
+      owner = "root";
+      group = "root";
+      mode = "0444";
+    };
   };
 
   modules.observability = {
@@ -419,6 +437,15 @@ in
         WEBSOCKET_ENABLED = true;
         ADMIN_TOKEN_FILE = config.age.secrets.vaultwarden-admin-token.path;
         DATABASE_URL = "postgresql://vaultwarden@/vaultwarden?host=/run/postgresql";
+
+        # SMTP via local Stalwart
+        SMTP_HOST = "mail.djv.sh";
+        SMTP_PORT = 587;
+        SMTP_SECURITY = "starttls";
+        SMTP_FROM = "vault@djv.sh";
+        SMTP_FROM_NAME = "Vaultwarden";
+        SMTP_USERNAME = "dan";
+        SMTP_PASSWORD_FILE = config.age.secrets.dan-mail-password.path;
       };
     };
 
@@ -506,19 +533,77 @@ in
           blob = "data";
           fts = "data";
           lookup = "data";
-          directory = "internal";
+          directory = "memory";
         };
 
-        # Internal directory for user management
-        directory.internal = {
-          type = "internal";
-          store = "data";
+        # In-memory directory with declarative users
+        directory."memory" = {
+          type = "memory";
+          principals = [
+            {
+              class = "individual";
+              name = "dan";
+              secret = "%{file:${config.age.secrets.dan-mail-password.path}}%";
+              email = [
+                "dan@djv.sh"
+                "postmaster@djv.sh"
+                "admin@djv.sh"
+                "vault@djv.sh"
+                "noreply@djv.sh"
+              ];
+            }
+          ];
         };
+
+        # DKIM signatures for outgoing mail
+        signature."rsa" = {
+          private-key = "%{file:${config.age.secrets.dkim-rsa-key.path}}%";
+          domain = "djv.sh";
+          selector = "mail";
+          headers = [
+            "From"
+            "To"
+            "Date"
+            "Subject"
+            "Message-ID"
+          ];
+          algorithm = "rsa-sha256";
+          canonicalization = "relaxed/relaxed";
+          expire = "10d";
+          report = true;
+        };
+
+        signature."ed25519" = {
+          private-key = "%{file:${config.age.secrets.dkim-ed25519-key.path}}%";
+          domain = "djv.sh";
+          selector = "ed";
+          headers = [
+            "From"
+            "To"
+            "Date"
+            "Subject"
+            "Message-ID"
+          ];
+          algorithm = "ed25519-sha256";
+          canonicalization = "relaxed/relaxed";
+          expire = "10d";
+          report = true;
+        };
+
+        # Sign outgoing mail with both RSA and ED25519
+        # Only sign mail from authenticated users (not incoming)
+        auth.dkim.sign = [
+          {
+            "if" = "listener != 'smtp'";
+            "then" = "['rsa', 'ed25519']";
+          }
+          { "else" = false; }
+        ];
 
         # Authentication settings
         session.auth = {
           mechanisms = "[plain]";
-          directory = "'internal'";
+          directory = "'memory'";
         };
 
         # Admin fallback account
@@ -715,7 +800,7 @@ in
 
         # ACME certificate resolver using Cloudflare DNS-01
         certificatesResolvers.letsencrypt.acme = {
-          email = "djverrall@gmail.com";
+          email = "admin@djv.sh";
           storage = "/var/lib/traefik/acme.json";
           dnsChallenge = {
             provider = "cloudflare";
@@ -876,7 +961,7 @@ in
   # (Traefik manages its own certs via certificatesResolvers)
   security.acme = {
     acceptTerms = true;
-    defaults.email = "djverrall@gmail.com";
+    defaults.email = "admin@djv.sh";
     certs = {
       # Kanidm terminates TLS itself, needs cert files
       "auth.djv.sh" = {
