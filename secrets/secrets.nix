@@ -29,4 +29,7 @@ in
 
   # OpenBao secrets management
   "openbao-keys.age".publicKeys = allKeys;
+
+  # Backup system
+  "backup-credentials.age".publicKeys = allKeys;
 }

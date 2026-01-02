@@ -94,6 +94,7 @@ in
     ./hardware.nix
     ../../modules/base.nix
     ../../modules/observability.nix
+    ../../modules/backup.nix
   ];
 
   networking = {
@@ -217,7 +218,7 @@ in
       file = ../../secrets/git-identity.age;
       path = "/home/dan/.config/git/identity";
       owner = "dan";
-      group = "dan";
+      group = "users";
       mode = "0400";
     };
     kanidm-admin-password = {
@@ -264,6 +265,12 @@ in
     };
     openbao-keys = {
       file = ../../secrets/openbao-keys.age;
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+    backup-credentials = {
+      file = ../../secrets/backup-credentials.age;
       owner = "root";
       group = "root";
       mode = "0400";
@@ -315,6 +322,32 @@ in
         ];
         exporters = [ "datadog" ];
       };
+    };
+  };
+
+  # Automated backups to MinIO (local S3)
+  modules.backup = {
+    enable = true;
+    repository = "s3:http://127.0.0.1:9000/backups";
+    environmentFile = config.age.secrets.backup-credentials.path;
+
+    paths = [
+      "/var/lib/kanidm"
+      "/var/backup/kanidm"
+      "/var/lib/stalwart-mail/data"
+      "/var/lib/openbao"
+    ];
+
+    postgresqlDatabases = [
+      "djv"
+      "vaultwarden"
+    ];
+
+    schedule = "daily";
+    retention = {
+      daily = 7;
+      weekly = 4;
+      monthly = 6;
     };
   };
 
