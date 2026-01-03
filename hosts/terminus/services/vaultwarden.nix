@@ -1,4 +1,8 @@
 # Vaultwarden password manager (Bitwarden-compatible) with Kanidm SSO
+#
+# SSO flow: Vaultwarden -> Kanidm OIDC -> passkey auth -> token exchange
+# Client secret shared via basicSecretFile in kanidm.nix and environmentFile here
+# Database: PostgreSQL (see default.nix for DB/user creation)
 { config, ... }:
 
 {
@@ -22,7 +26,6 @@
       SSO_CLIENT_ID = "vaultwarden";
       SSO_SCOPES = "openid profile email";
       SSO_PKCE = true;
-      SSO_DEBUG_TOKENS = true;
       # SSO_CLIENT_SECRET loaded from environmentFile
 
       # SMTP via local Stalwart

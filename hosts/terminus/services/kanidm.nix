@@ -53,6 +53,7 @@
           displayName = "OpenBao Secrets";
           originUrl = "https://bao.djv.sh/";
           originLanding = "https://bao.djv.sh/ui/";
+          basicSecretFile = config.age.secrets.kanidm-oauth2-openbao.path;
           preferShortUsername = true;
           scopeMaps.openbao_admins = [
             "openid"

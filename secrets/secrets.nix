@@ -24,6 +24,7 @@ in
 
   # Kanidm OAuth2 client secrets
   "kanidm-oauth2-vaultwarden.age".publicKeys = allKeys;
+  "kanidm-oauth2-openbao.age".publicKeys = allKeys;
 
   # Stalwart mail server
   "stalwart-admin-password.age".publicKeys = allKeys;
