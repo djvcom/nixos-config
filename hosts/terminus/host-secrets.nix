@@ -46,6 +46,12 @@ _:
       group = "kanidm";
       mode = "0400";
     };
+    kanidm-oauth2-vaultwarden = {
+      file = ../../secrets/kanidm-oauth2-vaultwarden.age;
+      owner = "kanidm";
+      group = "kanidm";
+      mode = "0400";
+    };
     vaultwarden-admin-token = {
       file = ../../secrets/vaultwarden-admin-token.age;
       owner = "vaultwarden";

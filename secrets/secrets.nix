@@ -22,6 +22,9 @@ in
   "vaultwarden-admin-token.age".publicKeys = allKeys;
   "vaultwarden-sso.age".publicKeys = allKeys;
 
+  # Kanidm OAuth2 client secrets
+  "kanidm-oauth2-vaultwarden.age".publicKeys = allKeys;
+
   # Stalwart mail server
   "stalwart-admin-password.age".publicKeys = allKeys;
   "dkim-rsa-key.age".publicKeys = allKeys;

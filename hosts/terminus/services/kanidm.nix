@@ -69,6 +69,7 @@
             "https://vault.djv.sh/identity/connect/oidc-signin"
           ];
           originLanding = "https://vault.djv.sh/";
+          basicSecretFile = config.age.secrets.kanidm-oauth2-vaultwarden.path;
           preferShortUsername = true;
           # PKCE is enabled by default in Kanidm; Vaultwarden uses SSO_PKCE=true
           scopeMaps.vaultwarden_users = [

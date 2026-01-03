@@ -48,6 +48,7 @@
       # Overlays for package customisation
       overlays = [
         (import ./overlays/vaultwarden-sso.nix)
+        (import ./overlays/kanidm-csp.nix)
       ];
 
       # Helper for creating NixOS configurations
