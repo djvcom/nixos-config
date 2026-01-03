@@ -142,7 +142,7 @@ in
 
             # Garage UI (SSO via oauth2-proxy) - higher priority for /ui path
             garage-ui = {
-              rule = "Host(`${domains.garage.host}`) && PathPrefix(`/ui`, `/oauth2`)";
+              rule = "Host(`${domains.garage.host}`) && (PathPrefix(`/ui`) || PathPrefix(`/oauth2`))";
               service = "garage-ui";
               middlewares = [ "security-headers" ];
               tls.certResolver = "letsencrypt";
@@ -150,13 +150,14 @@ in
               priority = 10;
             };
 
-            # Garage S3 API (access key auth)
+            # Garage S3 API (access key auth) - lower priority than UI routes
             garage-s3 = {
               rule = "Host(`${domains.garage.host}`)";
               service = "garage-s3";
               middlewares = [ "security-headers" ];
               tls.certResolver = "letsencrypt";
               entryPoints = [ "websecure" ];
+              priority = 1;
             };
 
             kanidm = {
