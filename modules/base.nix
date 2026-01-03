@@ -26,6 +26,10 @@
   };
 
   security = {
+    # NOPASSWD accepted for single-user personal infrastructure:
+    # - SSH uses key-only auth (password disabled)
+    # - Server not shared with other users
+    # - Attacker with SSH access already has user context
     sudo.extraRules = [
       {
         users = [ "dan" ];
@@ -41,6 +45,7 @@
   };
 
   # Brute-force protection - see <https://www.fail2ban.org/>
+  # Traefik logs in common format to /var/log/traefik/access.log
   services = {
     fail2ban = {
       enable = true;
@@ -48,22 +53,28 @@
       bantime = "1h";
       bantime-increment.enable = true;
       jails = {
-        # Protect against HTTP authentication brute-force
-        nginx-http-auth.settings = {
+        # Protect against HTTP authentication failures (401/403)
+        traefik-auth.settings = {
           enabled = true;
-          filter = "nginx-http-auth";
+          filter = "traefik-auth";
+          logpath = "/var/log/traefik/access.log";
+          backend = "auto";
           maxretry = 5;
         };
-        # Protect against bots scanning for vulnerabilities
-        nginx-botsearch.settings = {
+        # Protect against bots scanning for vulnerabilities (repeated 404s)
+        traefik-botsearch.settings = {
           enabled = true;
-          filter = "nginx-botsearch";
-          maxretry = 5;
+          filter = "traefik-botsearch";
+          logpath = "/var/log/traefik/access.log";
+          backend = "auto";
+          maxretry = 10;
         };
-        # Protect against excessive 4xx errors (scanners, bad bots)
-        nginx-bad-request.settings = {
+        # Protect against bad requests (400 errors)
+        traefik-badrequest.settings = {
           enabled = true;
-          filter = "nginx-bad-request";
+          filter = "traefik-badrequest";
+          logpath = "/var/log/traefik/access.log";
+          backend = "auto";
           maxretry = 10;
         };
       };
@@ -89,6 +100,26 @@
     gnumake
     just
   ];
+
+  # Custom fail2ban filters for Traefik (common log format)
+  # See: https://nixos.wiki/wiki/Fail2ban
+  environment.etc = {
+    "fail2ban/filter.d/traefik-auth.conf".text = ''
+      [Definition]
+      failregex = ^<HOST> - - \[.*\] ".*" (401|403) .*$
+      ignoreregex =
+    '';
+    "fail2ban/filter.d/traefik-botsearch.conf".text = ''
+      [Definition]
+      failregex = ^<HOST> - - \[.*\] ".*" 404 .*$
+      ignoreregex = \.(css|js|png|jpg|jpeg|gif|ico|woff|woff2|svg)
+    '';
+    "fail2ban/filter.d/traefik-badrequest.conf".text = ''
+      [Definition]
+      failregex = ^<HOST> - - \[.*\] ".*" 400 .*$
+      ignoreregex =
+    '';
+  };
 
   programs.nix-ld.enable = true;
 
