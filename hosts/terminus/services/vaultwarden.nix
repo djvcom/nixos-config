@@ -22,6 +22,7 @@
       SSO_CLIENT_ID = "vaultwarden";
       SSO_SCOPES = "openid profile email";
       SSO_PKCE = true;
+      SSO_DEBUG_TOKENS = true;
       # SSO_CLIENT_SECRET loaded from environmentFile
 
       # SMTP via local Stalwart

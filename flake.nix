@@ -45,12 +45,18 @@
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
 
+      # Overlays for package customisation
+      overlays = [
+        (import ./overlays/vaultwarden-sso.nix)
+      ];
+
       # Helper for creating NixOS configurations
       mkHost =
         hostname:
         nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
+            { nixpkgs.overlays = overlays; }
             ./hosts/${hostname}
             home-manager.nixosModules.home-manager
             agenix.nixosModules.default
