@@ -60,12 +60,12 @@ _:
     };
     garage-env = {
       file = ../../secrets/garage-env.age;
-      owner = "garage";
-      group = "garage";
-      mode = "0400";
+      owner = "root";
+      group = "root";
+      mode = "0444";
     };
-    oauth2-proxy-cookie = {
-      file = ../../secrets/oauth2-proxy-cookie.age;
+    oauth2-proxy-env = {
+      file = ../../secrets/oauth2-proxy-env.age;
       owner = "root";
       group = "root";
       mode = "0400";

@@ -16,7 +16,7 @@ in
   # Garage S3-compatible storage
   "garage-env.age".publicKeys = allKeys;
   "kanidm-oauth2-garage.age".publicKeys = allKeys;
-  "oauth2-proxy-cookie.age".publicKeys = allKeys;
+  "oauth2-proxy-env.age".publicKeys = allKeys;
 
   # Kanidm identity provider
   "kanidm-admin-password.age".publicKeys = allKeys;

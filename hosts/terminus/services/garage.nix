@@ -57,12 +57,9 @@
 
     provider = "oidc";
     clientID = "garage";
-    keyFile = config.age.secrets.kanidm-oauth2-garage.path;
+    keyFile = config.age.secrets.oauth2-proxy-env.path;
 
-    cookie = {
-      secret = null; # Loaded from keyFile
-      secure = true;
-    };
+    cookie.secure = true;
 
     extraConfig = {
       oidc-issuer-url = "https://auth.djv.sh/oauth2/openid/garage";
