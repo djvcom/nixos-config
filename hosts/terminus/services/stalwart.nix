@@ -16,6 +16,12 @@
         };
 
         listener = {
+          # SMTP for incoming mail from other servers (STARTTLS)
+          smtp = {
+            bind = [ "[::]:25" ];
+            protocol = "smtp";
+          };
+
           # SMTP submission (authenticated users)
           smtp-submission = {
             bind = [ "[::]:587" ];

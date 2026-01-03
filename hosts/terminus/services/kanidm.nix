@@ -64,7 +64,10 @@
 
         vaultwarden = {
           displayName = "Vaultwarden";
-          originUrl = "https://vault.djv.sh/";
+          originUrl = [
+            "https://vault.djv.sh/"
+            "https://vault.djv.sh/identity/connect/oidc-signin"
+          ];
           originLanding = "https://vault.djv.sh/";
           preferShortUsername = true;
           # PKCE is enabled by default in Kanidm; Vaultwarden uses SSO_PKCE=true
