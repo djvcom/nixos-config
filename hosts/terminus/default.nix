@@ -23,7 +23,7 @@
     ./services/vaultwarden.nix
     ./services/openbao.nix
     ./services/stalwart.nix
-    ./services/minio.nix
+    ./services/garage.nix
   ];
 
   networking = {
@@ -121,10 +121,10 @@
     };
   };
 
-  # Automated backups to MinIO (local S3)
+  # Automated backups to Garage (local S3)
   modules.backup = {
     enable = true;
-    repository = "s3:http://127.0.0.1:9000/backups";
+    repository = "s3:http://127.0.0.1:3900/backups";
     environmentFile = config.age.secrets.backup-credentials.path;
 
     paths = [
@@ -175,7 +175,6 @@
     zellij
     nftables
     nodejs_24
-    minio-client
   ];
 
   virtualisation = {

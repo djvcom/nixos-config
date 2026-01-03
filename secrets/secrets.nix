@@ -11,8 +11,12 @@ in
   "wireguard-private.age".publicKeys = allKeys;
   "datadog-api-key.age".publicKeys = allKeys;
   "datadog-app-key.age".publicKeys = allKeys;
-  "minio-credentials.age".publicKeys = allKeys;
   "cloudflare-dns-token.age".publicKeys = allKeys;
+
+  # Garage S3-compatible storage
+  "garage-env.age".publicKeys = allKeys;
+  "kanidm-oauth2-garage.age".publicKeys = allKeys;
+  "oauth2-proxy-cookie.age".publicKeys = allKeys;
 
   # Kanidm identity provider
   "kanidm-admin-password.age".publicKeys = allKeys;

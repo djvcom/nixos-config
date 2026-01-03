@@ -8,13 +8,10 @@ let
       host = "djv.sh";
       backend = "http://127.0.0.1:7823";
     };
-    minioApi = {
-      host = "state.djv.sh";
-      backend = "http://127.0.0.1:9000";
-    };
-    minioConsole = {
-      host = "minio.djv.sh";
-      backend = "http://127.0.0.1:9001";
+    garage = {
+      host = "s3.djv.sh";
+      s3Backend = "http://127.0.0.1:3900";
+      uiBackend = "http://127.0.0.1:4180"; # oauth2-proxy
     };
     kanidm = {
       host = "auth.djv.sh";
@@ -143,17 +140,20 @@ in
               entryPoints = [ "websecure" ];
             };
 
-            minio-api = {
-              rule = "Host(`${domains.minioApi.host}`)";
-              service = "minio-api";
+            # Garage UI (SSO via oauth2-proxy) - higher priority for /ui path
+            garage-ui = {
+              rule = "Host(`${domains.garage.host}`) && PathPrefix(`/ui`, `/oauth2`)";
+              service = "garage-ui";
               middlewares = [ "security-headers" ];
               tls.certResolver = "letsencrypt";
               entryPoints = [ "websecure" ];
+              priority = 10;
             };
 
-            minio-console = {
-              rule = "Host(`${domains.minioConsole.host}`)";
-              service = "minio-console";
+            # Garage S3 API (access key auth)
+            garage-s3 = {
+              rule = "Host(`${domains.garage.host}`)";
+              service = "garage-s3";
               middlewares = [ "security-headers" ];
               tls.certResolver = "letsencrypt";
               entryPoints = [ "websecure" ];
@@ -205,16 +205,13 @@ in
           services = {
             djv.loadBalancer.servers = [ { url = domains.djv.backend; } ];
 
-            minio-api.loadBalancer = {
-              servers = [ { url = domains.minioApi.backend; } ];
+            garage-s3.loadBalancer = {
+              servers = [ { url = domains.garage.s3Backend; } ];
               passHostHeader = true;
               responseForwarding.flushInterval = "100ms";
             };
 
-            minio-console.loadBalancer = {
-              servers = [ { url = domains.minioConsole.backend; } ];
-              passHostHeader = true;
-            };
+            garage-ui.loadBalancer.servers = [ { url = domains.garage.uiBackend; } ];
 
             # Kanidm handles TLS itself, so we need serversTransport
             kanidm.loadBalancer = {

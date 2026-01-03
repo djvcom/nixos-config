@@ -15,12 +15,6 @@ _:
       group = "root";
       mode = "0400";
     };
-    minio-credentials = {
-      file = ../../secrets/minio-credentials.age;
-      owner = "minio";
-      group = "minio";
-      mode = "0400";
-    };
     cloudflare-dns-token = {
       file = ../../secrets/cloudflare-dns-token.age;
       owner = "acme";
@@ -56,6 +50,24 @@ _:
       file = ../../secrets/kanidm-oauth2-openbao.age;
       owner = "kanidm";
       group = "kanidm";
+      mode = "0400";
+    };
+    kanidm-oauth2-garage = {
+      file = ../../secrets/kanidm-oauth2-garage.age;
+      owner = "kanidm";
+      group = "kanidm";
+      mode = "0400";
+    };
+    garage-env = {
+      file = ../../secrets/garage-env.age;
+      owner = "garage";
+      group = "garage";
+      mode = "0400";
+    };
+    oauth2-proxy-cookie = {
+      file = ../../secrets/oauth2-proxy-cookie.age;
+      owner = "root";
+      group = "root";
       mode = "0400";
     };
     vaultwarden-admin-token = {
