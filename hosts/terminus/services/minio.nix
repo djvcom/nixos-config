@@ -1,4 +1,7 @@
 # MinIO S3-compatible object storage
+#
+# Primary use: Restic backup target (see modules/backup.nix)
+# Console at :9001, API at :9000 (both localhost-only, via Traefik)
 { config, ... }:
 
 {

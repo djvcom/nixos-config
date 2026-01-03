@@ -1,4 +1,7 @@
 # djv portfolio site with PostgreSQL database
+#
+# Syncs project data from GitHub, crates.io, npm, and GitLab
+# Database: PostgreSQL (auto-configured via database.enable)
 _:
 
 {

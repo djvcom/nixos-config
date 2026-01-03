@@ -169,6 +169,85 @@ cd /etc/nixos/secrets
 agenix --rekey
 ```
 
+### Rotating secrets
+
+**Individual service secrets:**
+
+```bash
+cd /etc/nixos/secrets
+# Generate new value and encrypt
+echo "new-secret-value" | agenix -e myservice-secret.age
+# Or for random values:
+head -c 32 /dev/urandom | base64 | agenix -e myservice-secret.age
+
+# Rebuild to deploy
+just rebuild
+
+# Restart affected service
+sudo systemctl restart myservice
+```
+
+**Rotating agenix master keys:**
+
+1. Generate new SSH key:
+
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_new -C "dan@terminus"
+```
+
+2. Update `secrets/secrets.nix` with new public key:
+
+```nix
+let
+  dan = "ssh-ed25519 AAAA...new-key...";
+in
+```
+
+3. Re-encrypt all secrets:
+
+```bash
+cd /etc/nixos/secrets
+# Keep old key available for decryption
+SSH_AUTH_SOCK="" ssh-add ~/.ssh/id_ed25519
+agenix --rekey
+```
+
+4. Replace old key with new key, rebuild.
+
+**OAuth2 client secrets (Kanidm):**
+
+Client secrets are managed declaratively via `basicSecretFile`. To rotate:
+
+```bash
+# Generate new secret
+head -c 32 /dev/urandom | base64
+
+# Encrypt for Kanidm
+cd /etc/nixos/secrets
+echo "<new-secret>" | agenix -e kanidm-oauth2-myservice.age
+
+# For Vaultwarden, also update the SSO env file
+echo "SSO_CLIENT_SECRET=<new-secret>" | agenix -e vaultwarden-sso.age
+
+# Rebuild and restart
+just rebuild
+sudo systemctl restart kanidm vaultwarden
+```
+
+**Kanidm admin passwords:**
+
+```bash
+# Generate new password
+head -c 32 /dev/urandom | base64
+
+# Update encrypted file
+cd /etc/nixos/secrets
+echo "<new-password>" | agenix -e kanidm-admin-password.age
+
+# Rebuild - provisioning will update the password
+just rebuild
+```
+
 ---
 
 ## Adding a New Host
