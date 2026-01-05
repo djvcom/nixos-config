@@ -43,8 +43,9 @@
       ExecStart = "${pkgs.garage-webui}/bin/garage-webui";
       DynamicUser = true;
       Environment = [
-        "GARAGE_ADMIN_API=http://127.0.0.1:3903"
-        "GARAGE_S3_ENDPOINT=http://127.0.0.1:3900"
+        "CONFIG_PATH=/etc/garage.toml"
+        "API_BASE_URL=http://127.0.0.1:3903"
+        "S3_ENDPOINT_URL=http://127.0.0.1:3900"
         "PORT=3902"
       ];
       EnvironmentFile = config.age.secrets.garage-env.path;
@@ -70,6 +71,7 @@
       reverse-proxy = true;
       skip-provider-button = true;
       set-xauthrequest = true;
+      code-challenge-method = "S256"; # Required for Kanidm PKCE
     };
   };
 }

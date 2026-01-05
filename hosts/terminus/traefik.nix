@@ -118,16 +118,28 @@ in
 
       dynamicConfigOptions = {
         http = {
-          # Security headers middleware
-          middlewares.security-headers.headers = {
-            stsSeconds = 31536000;
-            stsIncludeSubdomains = true;
-            frameDeny = true;
-            contentTypeNosniff = true;
-            referrerPolicy = "strict-origin-when-cross-origin";
-            customResponseHeaders = {
-              Permissions-Policy = "geolocation=(), microphone=(), camera=()";
+          middlewares = {
+            # Redirect unknown subdomains to main site 404
+            redirect-to-404.redirectRegex = {
+              regex = ".*";
+              replacement = "https://djv.sh/404";
+              permanent = false;
             };
+
+            # Security headers middleware
+            security-headers.headers = {
+              stsSeconds = 31536000;
+              stsIncludeSubdomains = true;
+              frameDeny = true;
+              contentTypeNosniff = true;
+              referrerPolicy = "strict-origin-when-cross-origin";
+              customResponseHeaders = {
+                Permissions-Policy = "geolocation=(), microphone=(), camera=()";
+              };
+            };
+
+            # Strip /ui prefix for garage-webui
+            garage-strip-ui.stripPrefix.prefixes = [ "/ui" ];
           };
 
           # Routers for each domain
@@ -140,10 +152,30 @@ in
               entryPoints = [ "websecure" ];
             };
 
-            # Garage UI (SSO via oauth2-proxy) - higher priority for /ui path
+            # Garage UI (SSO via oauth2-proxy) - strip /ui prefix for webui
             garage-ui = {
-              rule = "Host(`${domains.garage.host}`) && (PathPrefix(`/ui`) || PathPrefix(`/oauth2`))";
+              rule = "Host(`${domains.garage.host}`) && PathPrefix(`/ui`)";
               service = "garage-ui";
+              middlewares = [ "garage-strip-ui" "security-headers" ];
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
+              priority = 10;
+            };
+
+            # Garage OAuth2 callbacks - don't strip prefix
+            garage-oauth2 = {
+              rule = "Host(`${domains.garage.host}`) && PathPrefix(`/oauth2`)";
+              service = "garage-ui";
+              middlewares = [ "security-headers" ];
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
+              priority = 10;
+            };
+
+            # Garage webui static assets and API (direct to webui)
+            garage-assets = {
+              rule = "Host(`${domains.garage.host}`) && (PathPrefix(`/assets`) || PathPrefix(`/api`) || Path(`/favicon-16x16.png`) || Path(`/favicon-32x32.png`) || Path(`/apple-touch-icon.png`) || Path(`/site.webmanifest`))";
+              service = "garage-webui-direct";
               middlewares = [ "security-headers" ];
               tls.certResolver = "letsencrypt";
               entryPoints = [ "websecure" ];
@@ -192,14 +224,22 @@ in
               entryPoints = [ "websecure" ];
             };
 
-            # Catch-all router for unknown hosts (lowest priority)
+            # Catch-all for unknown subdomains - redirect to main site 404 page
             catch-all = {
-              rule = "HostRegexp(`.*`)";
-              priority = 1;
-              service = "noop@internal";
-              tls.certResolver = "letsencrypt";
+              rule = "HostRegexp(`^.+\\.djv\\.sh$`)";
+              service = "djv"; # Redirect happens before reaching backend
+              middlewares = [ "redirect-to-404" ];
               entryPoints = [ "websecure" ];
+              priority = 1;
+              tls = {
+                certResolver = "letsencrypt";
+                domains = [{
+                  main = "djv.sh";
+                  sans = [ "*.djv.sh" ];
+                }];
+              };
             };
+
           };
 
           # Backend services
@@ -213,6 +253,9 @@ in
             };
 
             garage-ui.loadBalancer.servers = [ { url = domains.garage.uiBackend; } ];
+
+            # Direct access to garage-webui for static assets (bypasses oauth2-proxy)
+            garage-webui-direct.loadBalancer.servers = [ { url = "http://127.0.0.1:3902"; } ];
 
             # Kanidm handles TLS itself, so we need serversTransport
             kanidm.loadBalancer = {
