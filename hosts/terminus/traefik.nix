@@ -156,7 +156,10 @@ in
             garage-ui = {
               rule = "Host(`${domains.garage.host}`) && PathPrefix(`/ui`)";
               service = "garage-ui";
-              middlewares = [ "garage-strip-ui" "security-headers" ];
+              middlewares = [
+                "garage-strip-ui"
+                "security-headers"
+              ];
               tls.certResolver = "letsencrypt";
               entryPoints = [ "websecure" ];
               priority = 10;
@@ -233,10 +236,12 @@ in
               priority = 1;
               tls = {
                 certResolver = "letsencrypt";
-                domains = [{
-                  main = "djv.sh";
-                  sans = [ "*.djv.sh" ];
-                }];
+                domains = [
+                  {
+                    main = "djv.sh";
+                    sans = [ "*.djv.sh" ];
+                  }
+                ];
               };
             };
 

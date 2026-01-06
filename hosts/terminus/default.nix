@@ -24,6 +24,7 @@
     ./services/openbao.nix
     ./services/stalwart.nix
     ./services/garage.nix
+    ./services/valkey.nix
   ];
 
   networking = {
