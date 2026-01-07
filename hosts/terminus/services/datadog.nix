@@ -36,6 +36,9 @@ in
     # Hostname shown in Datadog
     hostname = "terminus";
 
+    # Enable live process collection
+    enableLiveProcessCollection = true;
+
     # Use the integrations defined in the let block
     inherit extraIntegrations;
 
@@ -45,8 +48,22 @@ in
       "host:terminus"
     ];
 
-    # Valkey/Redis check - no auth needed (localhost only)
+    # Check configurations
     checks = {
+      # Disable NTP check - systemd-timesyncd handles time sync
+      # The Datadog Go NTP client has connectivity issues on this server
+      ntp = {
+        init_config = { };
+        # Minimise NTP check impact - Go NTP library has connectivity issues
+        # systemd-timesyncd handles actual time synchronisation
+        instances = [
+          {
+            hosts = [ "127.0.0.1" ];
+            timeout = 1;
+          }
+        ];
+      };
+      # Valkey/Redis check - no auth needed (localhost only)
       redisdb = {
         init_config = { };
         instances = [
@@ -69,6 +86,8 @@ in
       database_monitoring = {
         enabled = true;
       };
+      # Disable cloud provider metadata detection (can cause NTP issues)
+      cloud_provider_metadata = [ ];
     };
   };
 
