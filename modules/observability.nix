@@ -33,6 +33,17 @@ in
   options.modules.observability = {
     enable = lib.mkEnableOption "OpenTelemetry observability";
 
+    hostname = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        Hostname to use for all telemetry sent to Datadog. When set, creates
+        a transform processor that sets datadog.host.name, which takes
+        precedence over host.id to ensure consistent host identification.
+      '';
+      example = "terminus";
+    };
+
     listenAddress = lib.mkOption {
       type = lib.types.str;
       default = "127.0.0.1";
@@ -94,6 +105,19 @@ in
       default = null;
       description = "Path to agenix-managed secret file containing API tokens as environment variables";
       example = lib.literalExpression "config.age.secrets.datadog-api-key.path";
+    };
+
+    extensions = lib.mkOption {
+      type = lib.types.attrsOf lib.types.anything;
+      default = { };
+      description = "Extension configurations keyed by extension name";
+      example = lib.literalExpression ''
+        {
+          datadog = {
+            api.key = "''${env:DD_API_KEY}";
+          };
+        }
+      '';
     };
   };
 
@@ -157,6 +181,32 @@ in
             detectors = [ "system" ];
             system.hostname_sources = [ "os" ];
           };
+        }
+        // lib.optionalAttrs (cfg.hostname != null) {
+          # Sets datadog.host.name to ensure consistent host identification
+          # This takes precedence over host.id which can cause duplicate hosts
+          "transform/hostname" = {
+            metric_statements = [
+              {
+                context = "resource";
+                statements = [ ''set(attributes["datadog.host.name"], "${cfg.hostname}")'' ];
+              }
+            ];
+            trace_statements = [
+              {
+                context = "resource";
+                statements = [ ''set(attributes["datadog.host.name"], "${cfg.hostname}")'' ];
+              }
+            ];
+            log_statements = [
+              {
+                context = "resource";
+                statements = [ ''set(attributes["datadog.host.name"], "${cfg.hostname}")'' ];
+              }
+            ];
+          };
+        }
+        // {
           "transform/logs" = {
             log_statements = [
               {
@@ -183,8 +233,11 @@ in
             ];
           };
         };
-        inherit (cfg) exporters;
-        service.pipelines = cfg.pipelines;
+        inherit (cfg) exporters extensions;
+        service = {
+          inherit (cfg) pipelines;
+          extensions = lib.attrNames cfg.extensions;
+        };
       };
     };
 

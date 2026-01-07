@@ -49,6 +49,7 @@
       overlays = [
         (import ./overlays/vaultwarden-sso.nix)
         (import ./overlays/kanidm-csp.nix)
+        (import ./overlays/opentelemetry-collector.nix)
       ];
 
       # Helper for creating NixOS configurations

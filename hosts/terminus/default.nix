@@ -78,7 +78,14 @@
   modules.observability = {
     enable = true;
     tokenSecretPath = config.age.secrets.datadog-api-key.path;
+    # Set explicit hostname to prevent host.id from creating duplicate hosts
+    hostname = "terminus";
     exporters = {
+      datadog = {
+        api.key = "\${env:DD_API_KEY}";
+      };
+    };
+    extensions = {
       datadog = {
         api.key = "\${env:DD_API_KEY}";
       };
@@ -91,6 +98,7 @@
         ];
         processors = [
           "resourcedetection"
+          "transform/hostname"
           "batch"
         ];
         exporters = [ "datadog" ];
@@ -99,6 +107,7 @@
         receivers = [ "otlp" ];
         processors = [
           "resourcedetection"
+          "transform/hostname"
           "batch"
         ];
         exporters = [ "datadog" ];
@@ -107,6 +116,7 @@
         receivers = [ "otlp" ];
         processors = [
           "resourcedetection"
+          "transform/hostname"
           "batch"
         ];
         exporters = [ "datadog" ];
@@ -116,6 +126,7 @@
         processors = [
           "transform/logs"
           "resourcedetection"
+          "transform/hostname"
           "batch"
         ];
         exporters = [ "datadog" ];
