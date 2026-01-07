@@ -41,4 +41,7 @@ in
 
   # Backup system
   "backup-credentials.age".publicKeys = allKeys;
+
+  # Datadog monitoring
+  "datadog-postgres-password.age".publicKeys = allKeys;
 }
