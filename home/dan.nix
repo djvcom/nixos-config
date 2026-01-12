@@ -29,7 +29,7 @@ in
 
       # Nix tooling
       nil # LSP
-      nixfmt-rfc-style # Formatter (official nixpkgs standard)
+      nixfmt
       statix # Linter
       deadnix # Find unused code
     ];
