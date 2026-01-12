@@ -51,6 +51,12 @@
     zsh
   ];
 
+  # Define the user (required for home-manager to derive home directory)
+  users.users.${username} = {
+    home = "/Users/${username}";
+    shell = pkgs.bashInteractive;
+  };
+
   # Home-manager configuration for the current user
   home-manager.users.${username} =
     { ... }:
