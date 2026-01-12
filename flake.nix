@@ -89,12 +89,23 @@
           hostname,
           system ? "aarch64-darwin",
         }:
+        let
+          # When run with sudo, SUDO_USER contains the original username
+          # When run without sudo, fall back to USER
+          sudoUser = builtins.getEnv "SUDO_USER";
+          user = builtins.getEnv "USER";
+          username =
+            if sudoUser != "" then
+              sudoUser
+            else if user != "" then
+              user
+            else
+              builtins.throw "Could not determine username from SUDO_USER or USER environment variables";
+        in
         nix-darwin.lib.darwinSystem {
           inherit system;
           specialArgs = {
-            inherit inputs;
-            # Read username from environment at evaluation time
-            username = builtins.getEnv "USER";
+            inherit inputs username;
           };
           modules = [
             ./hosts/${hostname}
