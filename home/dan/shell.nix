@@ -55,7 +55,7 @@ in
       autocd = true;
       autosuggestion.enable = true;
       syntaxHighlighting.enable = true;
-      initExtra = ''
+      initContent = ''
         export PATH="$HOME/.local/bin:$PATH"
 
         if [ -f "$HOME/.cargo/env" ]; then

@@ -29,6 +29,7 @@ in
       glab
       rustup
       gcc
+      nodejs_24
       yarn
       nodePackages.typescript-language-server
       dnsutils
