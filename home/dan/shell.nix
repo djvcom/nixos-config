@@ -1,5 +1,8 @@
-_:
+{ pkgs, lib, ... }:
 
+let
+  inherit (pkgs.stdenv) isDarwin isLinux;
+in
 {
   programs = {
     bash = {
@@ -7,8 +10,8 @@ _:
       enableCompletion = true;
       initExtra = ''
         # Source home-manager session vars for SSH sessions
-        if [ -f "/etc/profiles/per-user/dan/etc/profile.d/hm-session-vars.sh" ]; then
-          . "/etc/profiles/per-user/dan/etc/profile.d/hm-session-vars.sh"
+        if [ -f "/etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh" ]; then
+          . "/etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh"
         fi
 
         export PATH="$HOME/.local/bin:$PATH"
@@ -19,7 +22,6 @@ _:
       '';
       shellAliases = {
         la = "ls -lah";
-        rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#terminus";
         vim = "nvim";
         g = "git";
         gst = "git status";
@@ -35,10 +37,16 @@ _:
         gb = "git branch";
         glog = "git log --oneline --graph --decorate";
         tree = "eza --tree";
+      }
+      // lib.optionalAttrs (!isDarwin) {
+        rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#terminus";
+      }
+      // lib.optionalAttrs isDarwin {
+        rebuild = "darwin-rebuild switch --flake ~/.config/nix-darwin#macbook";
       };
     };
 
-    zellij = {
+    zellij = lib.mkIf isLinux {
       enable = true;
       enableBashIntegration = false;
     };

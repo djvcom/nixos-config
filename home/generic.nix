@@ -1,4 +1,10 @@
-{ pkgs, ... }:
+# Generic home-manager configuration that accepts username as parameter
+# Used for machines where username varies (e.g., work laptop)
+{
+  pkgs,
+  username,
+  ...
+}:
 
 let
   inherit (pkgs.stdenv) isDarwin;
@@ -12,8 +18,8 @@ in
   ];
 
   home = {
-    username = "dan";
-    homeDirectory = if isDarwin then "/Users/dan" else "/home/dan";
+    inherit username;
+    homeDirectory = if isDarwin then "/Users/${username}" else "/home/${username}";
     packages = with pkgs; [
       ripgrep
       fd
