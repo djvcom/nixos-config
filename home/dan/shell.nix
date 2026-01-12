@@ -2,6 +2,32 @@
 
 let
   inherit (pkgs.stdenv) isDarwin isLinux;
+
+  # Shared aliases for both bash and zsh
+  sharedAliases = {
+    la = "ls -lah";
+    vim = "nvim";
+    g = "git";
+    gst = "git status";
+    ga = "git add";
+    gaa = "git add --all";
+    gc = "git commit";
+    gcm = "git commit -m";
+    gco = "git checkout";
+    gp = "git push";
+    gl = "git pull";
+    gd = "git diff";
+    gds = "git diff --staged";
+    gb = "git branch";
+    glog = "git log --oneline --graph --decorate";
+    tree = "eza --tree";
+  }
+  // lib.optionalAttrs isLinux {
+    rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#terminus";
+  }
+  // lib.optionalAttrs isDarwin {
+    rebuild = "sudo darwin-rebuild switch --flake ~/.config/nix-darwin#macbook --impure";
+  };
 in
 {
   programs = {
@@ -20,30 +46,23 @@ in
           . "$HOME/.cargo/env"
         fi
       '';
-      shellAliases = {
-        la = "ls -lah";
-        vim = "nvim";
-        g = "git";
-        gst = "git status";
-        ga = "git add";
-        gaa = "git add --all";
-        gc = "git commit";
-        gcm = "git commit -m";
-        gco = "git checkout";
-        gp = "git push";
-        gl = "git pull";
-        gd = "git diff";
-        gds = "git diff --staged";
-        gb = "git branch";
-        glog = "git log --oneline --graph --decorate";
-        tree = "eza --tree";
-      }
-      // lib.optionalAttrs (!isDarwin) {
-        rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#terminus";
-      }
-      // lib.optionalAttrs isDarwin {
-        rebuild = "darwin-rebuild switch --flake ~/.config/nix-darwin#macbook";
-      };
+      shellAliases = sharedAliases;
+    };
+
+    zsh = {
+      enable = true;
+      enableCompletion = true;
+      autocd = true;
+      autosuggestion.enable = true;
+      syntaxHighlighting.enable = true;
+      initExtra = ''
+        export PATH="$HOME/.local/bin:$PATH"
+
+        if [ -f "$HOME/.cargo/env" ]; then
+          . "$HOME/.cargo/env"
+        fi
+      '';
+      shellAliases = sharedAliases;
     };
 
     zellij = lib.mkIf isLinux {
@@ -54,6 +73,7 @@ in
     starship = {
       enable = true;
       enableBashIntegration = true;
+      enableZshIntegration = true;
       settings = {
         add_newline = false;
         character = {
@@ -71,12 +91,14 @@ in
     direnv = {
       enable = true;
       enableBashIntegration = true;
+      enableZshIntegration = true;
       nix-direnv.enable = true;
     };
 
     zoxide = {
       enable = true;
       enableBashIntegration = true;
+      enableZshIntegration = true;
     };
   };
 }
