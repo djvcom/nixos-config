@@ -8,7 +8,12 @@ let
     #!/usr/bin/env bash
     set -euo pipefail
 
-    CONFIG_FILE="$HOME/.config/glab-cli/config.yml"
+    # Platform-aware config path
+    if [[ "$(uname)" == "Darwin" ]]; then
+      CONFIG_FILE="$HOME/Library/Application Support/glab-cli/config.yaml"
+    else
+      CONFIG_FILE="$HOME/.config/glab-cli/config.yml"
+    fi
     LOG_TAG="gitlab-token-rotation"
 
     log() {

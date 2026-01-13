@@ -27,14 +27,17 @@
         executable = true;
         text = ''
           # Export GitLab token for API and npm registry access
-          if [ -f "$HOME/.config/glab-cli/config.yml" ]; then
-            _gitlab_token=$(grep -A20 "hosts:" "$HOME/.config/glab-cli/config.yml" 2>/dev/null | grep "token:" | head -1 | sed 's/.*token: //' | sed 's/!!null //')
+          # macOS uses ~/Library/Application Support, Linux uses ~/.config
+          _glab_config="$HOME/Library/Application Support/glab-cli/config.yaml"
+          if [ -f "$_glab_config" ]; then
+            _gitlab_token=$(grep -A20 "hosts:" "$_glab_config" 2>/dev/null | grep "token:" | head -1 | sed 's/.*token: //' | sed 's/!!null //')
             if [ -n "$_gitlab_token" ] && [ "$_gitlab_token" != "null" ]; then
               export GITLAB_TOKEN="$_gitlab_token"
               export NPM_TOKEN="$_gitlab_token"
             fi
             unset _gitlab_token
           fi
+          unset _glab_config
         '';
       };
     };
