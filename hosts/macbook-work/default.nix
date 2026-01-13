@@ -16,5 +16,10 @@
       imports = [ ../../home/generic.nix ];
       _module.args.username = username;
       _module.args.isPersonal = false;
+
+      # Work-specific packages
+      home.packages = with pkgs; [
+        uv
+      ];
     };
 }
