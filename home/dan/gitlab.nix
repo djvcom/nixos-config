@@ -8,11 +8,17 @@ let
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # Platform-aware config path
-    if [[ "$(uname)" == "Darwin" ]]; then
-      CONFIG_FILE="$HOME/Library/Application Support/glab-cli/config.yaml"
-    else
+    # Find glab config - location varies by platform and version
+    CONFIG_FILE=""
+    if [[ -f "$HOME/.config/glab-cli/config.yml" ]]; then
       CONFIG_FILE="$HOME/.config/glab-cli/config.yml"
+    elif [[ -f "$HOME/Library/Application Support/glab-cli/config.yaml" ]]; then
+      CONFIG_FILE="$HOME/Library/Application Support/glab-cli/config.yaml"
+    fi
+
+    if [[ -z "$CONFIG_FILE" ]]; then
+      echo "ERROR: No glab config found"
+      exit 1
     fi
     LOG_TAG="gitlab-token-rotation"
 
