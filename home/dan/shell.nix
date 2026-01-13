@@ -58,6 +58,11 @@ in
         if [ -f "$HOME/.localrc" ]; then
           . "$HOME/.localrc"
         fi
+
+        # Source work-specific config if present
+        if [ -f "$HOME/.config/shell/work.sh" ]; then
+          . "$HOME/.config/shell/work.sh"
+        fi
       '';
       shellAliases = sharedAliases;
     };
@@ -78,6 +83,11 @@ in
         # Source local config (not tracked by git)
         if [ -f "$HOME/.localrc" ]; then
           . "$HOME/.localrc"
+        fi
+
+        # Source work-specific config if present
+        if [ -f "$HOME/.config/shell/work.sh" ]; then
+          . "$HOME/.config/shell/work.sh"
         fi
       '';
       shellAliases = sharedAliases;
