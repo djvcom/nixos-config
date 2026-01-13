@@ -85,7 +85,7 @@ in
       Description = "Weekly GitLab token rotation";
     };
     Timer = {
-      OnCalendar = "weekly";
+      OnCalendar = "Mon 09:00";
       Persistent = true;
       RandomizedDelaySec = "1h";
     };
@@ -106,9 +106,9 @@ in
       ];
       StartCalendarInterval = [
         {
-          # Run weekly on Sunday at 10:00
-          Weekday = 0;
-          Hour = 10;
+          # Run weekly on Monday at 09:00
+          Weekday = 1;
+          Hour = 9;
           Minute = 0;
         }
       ];

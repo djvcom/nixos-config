@@ -1,6 +1,6 @@
-# NixOS Configuration
+# Nix Configuration
 
-NixOS configuration for personal development and hosting infrastructure.
+NixOS and nix-darwin configuration for personal development infrastructure.
 
 ## Structure
 
@@ -8,16 +8,30 @@ NixOS configuration for personal development and hosting infrastructure.
 ├── flake.nix                    # Entry point, defines all hosts
 ├── flake.lock                   # Pinned dependencies
 ├── hosts/
-│   └── terminus/
-│       ├── default.nix          # Host-specific configuration
-│       ├── hardware.nix         # Hardware settings (nixos-generate-config)
-│       └── disko.nix            # Disk partitioning (for nixos-anywhere)
+│   ├── terminus/                # NixOS server
+│   │   ├── default.nix          # Host-specific configuration
+│   │   ├── hardware.nix         # Hardware settings (nixos-generate-config)
+│   │   └── disko.nix            # Disk partitioning (for nixos-anywhere)
+│   ├── macbook/                 # Shared macOS base
+│   │   └── base.nix             # Common darwin configuration
+│   ├── macbook-personal/        # Personal MacBook
+│   │   └── default.nix          # Imports base + personal apps (GOG, Jellyfin)
+│   └── macbook-work/            # Work MacBook
+│       └── default.nix          # Imports base, work-only config
 ├── modules/
 │   ├── base.nix                 # Security, SSH, fail2ban, nix settings
 │   ├── observability.nix        # OpenTelemetry metrics/traces/logs
 │   └── wireguard.nix            # VPN configuration
 ├── home/
-│   └── dan.nix                  # User environment (home-manager)
+│   ├── generic.nix              # Shared home-manager config
+│   └── dan/                     # User-specific modules
+│       ├── shell.nix            # Bash/Zsh, aliases, starship, direnv
+│       ├── git.nix              # Git config with delta
+│       ├── neovim.nix           # Neovim with LSP, treesitter, catppuccin
+│       ├── ghostty.nix          # Ghostty terminal config
+│       ├── firefox.nix          # LibreWolf with extensions
+│       ├── aerospace.nix        # Tiling window manager (macOS)
+│       └── gitlab.nix           # GitLab token rotation
 └── secrets/
     ├── secrets.nix              # Defines who can decrypt
     └── *.age                    # Encrypted secrets (agenix)
@@ -93,9 +107,81 @@ To add a new secret:
 
 ## Hosts
 
-| Name | Purpose | Wireguard IP |
-|------|---------|--------------|
-| terminus | Primary development and hosting server | 10.100.0.1 |
+| Name | Platform | Purpose |
+|------|----------|---------|
+| terminus | NixOS | Primary development and hosting server |
+| macbook-personal | macOS (nix-darwin) | Personal laptop with gaming apps |
+| macbook-work | macOS (nix-darwin) | Work laptop, no personal apps |
+
+## macOS Setup (nix-darwin)
+
+### Initial Setup
+
+1. Install Nix (official installer):
+   ```bash
+   sh <(curl -L https://nixos.org/nix/install)
+   ```
+
+2. Clone this repo:
+   ```bash
+   git clone <repo-url> ~/.config/nix-darwin
+   ```
+
+3. Bootstrap nix-darwin:
+   ```bash
+   nix --extra-experimental-features "nix-command flakes" run nix-darwin -- \
+     switch --flake ~/.config/nix-darwin#macbook-personal --impure
+   ```
+
+4. Set up git identity (not tracked):
+   ```bash
+   mkdir -p ~/.config/git
+   cat > ~/.config/git/identity << 'EOF'
+   [user]
+       name = Your Name
+       email = your@email.com
+   EOF
+   ```
+
+5. Set up GitLab CLI:
+   ```bash
+   glab auth login
+   ```
+
+### Daily Usage
+
+Rebuild after config changes:
+```bash
+rebuild
+```
+
+The `rebuild` alias automatically targets the correct flake configuration based on which machine you're on.
+
+### What's Included (macOS)
+
+**System:**
+- Homebrew managed declaratively (Ghostty, GOG Galaxy on personal)
+- Touch ID for sudo
+- Passwordless `darwin-rebuild`
+
+**Terminal:**
+- Ghostty with Catppuccin Mocha theme, 90% opacity
+- Zsh with autosuggestions, syntax highlighting
+- Starship prompt
+- Modern CLI tools: eza, bat, delta, fzf, ripgrep, fd, bottom, dust, procs
+
+**Development:**
+- Neovim with LSP (Rust, TypeScript, Nix), treesitter, telescope
+- Git with delta for diffs
+- direnv with nix-direnv
+- Node.js 24, Rust (via rustup)
+
+**Desktop:**
+- Aerospace tiling window manager (alt+hjkl navigation)
+- LibreWolf browser with Sidebery, Bitwarden, Dark Reader
+
+**Automation:**
+- GitLab token rotation (Monday 09:00)
 
 ## Wireguard VPN
 

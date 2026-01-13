@@ -2,7 +2,9 @@
 # Used for machines where username varies (e.g., work laptop)
 {
   pkgs,
+  lib,
   username,
+  isPersonal ? true,
   ...
 }:
 
@@ -15,6 +17,9 @@ in
     ./dan/shell.nix
     ./dan/git.nix
     ./dan/gitlab.nix
+    ./dan/ghostty.nix
+    ./dan/firefox.nix
+    ./dan/aerospace.nix
   ];
 
   home = {
@@ -34,11 +39,25 @@ in
       nodePackages.typescript-language-server
       dnsutils
 
+      # Modern CLI tools
+      bat
+      delta
+      fzf
+      bottom
+      dust
+      procs
+      sd
+      hyperfine
+      tokei
+
       # Nix tooling
       nil # LSP
       nixfmt
       statix # Linter
       deadnix # Find unused code
+    ]
+    ++ lib.optionals isPersonal [
+      jellyfin-media-player
     ];
     sessionVariables = {
       EDITOR = "nvim";

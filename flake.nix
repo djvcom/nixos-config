@@ -36,6 +36,11 @@
       url = "github:djvcom/djv/stable";
       # Don't follow nixpkgs - djv needs specific wasm-bindgen-cli version
     };
+
+    firefox-addons = {
+      url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
   };
 
   outputs =
@@ -49,6 +54,7 @@
       disko,
       dagger,
       djv,
+      firefox-addons,
       ...
     }@inputs:
     let
@@ -125,8 +131,10 @@
       nixosConfigurations.terminus = mkNixosHost "terminus";
 
       # nix-darwin configurations
-      # Usage: darwin-rebuild switch --flake .#macbook
-      darwinConfigurations.macbook = mkDarwinHost { hostname = "macbook"; };
+      darwinConfigurations.macbook-personal = mkDarwinHost { hostname = "macbook-personal"; };
+      darwinConfigurations.macbook-work = mkDarwinHost { hostname = "macbook-work"; };
+      # Alias for backwards compatibility
+      darwinConfigurations.macbook = mkDarwinHost { hostname = "macbook-personal"; };
 
       # Formatter for `nix fmt`
       formatter = {

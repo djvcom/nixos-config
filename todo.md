@@ -135,11 +135,17 @@ These contain auth tokens or state - don't delete:
 
 ## After Migration Checklist
 
-- [ ] Nix installed
-- [ ] nix-darwin bootstrapped
-- [ ] Shell working correctly (aliases, prompt, completions)
-- [ ] Git working correctly
-- [ ] Neovim working correctly
-- [ ] All tools available (ripgrep, fd, jq, etc.)
-- [ ] direnv working in project directories
+- [x] Nix installed
+- [x] nix-darwin bootstrapped
+- [x] Shell working correctly (aliases, prompt, completions)
+- [x] Git working correctly (with delta for diffs)
+- [x] Neovim working correctly (LSP, treesitter, catppuccin theme)
+- [x] All tools available (ripgrep, fd, jq, eza, bat, etc.)
+- [x] direnv working in project directories
+- [x] Ghostty terminal configured
+- [x] LibreWolf browser with extensions
+- [x] Aerospace tiling window manager
+- [x] GitLab token rotation scheduled (Monday 09:00)
+- [x] Separate configs for personal/work MacBooks
 - [ ] Clean up old dotfiles marked above
+- [ ] Set up work MacBook with macbook-work config

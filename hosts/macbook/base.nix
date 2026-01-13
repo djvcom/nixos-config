@@ -1,10 +1,10 @@
 # Shared nix-darwin configuration for macOS machines
-# Username is read from $USER environment variable at build time
-{ pkgs, username, ... }:
+{ pkgs, username, extraBrewCasks ? [], ... }:
 
 {
   # Required for homebrew and other user-specific options
   system.primaryUser = username;
+
   # Nix configuration
   nix = {
     settings = {
@@ -12,13 +12,11 @@
         "nix-command"
         "flakes"
       ];
-      # Recommended by nix-darwin
       trusted-users = [
         "root"
         username
       ];
     };
-    # Automatic garbage collection
     gc = {
       automatic = true;
       interval = {
@@ -30,7 +28,6 @@
     };
   };
 
-  # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # System packages available to all users
@@ -50,30 +47,18 @@
     ${username} ALL=(ALL) NOPASSWD: /run/current-system/sw/bin/darwin-rebuild
   '';
 
-  # Create /etc/zshrc that loads nix-darwin environment
   programs.zsh.enable = true;
   programs.bash.enable = true;
 
-  # Shells available to users
   environment.shells = with pkgs; [
     bashInteractive
     zsh
   ];
 
-  # Define the user (required for home-manager to derive home directory)
   users.users.${username} = {
     home = "/Users/${username}";
     shell = pkgs.bashInteractive;
   };
-
-  # Home-manager configuration for the current user
-  home-manager.users.${username} =
-    { ... }:
-    {
-      imports = [ ../../home/generic.nix ];
-      # Pass username to the generic config
-      _module.args.username = username;
-    };
 
   # Homebrew - for packages not available in nixpkgs on macOS
   homebrew = {
@@ -83,12 +68,8 @@
       upgrade = true;
       cleanup = "uninstall";
     };
-    casks = [
-      "ghostty"
-      "gog-galaxy"
-    ];
+    casks = [ "ghostty" ] ++ extraBrewCasks;
   };
 
-  # Used for backwards compatibility
   system.stateVersion = 6;
 }

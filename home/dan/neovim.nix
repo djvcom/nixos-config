@@ -31,7 +31,7 @@
         p.tsx
       ]))
 
-      gruvbox-nvim
+      catppuccin-nvim
       nvim-tree-lua
       nvim-web-devicons
 
@@ -64,7 +64,7 @@
 
       vim.g.mapleader = " "
 
-      vim.cmd.colorscheme("gruvbox")
+      vim.cmd.colorscheme("catppuccin-mocha")
 
       require("nvim-tree").setup({
         view = { width = 30 },
@@ -72,8 +72,11 @@
       })
       vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { desc = "Toggle file tree" })
 
-      require("nvim-treesitter.configs").setup({
-        highlight = { enable = true },
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "*",
+        callback = function()
+          pcall(vim.treesitter.start)
+        end,
       })
 
       local capabilities = require("cmp_nvim_lsp").default_capabilities()

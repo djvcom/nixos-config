@@ -1,12 +1,20 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, isPersonal ? true, ... }:
 
 let
   inherit (pkgs.stdenv) isDarwin isLinux;
+  darwinTarget = if isPersonal then "macbook-personal" else "macbook-work";
 
   # Shared aliases for both bash and zsh
   sharedAliases = {
     la = "ls -lah";
+    ls = "eza";
+    ll = "eza -l";
+    cat = "bat --plain";
     vim = "nvim";
+    web = "open '/Applications/Nix Apps/LibreWolf.app'";
+    top = "btm";
+    du = "dust";
+    ps = "procs";
     g = "git";
     gst = "git status";
     ga = "git add";
@@ -26,7 +34,7 @@ let
     rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#terminus";
   }
   // lib.optionalAttrs isDarwin {
-    rebuild = "sudo darwin-rebuild switch --flake ~/.config/nix-darwin#macbook --impure";
+    rebuild = "darwin-rebuild switch --flake ~/.config/nix-darwin#${darwinTarget} --impure";
   };
 in
 {
@@ -45,6 +53,11 @@ in
         if [ -f "$HOME/.cargo/env" ]; then
           . "$HOME/.cargo/env"
         fi
+
+        # Source local config (not tracked by git)
+        if [ -f "$HOME/.localrc" ]; then
+          . "$HOME/.localrc"
+        fi
       '';
       shellAliases = sharedAliases;
     };
@@ -60,6 +73,11 @@ in
 
         if [ -f "$HOME/.cargo/env" ]; then
           . "$HOME/.cargo/env"
+        fi
+
+        # Source local config (not tracked by git)
+        if [ -f "$HOME/.localrc" ]; then
+          . "$HOME/.localrc"
         fi
       '';
       shellAliases = sharedAliases;
