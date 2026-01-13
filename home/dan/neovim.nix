@@ -37,6 +37,8 @@
 
       conform-nvim
       nvim-lint
+
+      vim-fugitive
     ];
 
     extraLuaConfig = ''
