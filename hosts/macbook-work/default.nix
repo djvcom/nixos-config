@@ -20,6 +20,7 @@
       # Work-specific packages
       home.packages = with pkgs; [
         uv
+        aws-sam-cli 
       ];
 
       # Work-specific shell config for GitLab token
