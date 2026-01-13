@@ -34,7 +34,7 @@ let
     rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#terminus";
   }
   // lib.optionalAttrs isDarwin {
-    rebuild = "darwin-rebuild switch --flake ~/.config/nix-darwin#${darwinTarget} --impure";
+    rebuild = "sudo darwin-rebuild switch --flake ~/.config/nix-darwin#${darwinTarget} --impure";
   };
 in
 {
