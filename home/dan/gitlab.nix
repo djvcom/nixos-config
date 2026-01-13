@@ -12,6 +12,8 @@ let
     CONFIG_FILE=""
     if [[ -f "$HOME/.config/glab-cli/config.yml" ]]; then
       CONFIG_FILE="$HOME/.config/glab-cli/config.yml"
+    elif [[ -f "$HOME/Library/Application Support/glab-cli/config.yml" ]]; then
+      CONFIG_FILE="$HOME/Library/Application Support/glab-cli/config.yml"
     elif [[ -f "$HOME/Library/Application Support/glab-cli/config.yaml" ]]; then
       CONFIG_FILE="$HOME/Library/Application Support/glab-cli/config.yaml"
     fi

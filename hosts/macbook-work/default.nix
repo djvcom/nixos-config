@@ -31,6 +31,8 @@
           _glab_config=""
           if [ -f "$HOME/.config/glab-cli/config.yml" ]; then
             _glab_config="$HOME/.config/glab-cli/config.yml"
+          elif [ -f "$HOME/Library/Application Support/glab-cli/config.yml" ]; then
+            _glab_config="$HOME/Library/Application Support/glab-cli/config.yml"
           elif [ -f "$HOME/Library/Application Support/glab-cli/config.yaml" ]; then
             _glab_config="$HOME/Library/Application Support/glab-cli/config.yaml"
           fi
