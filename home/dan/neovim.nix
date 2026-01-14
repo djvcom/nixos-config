@@ -52,10 +52,11 @@
         };
         # Skip require check - plugin has runtime dependencies on neotest
         doCheck = false;
-        # Patch to fix async compatibility - allow custom is_test_file to
-        # bypass the broken hasVitestDependency check
+        # Patch to fix async compatibility - hasVitestDependency uses async
+        # file read (lib.files.read) but is_test_file is called synchronously,
+        # causing "cannot read package.json" errors. Remove the broken call.
         postPatch = ''
-          sed -i '/adapter.is_test_file = function(file_path)/,/^[[:space:]]*end$/c\      adapter.is_test_file = opts.is_test_file' lua/neotest-vitest/init.lua
+          sed -i 's/return is_test_file and hasVitestDependency(file_path)/return is_test_file/' lua/neotest-vitest/init.lua
         '';
       })
       neotest-rust
@@ -211,11 +212,7 @@
       -- Neotest configuration
       require("neotest").setup({
         adapters = {
-          require("neotest-vitest")({
-            is_test_file = function(file_path)
-              return file_path:match("%.test%.[jt]sx?$") or file_path:match("%.spec%.[jt]sx?$")
-            end,
-          }),
+          require("neotest-vitest"),
           require("neotest-rust"),
         },
       })
