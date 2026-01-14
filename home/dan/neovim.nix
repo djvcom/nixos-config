@@ -196,8 +196,8 @@
       -- Neotest configuration
       require("neotest").setup({
         adapters = {
-          require("neotest-vitest")(),
-          require("neotest-rust")(),
+          require("neotest-vitest")({}),
+          require("neotest-rust")({}),
         },
       })
 
