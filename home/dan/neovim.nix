@@ -27,6 +27,7 @@
         p.json
         p.yaml
         p.markdown
+        p.javascript
         p.typescript
         p.tsx
       ]))
