@@ -42,7 +42,17 @@
       vim-fugitive
 
       neotest
-      neotest-vitest
+      (pkgs.vimUtils.buildVimPlugin {
+        name = "neotest-vitest";
+        src = pkgs.fetchFromGitHub {
+          owner = "marilari88";
+          repo = "neotest-vitest";
+          rev = "main";
+          hash = "sha256-XpiZ95MhjIS99dBrNFfq8SfggdIeEFfOSu3THgmX3+s=";
+        };
+        # Skip require check - plugin has runtime dependencies on neotest
+        doCheck = false;
+      })
       neotest-rust
       nvim-nio
     ];
