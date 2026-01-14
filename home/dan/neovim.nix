@@ -124,7 +124,12 @@
       end
 
       -- Neotest configuration
+      -- discovery.enabled = false prevents neotest from using a subprocess
+      -- which can't find nix-installed treesitter parsers
       require("neotest").setup({
+        discovery = {
+          enabled = false,
+        },
         adapters = {
           vitest_adapter,
           require("neotest-rust"),
