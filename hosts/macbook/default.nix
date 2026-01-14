@@ -33,32 +33,34 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # System packages available to all users
-  environment.systemPackages = with pkgs; [
-    vim
-    git
-    curl
-    librewolf
-    aerospace
-  ];
+  environment = {
+    # System packages available to all users
+    systemPackages = with pkgs; [
+      vim
+      git
+      curl
+      librewolf
+      aerospace
+    ];
+
+    # Allow darwin-rebuild without password
+    etc."sudoers.d/darwin-rebuild".text = ''
+      ${username} ALL=(ALL) NOPASSWD: /run/current-system/sw/bin/darwin-rebuild
+    '';
+
+    # Shells available to users
+    shells = with pkgs; [
+      bashInteractive
+      zsh
+    ];
+  };
 
   # Use Touch ID for sudo
   security.pam.services.sudo_local.touchIdAuth = true;
 
-  # Allow darwin-rebuild without password
-  environment.etc."sudoers.d/darwin-rebuild".text = ''
-    ${username} ALL=(ALL) NOPASSWD: /run/current-system/sw/bin/darwin-rebuild
-  '';
-
   # Create /etc/zshrc that loads nix-darwin environment
   programs.zsh.enable = true;
   programs.bash.enable = true;
-
-  # Shells available to users
-  environment.shells = with pkgs; [
-    bashInteractive
-    zsh
-  ];
 
   # Define the user (required for home-manager to derive home directory)
   users.users.${username} = {

@@ -27,6 +27,9 @@ in
       nodePackages.typescript-language-server
       dnsutils
 
+      # Modern CLI tools
+      delta
+
       # Nix tooling
       nil # LSP
       nixfmt

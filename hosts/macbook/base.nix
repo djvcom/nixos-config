@@ -1,5 +1,10 @@
 # Shared nix-darwin configuration for macOS machines
-{ pkgs, username, extraBrewCasks ? [], ... }:
+{
+  pkgs,
+  username,
+  extraBrewCasks ? [ ],
+  ...
+}:
 
 {
   # Required for homebrew and other user-specific options
@@ -30,30 +35,32 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  # System packages available to all users
-  environment.systemPackages = with pkgs; [
-    vim
-    git
-    curl
-    librewolf
-    aerospace
-  ];
+  environment = {
+    # System packages available to all users
+    systemPackages = with pkgs; [
+      vim
+      git
+      curl
+      librewolf
+      aerospace
+    ];
+
+    # Allow darwin-rebuild without password
+    etc."sudoers.d/darwin-rebuild".text = ''
+      ${username} ALL=(ALL) NOPASSWD: /run/current-system/sw/bin/darwin-rebuild
+    '';
+
+    shells = with pkgs; [
+      bashInteractive
+      zsh
+    ];
+  };
 
   # Use Touch ID for sudo
   security.pam.services.sudo_local.touchIdAuth = true;
 
-  # Allow darwin-rebuild without password
-  environment.etc."sudoers.d/darwin-rebuild".text = ''
-    ${username} ALL=(ALL) NOPASSWD: /run/current-system/sw/bin/darwin-rebuild
-  '';
-
   programs.zsh.enable = true;
   programs.bash.enable = true;
-
-  environment.shells = with pkgs; [
-    bashInteractive
-    zsh
-  ];
 
   users.users.${username} = {
     home = "/Users/${username}";

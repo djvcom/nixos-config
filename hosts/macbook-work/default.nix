@@ -5,7 +5,7 @@
   imports = [
     (import ../macbook/base.nix {
       inherit pkgs username;
-      extraBrewCasks = [];
+      extraBrewCasks = [ ];
     })
   ];
 
@@ -20,7 +20,7 @@
       # Work-specific packages
       home.packages = with pkgs; [
         uv
-        aws-sam-cli 
+        aws-sam-cli
       ];
 
       # Work-specific shell config for GitLab token

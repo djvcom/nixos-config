@@ -25,40 +25,42 @@ in
   home = {
     inherit username;
     homeDirectory = if isDarwin then "/Users/${username}" else "/home/${username}";
-    packages = with pkgs; [
-      ripgrep
-      fd
-      eza
-      jq
-      gh
-      glab
-      rustup
-      gcc
-      nodejs_24
-      yarn
-      nodePackages.typescript-language-server
-      dnsutils
+    packages =
+      with pkgs;
+      [
+        ripgrep
+        fd
+        eza
+        jq
+        gh
+        glab
+        rustup
+        gcc
+        nodejs_24
+        yarn
+        nodePackages.typescript-language-server
+        dnsutils
 
-      # Modern CLI tools
-      bat
-      delta
-      fzf
-      bottom
-      dust
-      procs
-      sd
-      hyperfine
-      tokei
+        # Modern CLI tools
+        bat
+        delta
+        fzf
+        bottom
+        dust
+        procs
+        sd
+        hyperfine
+        tokei
 
-      # Nix tooling
-      nil # LSP
-      nixfmt
-      statix # Linter
-      deadnix # Find unused code
-    ]
-    ++ lib.optionals isPersonal [
-      jellyfin-media-player
-    ];
+        # Nix tooling
+        nil # LSP
+        nixfmt
+        statix # Linter
+        deadnix # Find unused code
+      ]
+      ++ lib.optionals isPersonal [
+        jellyfin-media-player
+      ];
     sessionVariables = {
       EDITOR = "nvim";
     };

@@ -54,7 +54,6 @@
       disko,
       dagger,
       djv,
-      firefox-addons,
       ...
     }@inputs:
     let
@@ -131,10 +130,12 @@
       nixosConfigurations.terminus = mkNixosHost "terminus";
 
       # nix-darwin configurations
-      darwinConfigurations.macbook-personal = mkDarwinHost { hostname = "macbook-personal"; };
-      darwinConfigurations.macbook-work = mkDarwinHost { hostname = "macbook-work"; };
-      # Alias for backwards compatibility
-      darwinConfigurations.macbook = mkDarwinHost { hostname = "macbook-personal"; };
+      darwinConfigurations = {
+        macbook-personal = mkDarwinHost { hostname = "macbook-personal"; };
+        macbook-work = mkDarwinHost { hostname = "macbook-work"; };
+        # Alias for backwards compatibility
+        macbook = mkDarwinHost { hostname = "macbook-personal"; };
+      };
 
       # Formatter for `nix fmt`
       formatter = {
