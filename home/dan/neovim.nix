@@ -90,14 +90,48 @@
 
       vim.cmd.colorscheme("catppuccin-mocha")
 
-      -- Neotest configuration (must be early to avoid plenary.filetype race condition)
-      -- See: https://github.com/nvim-neotest/neotest/issues/502
+      -- Debug logging for neotest
+      local neotest_log = function(msg)
+        local f = io.open("/tmp/neotest-debug.log", "a")
+        if f then
+          f:write(os.date("%H:%M:%S") .. " " .. msg .. "\n")
+          f:close()
+        end
+      end
+
+      neotest_log("=== Neovim starting ===")
+
+      -- Wrap neotest-vitest adapter with logging
+      local vitest_adapter = require("neotest-vitest")
+      local original_is_test_file = vitest_adapter.is_test_file
+      local original_discover = vitest_adapter.discover_positions
+
+      vitest_adapter.is_test_file = function(file_path)
+        local result = original_is_test_file(file_path)
+        neotest_log("is_test_file(" .. tostring(file_path) .. ") = " .. tostring(result))
+        return result
+      end
+
+      vitest_adapter.discover_positions = function(path)
+        neotest_log("discover_positions called: " .. tostring(path))
+        local ok, result = pcall(original_discover, path)
+        if ok then
+          neotest_log("discover_positions succeeded, type: " .. type(result))
+        else
+          neotest_log("discover_positions FAILED: " .. tostring(result))
+        end
+        return ok and result or nil
+      end
+
+      -- Neotest configuration
       require("neotest").setup({
         adapters = {
-          require("neotest-vitest"),
+          vitest_adapter,
           require("neotest-rust"),
         },
       })
+
+      neotest_log("neotest setup complete")
 
       require("nvim-tree").setup({
         view = { width = 30 },
