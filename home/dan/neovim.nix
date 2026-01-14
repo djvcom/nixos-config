@@ -39,6 +39,11 @@
       nvim-lint
 
       vim-fugitive
+
+      neotest
+      neotest-vitest
+      neotest-rust
+      nvim-nio
     ];
 
     extraLuaConfig = ''
@@ -186,6 +191,22 @@
       vim.keymap.set("n", "<leader>fg", telescope.live_grep, { desc = "Live grep" })
       vim.keymap.set("n", "<leader>fb", telescope.buffers, { desc = "Buffers" })
       vim.keymap.set("n", "<leader>fh", telescope.help_tags, { desc = "Help tags" })
+
+      -- Neotest configuration
+      require("neotest").setup({
+        adapters = {
+          require("neotest-vitest"),
+          require("neotest-rust"),
+        },
+      })
+
+      vim.keymap.set("n", "<leader>tn", function() require("neotest").run.run() end, { desc = "Run nearest test" })
+      vim.keymap.set("n", "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end, { desc = "Run file tests" })
+      vim.keymap.set("n", "<leader>ts", function() require("neotest").summary.toggle() end, { desc = "Toggle test summary" })
+      vim.keymap.set("n", "<leader>to", function() require("neotest").output.open({ enter = true }) end, { desc = "Show test output" })
+      vim.keymap.set("n", "<leader>tp", function() require("neotest").output_panel.toggle() end, { desc = "Toggle output panel" })
+      vim.keymap.set("n", "<leader>tl", function() require("neotest").run.run_last() end, { desc = "Run last test" })
+      vim.keymap.set("n", "<leader>td", function() require("neotest").run.run({ strategy = "dap" }) end, { desc = "Debug nearest test" })
     '';
   };
 }
