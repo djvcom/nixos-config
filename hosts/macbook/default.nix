@@ -7,6 +7,8 @@
   system.primaryUser = username;
   # Nix configuration
   nix = {
+    # Disable legacy channels (using flakes instead)
+    channel.enable = false;
     settings = {
       experimental-features = [
         "nix-command"
