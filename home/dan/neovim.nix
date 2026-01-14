@@ -124,12 +124,14 @@
       end
 
       -- Neotest configuration
-      -- discovery.enabled = false prevents neotest from using a subprocess
-      -- which can't find nix-installed treesitter parsers
+      -- Neotest spawns a subprocess with "-u NONE" which has no plugins/parsers.
+      -- Disable subprocess so discovery runs in main process where parsers exist.
+      local neotest_lib_ok, neotest_subprocess = pcall(require, "neotest.lib.subprocess")
+      if neotest_lib_ok then
+        neotest_subprocess.enabled = function() return false end
+      end
+
       require("neotest").setup({
-        discovery = {
-          enabled = false,
-        },
         adapters = {
           vitest_adapter,
           require("neotest-rust"),
