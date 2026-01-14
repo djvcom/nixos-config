@@ -52,6 +52,11 @@
         };
         # Skip require check - plugin has runtime dependencies on neotest
         doCheck = false;
+        # Patch to fix async compatibility - allow custom is_test_file to
+        # bypass the broken hasVitestDependency check
+        postPatch = ''
+          sed -i '/adapter.is_test_file = function(file_path)/,/^[[:space:]]*end$/c\      adapter.is_test_file = opts.is_test_file' lua/neotest-vitest/init.lua
+        '';
       })
       neotest-rust
       nvim-nio
@@ -206,7 +211,11 @@
       -- Neotest configuration
       require("neotest").setup({
         adapters = {
-          require("neotest-vitest"),
+          require("neotest-vitest")({
+            is_test_file = function(file_path)
+              return file_path:match("%.test%.[jt]sx?$") or file_path:match("%.spec%.[jt]sx?$")
+            end,
+          }),
           require("neotest-rust"),
         },
       })
