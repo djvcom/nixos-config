@@ -196,15 +196,8 @@
       -- Neotest configuration
       require("neotest").setup({
         adapters = {
-          require("neotest-vitest")({
-            -- Workaround for nixpkgs version mismatch where lib.files.read
-            -- is async but is_test_file calls it synchronously
-            is_test_file = function(file_path)
-              return file_path:match("%.test%.[jt]sx?$") ~= nil
-                or file_path:match("%.spec%.[jt]sx?$") ~= nil
-            end,
-          }),
-          require("neotest-rust")({}),
+          require("neotest-vitest"),
+          require("neotest-rust"),
         },
       })
 

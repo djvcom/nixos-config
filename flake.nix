@@ -64,11 +64,6 @@
         (import ./overlays/opentelemetry-collector.nix)
       ];
 
-      # Overlays for macOS (shared home-manager packages)
-      darwinOverlays = [
-        (import ./overlays/neotest-vitest-async-fix.nix)
-      ];
-
       # Helper for creating NixOS configurations
       mkNixosHost =
         hostname:
@@ -118,7 +113,6 @@
             inherit inputs username;
           };
           modules = [
-            { nixpkgs.overlays = darwinOverlays; }
             ./hosts/${hostname}
             home-manager.darwinModules.home-manager
             {
