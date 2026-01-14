@@ -90,55 +90,18 @@
 
       vim.cmd.colorscheme("catppuccin-mocha")
 
-      -- Debug logging for neotest
-      local neotest_log = function(msg)
-        local f = io.open("/tmp/neotest-debug.log", "a")
-        if f then
-          f:write(os.date("%H:%M:%S") .. " " .. msg .. "\n")
-          f:close()
-        end
-      end
-
-      neotest_log("=== Neovim starting ===")
-
-      -- Wrap neotest-vitest adapter with logging
-      local vitest_adapter = require("neotest-vitest")
-      local original_is_test_file = vitest_adapter.is_test_file
-      local original_discover = vitest_adapter.discover_positions
-
-      vitest_adapter.is_test_file = function(file_path)
-        local result = original_is_test_file(file_path)
-        neotest_log("is_test_file(" .. tostring(file_path) .. ") = " .. tostring(result))
-        return result
-      end
-
-      vitest_adapter.discover_positions = function(path)
-        neotest_log("discover_positions called: " .. tostring(path))
-        local ok, result = pcall(original_discover, path)
-        if ok then
-          neotest_log("discover_positions succeeded, type: " .. type(result))
-        else
-          neotest_log("discover_positions FAILED: " .. tostring(result))
-        end
-        return ok and result or nil
-      end
-
-      -- Neotest configuration
       -- Neotest spawns a subprocess with "-u NONE" which has no plugins/parsers.
-      -- Disable subprocess so discovery runs in main process where parsers exist.
-      local neotest_lib_ok, neotest_subprocess = pcall(require, "neotest.lib.subprocess")
-      if neotest_lib_ok then
-        neotest_subprocess.enabled = function() return false end
-      end
+      -- Disable subprocess so discovery runs in main process where nix-installed
+      -- treesitter parsers are available.
+      local neotest_subprocess = require("neotest.lib.subprocess")
+      neotest_subprocess.enabled = function() return false end
 
       require("neotest").setup({
         adapters = {
-          vitest_adapter,
+          require("neotest-vitest"),
           require("neotest-rust"),
         },
       })
-
-      neotest_log("neotest setup complete")
 
       require("nvim-tree").setup({
         view = { width = 30 },
