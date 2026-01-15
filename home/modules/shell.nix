@@ -1,13 +1,12 @@
 {
   pkgs,
   lib,
-  isPersonal ? true,
+  darwinTarget ? "macbook-personal",
   ...
 }:
 
 let
   inherit (pkgs.stdenv) isDarwin isLinux;
-  darwinTarget = if isPersonal then "macbook-personal" else "macbook-work";
 
   # Shared aliases for both bash and zsh
   sharedAliases = {

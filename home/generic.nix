@@ -1,10 +1,9 @@
-# Generic home-manager configuration that accepts username as parameter
-# Used for machines where username varies (e.g., work laptop)
+# Shared home-manager configuration for all machines
+# Username is passed via _module.args from each host config
 {
   pkgs,
   lib,
   username,
-  isPersonal ? true,
   ...
 }:
 
@@ -13,13 +12,13 @@ let
 in
 {
   imports = [
-    ./dan/neovim.nix
-    ./dan/shell.nix
-    ./dan/git.nix
-    ./dan/gitlab.nix
-    ./dan/ghostty.nix
-    ./dan/firefox.nix
-    ./dan/aerospace.nix
+    ./modules/neovim.nix
+    ./modules/shell.nix
+    ./modules/git.nix
+    ./modules/gitlab.nix
+    ./modules/ghostty.nix
+    ./modules/firefox.nix
+    ./modules/aerospace.nix
   ];
 
   home = {
@@ -57,9 +56,6 @@ in
         nixfmt
         statix # Linter
         deadnix # Find unused code
-      ]
-      ++ lib.optionals isPersonal [
-        jellyfin-media-player
       ]
       ++ lib.optionals isLinux [
         chromium

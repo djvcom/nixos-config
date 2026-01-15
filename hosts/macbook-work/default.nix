@@ -9,16 +9,15 @@
     })
   ];
 
-  # Home-manager configuration for the current user
   home-manager.users.${username} =
-    { ... }:
+    { pkgs, ... }:
     {
       imports = [ ../../home/generic.nix ];
       _module.args.username = username;
-      _module.args.isPersonal = false;
+      _module.args.darwinTarget = "macbook-work";
 
-      # Work-specific packages
       home.packages = with pkgs; [
+        opencode
         uv
         aws-sam-cli
       ];

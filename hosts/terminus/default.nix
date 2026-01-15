@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 
@@ -444,10 +445,12 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "backup";
+    extraSpecialArgs = { inherit inputs; };
     users.dan =
       { ... }:
       {
-        imports = [ ../../home/dan.nix ];
+        imports = [ ../../home/generic.nix ];
+        _module.args.username = "dan";
       };
   };
 
