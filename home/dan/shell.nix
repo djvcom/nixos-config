@@ -133,5 +133,14 @@ in
       enableBashIntegration = true;
       enableZshIntegration = true;
     };
+
+    readline = {
+      enable = true;
+      extraConfig = ''
+        # Up/down arrows search history based on typed prefix
+        "\e[A": history-search-backward
+        "\e[B": history-search-forward
+      '';
+    };
   };
 }

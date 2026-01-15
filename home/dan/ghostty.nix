@@ -24,6 +24,9 @@ in
       background-opacity = 0.9;
       clipboard-read = "allow";
       clipboard-write = "allow";
+      keybind = {
+        "shift+enter" = "text:\\n";
+      };
     };
   };
 

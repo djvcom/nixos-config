@@ -9,7 +9,7 @@
 }:
 
 let
-  inherit (pkgs.stdenv) isDarwin;
+  inherit (pkgs.stdenv) isDarwin isLinux;
 in
 {
   imports = [
@@ -60,6 +60,9 @@ in
       ]
       ++ lib.optionals isPersonal [
         jellyfin-media-player
+      ]
+      ++ lib.optionals isLinux [
+        chromium
       ];
     sessionVariables = {
       EDITOR = "nvim";

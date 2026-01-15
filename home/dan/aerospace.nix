@@ -15,6 +15,7 @@ in
       # Launch apps on startup
       after-startup-command = [
         "exec-and-forget open '/Applications/Nix Apps/LibreWolf.app'",
+        "workspace 2",
         "exec-and-forget open -a Ghostty"
       ]
 
@@ -95,10 +96,6 @@ in
       [[on-window-detected]]
       if.app-id = "org.mozilla.librewolf"
       run = ["move-node-to-workspace 1"]
-
-      [[on-window-detected]]
-      if.app-id = "com.mitchellh.ghostty"
-      run = ["move-node-to-workspace 1", "flatten-workspace-tree"]
     '';
   };
 }

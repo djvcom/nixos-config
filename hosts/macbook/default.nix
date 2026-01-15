@@ -90,6 +90,7 @@
     casks = [
       "ghostty"
       "gog-galaxy"
+      "google-chrome"
     ];
   };
 
