@@ -56,6 +56,12 @@
       bashInteractive
       zsh
     ];
+
+    # SSL certificates for nix-installed tools
+    variables = {
+      NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+    };
   };
 
   # Use Touch ID for sudo
