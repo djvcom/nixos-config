@@ -20,6 +20,7 @@
         opencode
         uv
         aws-sam-cli
+        awscli2
       ];
 
       # Work-specific shell config for GitLab token
