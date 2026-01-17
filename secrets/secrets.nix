@@ -44,4 +44,7 @@ in
 
   # Datadog monitoring
   "datadog-postgres-password.age".publicKeys = allKeys;
+
+  # Roundcube webmail
+  "roundcube-des-key.age".publicKeys = allKeys;
 }

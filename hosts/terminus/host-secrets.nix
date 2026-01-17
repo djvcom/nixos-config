@@ -124,5 +124,11 @@ _:
       group = "root";
       mode = "0400";
     };
+    roundcube-des-key = {
+      file = ../../secrets/roundcube-des-key.age;
+      owner = "roundcube";
+      group = "roundcube";
+      mode = "0400";
+    };
   };
 }

@@ -29,6 +29,10 @@ let
       host = "mail.djv.sh";
       backend = "http://127.0.0.1:8082";
     };
+    roundcube = {
+      host = "webmail.djv.sh";
+      backend = "http://127.0.0.1:8083";
+    };
   };
 in
 {
@@ -138,6 +142,18 @@ in
               };
             };
 
+            # Security headers for Roundcube (allows same-origin framing for email preview)
+            security-headers-roundcube.headers = {
+              stsSeconds = 31536000;
+              stsIncludeSubdomains = true;
+              customFrameOptionsValue = "SAMEORIGIN";
+              contentTypeNosniff = true;
+              referrerPolicy = "strict-origin-when-cross-origin";
+              customResponseHeaders = {
+                Permissions-Policy = "geolocation=(), microphone=(), camera=()";
+              };
+            };
+
             # Strip /ui prefix for garage-webui
             garage-strip-ui.stripPrefix.prefixes = [ "/ui" ];
           };
@@ -227,6 +243,14 @@ in
               entryPoints = [ "websecure" ];
             };
 
+            roundcube = {
+              rule = "Host(`${domains.roundcube.host}`)";
+              service = "roundcube";
+              middlewares = [ "security-headers-roundcube" ];
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
+            };
+
             # Catch-all for unknown subdomains - redirect to main site 404 page
             catch-all = {
               rule = "HostRegexp(`^.+\\.djv\\.sh$`)";
@@ -273,6 +297,8 @@ in
             openbao.loadBalancer.servers = [ { url = domains.openbao.backend; } ];
 
             stalwart.loadBalancer.servers = [ { url = domains.stalwart.backend; } ];
+
+            roundcube.loadBalancer.servers = [ { url = domains.roundcube.backend; } ];
           };
 
           # Server transport for Kanidm backend TLS

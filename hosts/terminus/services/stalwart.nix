@@ -144,11 +144,10 @@
         { "else" = false; }
       ];
 
-      # Authentication settings
-      # SCRAM-SHA-256 preferred; PLAIN fallback for legacy clients (over TLS)
-      session.auth = {
-        mechanisms = "[scram-sha-256, plain]";
-        directory = "'memory'";
+      # IMAP authentication - point to memory directory where users are defined
+      imap.auth = {
+        mechanisms = [ "plain" ];
+        directory = "memory";
       };
 
       # Admin fallback account

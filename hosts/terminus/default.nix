@@ -27,11 +27,14 @@
     ./services/garage.nix
     ./services/valkey.nix
     ./services/datadog.nix
+    ./services/roundcube.nix
   ];
 
   networking = {
     hostName = "terminus";
     useDHCP = false;
+    # Resolve mail.djv.sh to localhost for Roundcube IMAP connection
+    hosts."127.0.0.1" = [ "mail.djv.sh" ];
     interfaces.eth0 = {
       ipv4.addresses = [
         {
@@ -151,6 +154,7 @@
     postgresqlDatabases = [
       "djv"
       "vaultwarden"
+      "roundcube"
     ];
 
     schedule = "daily";
@@ -207,6 +211,7 @@
     ensureDatabases = [
       "djv"
       "vaultwarden"
+      "roundcube"
     ];
     ensureUsers = [
       {
