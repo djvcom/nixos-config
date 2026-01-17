@@ -27,6 +27,7 @@
 
       admin = {
         api_bind_addr = "127.0.0.1:3903";
+        trace_sink = "http://127.0.0.1:4317";
       };
     };
 

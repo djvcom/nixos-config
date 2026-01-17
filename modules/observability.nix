@@ -171,6 +171,9 @@ in
               "systemd-*"
               "nixos-upgrade"
               "nixos-upgrade-preflight"
+              "stalwart-mail"
+              "garage"
+              "oauth2-proxy"
             ];
             priority = "info";
           };

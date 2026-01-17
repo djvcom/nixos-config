@@ -7,6 +7,15 @@
     openFirewall = true;
 
     settings = {
+      # OpenTelemetry tracing
+      tracer.otel = {
+        type = "open-telemetry";
+        transport = "grpc";
+        endpoint = "http://127.0.0.1:4317";
+        level = "info";
+        enable = true;
+      };
+
       server = {
         hostname = "mail.djv.sh";
 
