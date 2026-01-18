@@ -83,7 +83,11 @@
       upgrade = true;
       cleanup = "uninstall";
     };
-    casks = [ "ghostty" ] ++ extraBrewCasks;
+    casks = [
+      "ghostty"
+      "google-chrome"
+    ]
+    ++ extraBrewCasks;
   };
 
   system.stateVersion = 6;
