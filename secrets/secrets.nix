@@ -47,4 +47,12 @@ in
 
   # Roundcube webmail
   "roundcube-des-key.age".publicKeys = allKeys;
+
+  # Dashboard (Homepage)
+  "kanidm-oauth2-dashboard.age".publicKeys = allKeys;
+  "dashboard-oauth2-env.age".publicKeys = allKeys;
+
+  # Roundcube OIDC
+  "kanidm-oauth2-roundcube.age".publicKeys = allKeys;
+  "roundcube-oauth2-env.age".publicKeys = allKeys;
 }

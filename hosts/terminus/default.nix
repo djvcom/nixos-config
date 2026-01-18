@@ -28,6 +28,7 @@
     ./services/valkey.nix
     ./services/datadog.nix
     ./services/roundcube.nix
+    ./services/dashboard.nix
   ];
 
   networking = {

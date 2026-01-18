@@ -4,7 +4,8 @@
 {
   services.stalwart-mail = {
     enable = true;
-    openFirewall = true;
+    # HTTP listener is localhost-only, Traefik handles external; mail ports opened explicitly below
+    openFirewall = false;
 
     settings = {
       # OpenTelemetry tracing
@@ -166,5 +167,33 @@
     dnsProvider = "cloudflare";
     environmentFile = config.age.secrets.cloudflare-dns-token.path;
     group = "stalwart-mail";
+  };
+
+  # Open mail ports explicitly (HTTP 8082 stays localhost-only behind Traefik)
+  networking.firewall.allowedTCPPorts = [
+    25 # SMTP
+    587 # SMTP submission
+    465 # SMTPS
+    993 # IMAPS
+  ];
+
+  # Systemd hardening for stalwart-mail
+  systemd.services.stalwart-mail.serviceConfig = {
+    NoNewPrivileges = true;
+    ProtectSystem = "strict";
+    ProtectHome = true;
+    PrivateTmp = true;
+    PrivateDevices = true;
+    ProtectKernelTunables = true;
+    ProtectKernelModules = true;
+    ProtectControlGroups = true;
+    RestrictNamespaces = true;
+    RestrictRealtime = true;
+    RestrictSUIDSGID = true;
+    LockPersonality = true;
+    ReadWritePaths = [
+      "/var/lib/stalwart-mail"
+      "/var/lib/acme"
+    ];
   };
 }

@@ -31,7 +31,11 @@ let
     };
     roundcube = {
       host = "webmail.djv.sh";
-      backend = "http://127.0.0.1:8083";
+      backend = "http://127.0.0.1:4182"; # oauth2-proxy
+    };
+    dashboard = {
+      host = "dash.djv.sh";
+      backend = "http://127.0.0.1:4181"; # oauth2-proxy
     };
   };
 in
@@ -156,6 +160,18 @@ in
 
             # Strip /ui prefix for garage-webui
             garage-strip-ui.stripPrefix.prefixes = [ "/ui" ];
+
+            # Rate limiting for general traffic (100 req/s average, burst of 50)
+            rate-limit.rateLimit = {
+              average = 100;
+              burst = 50;
+            };
+
+            # Stricter rate limiting for authentication endpoints
+            auth-rate-limit.rateLimit = {
+              average = 10;
+              burst = 20;
+            };
           };
 
           # Routers for each domain
@@ -214,7 +230,10 @@ in
             kanidm = {
               rule = "Host(`${domains.kanidm.host}`)";
               service = "kanidm";
-              middlewares = [ "security-headers" ];
+              middlewares = [
+                "auth-rate-limit"
+                "security-headers"
+              ];
               tls.certResolver = "letsencrypt";
               entryPoints = [ "websecure" ];
             };
@@ -222,7 +241,10 @@ in
             vaultwarden = {
               rule = "Host(`${domains.vaultwarden.host}`)";
               service = "vaultwarden";
-              middlewares = [ "security-headers" ];
+              middlewares = [
+                "rate-limit"
+                "security-headers"
+              ];
               tls.certResolver = "letsencrypt";
               entryPoints = [ "websecure" ];
             };
@@ -247,6 +269,17 @@ in
               rule = "Host(`${domains.roundcube.host}`)";
               service = "roundcube";
               middlewares = [ "security-headers-roundcube" ];
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
+            };
+
+            dashboard = {
+              rule = "Host(`${domains.dashboard.host}`)";
+              service = "dashboard";
+              middlewares = [
+                "rate-limit"
+                "security-headers"
+              ];
               tls.certResolver = "letsencrypt";
               entryPoints = [ "websecure" ];
             };
@@ -299,6 +332,8 @@ in
             stalwart.loadBalancer.servers = [ { url = domains.stalwart.backend; } ];
 
             roundcube.loadBalancer.servers = [ { url = domains.roundcube.backend; } ];
+
+            dashboard.loadBalancer.servers = [ { url = domains.dashboard.backend; } ];
           };
 
           # Server transport for Kanidm backend TLS

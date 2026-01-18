@@ -1,5 +1,5 @@
 # OpenBao secrets management (HashiCorp Vault fork)
-_:
+{ lib, ... }:
 
 {
   services.openbao = {
@@ -22,5 +22,28 @@ _:
         node_id = "terminus";
       };
     };
+  };
+
+  # Systemd hardening for OpenBao
+  systemd.services.openbao.serviceConfig = {
+    NoNewPrivileges = true;
+    ProtectSystem = "strict";
+    ProtectHome = true;
+    PrivateTmp = true;
+    PrivateDevices = true;
+    ProtectKernelTunables = true;
+    ProtectKernelModules = true;
+    ProtectControlGroups = true;
+    RestrictNamespaces = true;
+    RestrictRealtime = true;
+    RestrictSUIDSGID = true;
+    LockPersonality = true;
+    CapabilityBoundingSet = lib.mkForce "";
+    SystemCallFilter = [
+      "@system-service"
+      "~@privileged"
+    ];
+    SystemCallArchitectures = "native";
+    ReadWritePaths = [ "/var/lib/openbao" ];
   };
 }

@@ -1,8 +1,10 @@
-# Roundcube webmail for Stalwart
+# Roundcube webmail for Stalwart with Kanidm SSO
 { config, pkgs, ... }:
 
 let
   desKeyPath = config.age.secrets.roundcube-des-key.path;
+  roundcubePort = 8083;
+  oauth2Port = 4182;
 in
 {
   services.roundcube = {
@@ -43,15 +45,62 @@ in
     '';
   };
 
-  # nginx listens on localhost only; Traefik handles TLS termination
+  # nginx listens on localhost only; oauth2-proxy sits in front
   services.nginx.virtualHosts."localhost" = {
     listen = [
       {
         addr = "127.0.0.1";
-        port = 8083;
+        port = roundcubePort;
       }
     ];
     forceSSL = false;
     enableACME = false;
+  };
+
+  # oauth2-proxy for Roundcube SSO (Kanidm auth before accessing webmail)
+  systemd.services.roundcube-oauth2-proxy = {
+    description = "OAuth2 Proxy for Roundcube";
+    after = [
+      "network.target"
+      "nginx.service"
+    ];
+    wantedBy = [ "multi-user.target" ];
+
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = ''
+        ${pkgs.oauth2-proxy}/bin/oauth2-proxy \
+          --provider=oidc \
+          --oidc-issuer-url=https://auth.djv.sh/oauth2/openid/roundcube \
+          --client-id=roundcube \
+          --redirect-url=https://webmail.djv.sh/oauth2/callback \
+          --email-domain=* \
+          --upstream=http://127.0.0.1:${toString roundcubePort} \
+          --http-address=127.0.0.1:${toString oauth2Port} \
+          --cookie-secure=true \
+          --cookie-samesite=lax \
+          --cookie-name=_roundcube_oauth2 \
+          --reverse-proxy=true \
+          --skip-provider-button=true \
+          --code-challenge-method=S256
+      '';
+      EnvironmentFile = config.age.secrets.roundcube-oauth2-env.path;
+      Restart = "on-failure";
+      DynamicUser = true;
+
+      # Systemd hardening
+      NoNewPrivileges = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      PrivateTmp = true;
+      PrivateDevices = true;
+      ProtectKernelTunables = true;
+      ProtectKernelModules = true;
+      ProtectControlGroups = true;
+      RestrictNamespaces = true;
+      RestrictRealtime = true;
+      RestrictSUIDSGID = true;
+      LockPersonality = true;
+    };
   };
 }

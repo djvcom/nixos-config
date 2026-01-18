@@ -68,7 +68,7 @@ _:
       file = ../../secrets/garage-env.age;
       owner = "root";
       group = "root";
-      mode = "0444";
+      mode = "0400";
     };
     oauth2-proxy-env = {
       file = ../../secrets/oauth2-proxy-env.age;
@@ -128,6 +128,34 @@ _:
       file = ../../secrets/roundcube-des-key.age;
       owner = "roundcube";
       group = "roundcube";
+      mode = "0400";
+    };
+
+    # Dashboard (Homepage) with SSO
+    kanidm-oauth2-dashboard = {
+      file = ../../secrets/kanidm-oauth2-dashboard.age;
+      owner = "kanidm";
+      group = "kanidm";
+      mode = "0400";
+    };
+    dashboard-oauth2-env = {
+      file = ../../secrets/dashboard-oauth2-env.age;
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+
+    # Roundcube OIDC
+    kanidm-oauth2-roundcube = {
+      file = ../../secrets/kanidm-oauth2-roundcube.age;
+      owner = "kanidm";
+      group = "kanidm";
+      mode = "0400";
+    };
+    roundcube-oauth2-env = {
+      file = ../../secrets/roundcube-oauth2-env.age;
+      owner = "root";
+      group = "root";
       mode = "0400";
     };
   };
