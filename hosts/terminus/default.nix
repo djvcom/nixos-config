@@ -190,13 +190,10 @@
     };
   };
 
-  nixpkgs.config.allowUnfree = true;
-
   environment.systemPackages = with pkgs; [
     zellij
     nftables
     nodejs_24
-    google-chrome
   ];
 
   virtualisation = {
