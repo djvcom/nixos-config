@@ -58,7 +58,8 @@ let
       oidc_scopes="openid,profile,email,groups" \
       token_policies="default" \
       token_ttl="1h" \
-      token_max_ttl="24h"
+      token_max_ttl="24h" \
+      oidc_supported_algs="ES256,RS256"
 
     # Create admin policy for openbao_admins group
     echo "Creating admin policy..."
