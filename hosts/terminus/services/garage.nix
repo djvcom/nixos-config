@@ -79,7 +79,7 @@
 
     extraConfig = {
       oidc-issuer-url = "https://auth.djv.sh/oauth2/openid/garage";
-      redirect-url = "https://s3.djv.sh/oauth2/callback";
+      redirect-url = "https://garage.djv.sh/oauth2/callback";
       email-domain = "*";
       upstream = "http://127.0.0.1:3902";
       http-address = "127.0.0.1:4180";

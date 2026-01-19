@@ -1,5 +1,10 @@
 # OpenBao secrets management (HashiCorp Vault fork)
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   oidcSetupScript = pkgs.writeShellScript "openbao-oidc-setup" ''

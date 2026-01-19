@@ -92,10 +92,10 @@
         garage = {
           displayName = "Garage Storage";
           originUrl = [
-            "https://s3.djv.sh/"
-            "https://s3.djv.sh/oauth2/callback"
+            "https://garage.djv.sh/"
+            "https://garage.djv.sh/oauth2/callback"
           ];
-          originLanding = "https://s3.djv.sh/ui/";
+          originLanding = "https://garage.djv.sh/";
           basicSecretFile = config.age.secrets.kanidm-oauth2-garage.path;
           preferShortUsername = true;
           scopeMaps.garage_users = [

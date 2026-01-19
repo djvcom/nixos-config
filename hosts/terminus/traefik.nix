@@ -11,7 +11,10 @@ let
     garage = {
       host = "s3.djv.sh";
       s3Backend = "http://127.0.0.1:3900";
-      uiBackend = "http://127.0.0.1:4180"; # oauth2-proxy
+    };
+    garageAdmin = {
+      host = "garage.djv.sh";
+      backend = "http://127.0.0.1:4180"; # oauth2-proxy
     };
     kanidm = {
       host = "auth.djv.sh";
@@ -158,9 +161,6 @@ in
               };
             };
 
-            # Strip /ui prefix for garage-webui
-            garage-strip-ui.stripPrefix.prefixes = [ "/ui" ];
-
             # Rate limiting for general traffic (100 req/s average, burst of 50)
             rate-limit.rateLimit = {
               average = 100;
@@ -184,47 +184,25 @@ in
               entryPoints = [ "websecure" ];
             };
 
-            # Garage UI (SSO via oauth2-proxy) - strip /ui prefix for webui
-            garage-ui = {
-              rule = "Host(`${domains.garage.host}`) && PathPrefix(`/ui`)";
-              service = "garage-ui";
-              middlewares = [
-                "garage-strip-ui"
-                "security-headers"
-              ];
-              tls.certResolver = "letsencrypt";
-              entryPoints = [ "websecure" ];
-              priority = 10;
-            };
-
-            # Garage OAuth2 callbacks - don't strip prefix
-            garage-oauth2 = {
-              rule = "Host(`${domains.garage.host}`) && PathPrefix(`/oauth2`)";
-              service = "garage-ui";
-              middlewares = [ "security-headers" ];
-              tls.certResolver = "letsencrypt";
-              entryPoints = [ "websecure" ];
-              priority = 10;
-            };
-
-            # Garage webui static assets and API (direct to webui)
-            garage-assets = {
-              rule = "Host(`${domains.garage.host}`) && (PathPrefix(`/assets`) || PathPrefix(`/api`) || Path(`/favicon-16x16.png`) || Path(`/favicon-32x32.png`) || Path(`/apple-touch-icon.png`) || Path(`/site.webmanifest`))";
-              service = "garage-webui-direct";
-              middlewares = [ "security-headers" ];
-              tls.certResolver = "letsencrypt";
-              entryPoints = [ "websecure" ];
-              priority = 10;
-            };
-
-            # Garage S3 API (access key auth) - lower priority than UI routes
+            # Garage S3 API (access key auth)
             garage-s3 = {
               rule = "Host(`${domains.garage.host}`)";
               service = "garage-s3";
               middlewares = [ "security-headers" ];
               tls.certResolver = "letsencrypt";
               entryPoints = [ "websecure" ];
-              priority = 1;
+            };
+
+            # Garage Admin UI (SSO via oauth2-proxy)
+            garage-admin = {
+              rule = "Host(`${domains.garageAdmin.host}`)";
+              service = "garage-admin";
+              middlewares = [
+                "rate-limit"
+                "security-headers"
+              ];
+              tls.certResolver = "letsencrypt";
+              entryPoints = [ "websecure" ];
             };
 
             kanidm = {
@@ -314,10 +292,7 @@ in
               responseForwarding.flushInterval = "100ms";
             };
 
-            garage-ui.loadBalancer.servers = [ { url = domains.garage.uiBackend; } ];
-
-            # Direct access to garage-webui for static assets (bypasses oauth2-proxy)
-            garage-webui-direct.loadBalancer.servers = [ { url = "http://127.0.0.1:3902"; } ];
+            garage-admin.loadBalancer.servers = [ { url = domains.garageAdmin.backend; } ];
 
             # Kanidm handles TLS itself, so we need serversTransport
             kanidm.loadBalancer = {
