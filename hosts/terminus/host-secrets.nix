@@ -70,6 +70,12 @@ _:
       group = "root";
       mode = "0400";
     };
+    garage-webui-env = {
+      file = ../../secrets/garage-webui-env.age;
+      owner = "garage-webui";
+      group = "garage-webui";
+      mode = "0400";
+    };
     oauth2-proxy-env = {
       file = ../../secrets/oauth2-proxy-env.age;
       owner = "root";

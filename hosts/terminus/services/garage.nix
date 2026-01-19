@@ -1,10 +1,16 @@
 # Garage S3-compatible object storage
 #
-# Replaces MinIO for Restic backups. Web UI at /ui/ uses oauth2-proxy for SSO.
+# Replaces MinIO for Restic backups. Web UI uses oauth2-proxy for SSO.
 # S3 API uses standard access keys (required for Restic compatibility).
 { config, pkgs, ... }:
 
 {
+  # Dedicated user for garage-webui
+  users.users.garage-webui = {
+    isSystemUser = true;
+    group = "garage-webui";
+  };
+  users.groups.garage-webui = { };
   services.garage = {
     enable = true;
     package = pkgs.garage;
@@ -42,14 +48,15 @@
 
     serviceConfig = {
       ExecStart = "${pkgs.garage-webui}/bin/garage-webui";
-      DynamicUser = true;
+      User = "garage-webui";
+      Group = "garage-webui";
       Environment = [
         "CONFIG_PATH=/etc/garage.toml"
         "API_BASE_URL=http://127.0.0.1:3903"
         "S3_ENDPOINT_URL=http://127.0.0.1:3900"
         "PORT=3902"
       ];
-      EnvironmentFile = config.age.secrets.garage-env.path;
+      EnvironmentFile = config.age.secrets.garage-webui-env.path;
 
       # Systemd hardening
       NoNewPrivileges = true;
@@ -87,6 +94,8 @@
       skip-provider-button = true;
       set-xauthrequest = true;
       code-challenge-method = "S256"; # Required for Kanidm PKCE
+      # Skip auth for static assets fetched during OAuth redirect flow
+      skip-auth-regex = "^/(site\\.webmanifest|favicon.*|apple-touch-icon.*|assets/.*)$";
     };
   };
 }
