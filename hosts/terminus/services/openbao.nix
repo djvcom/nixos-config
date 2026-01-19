@@ -46,7 +46,8 @@ let
       oidc_discovery_url="https://auth.djv.sh/oauth2/openid/openbao" \
       oidc_client_id="openbao" \
       oidc_client_secret="$OIDC_CLIENT_SECRET" \
-      default_role="default"
+      default_role="default" \
+      jwt_supported_algs=ES256
 
     # Configure default role
     echo "Configuring default OIDC role..."
@@ -58,8 +59,7 @@ let
       oidc_scopes="openid,profile,email,groups" \
       token_policies="default" \
       token_ttl="1h" \
-      token_max_ttl="24h" \
-      oidc_supported_algs=ES256
+      token_max_ttl="24h"
 
     # Create admin policy for openbao_admins group
     echo "Creating admin policy..."
