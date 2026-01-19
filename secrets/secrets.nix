@@ -38,6 +38,8 @@ in
 
   # OpenBao secrets management
   "openbao-keys.age".publicKeys = allKeys;
+  "openbao-oidc-secret.age".publicKeys = allKeys;
+  "openbao-oidc-env.age".publicKeys = allKeys;
 
   # Backup system
   "backup-credentials.age".publicKeys = allKeys;

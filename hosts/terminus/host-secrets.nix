@@ -118,6 +118,18 @@ _:
       group = "root";
       mode = "0400";
     };
+    openbao-oidc-secret = {
+      file = ../../secrets/openbao-oidc-secret.age;
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+    openbao-oidc-env = {
+      file = ../../secrets/openbao-oidc-env.age;
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
     backup-credentials = {
       file = ../../secrets/backup-credentials.age;
       owner = "root";
