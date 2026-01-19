@@ -57,7 +57,10 @@
       systems.oauth2 = {
         openbao = {
           displayName = "OpenBao Secrets";
-          originUrl = "https://bao.djv.sh/";
+          originUrl = [
+            "https://bao.djv.sh/"
+            "https://bao.djv.sh/ui/vault/auth/oidc/oidc/callback"
+          ];
           originLanding = "https://bao.djv.sh/ui/";
           basicSecretFile = config.age.secrets.kanidm-oauth2-openbao.path;
           preferShortUsername = true;
