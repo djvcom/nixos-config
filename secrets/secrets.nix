@@ -1,10 +1,18 @@
 let
-  terminus = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPGskDEvecbqILMi3BN755k2pg6S+2ctewH66YWdpX5H";
-  dan = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICKGGvADTZrv8lir6I2mTEtef/r1StZ0pfAkRNZcr9tE";
-  allKeys = [
-    terminus
-    dan
-  ];
+  machines = {
+    terminus = {
+      host = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPGskDEvecbqILMi3BN755k2pg6S+2ctewH66YWdpX5H";
+      user = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILrLb2U2NmkEjMlz2tmhQSwfoU3EtwTZSk6XE6RJlVHA";
+    };
+    macbookPersonal = {
+      user = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICKGGvADTZrv8lir6I2mTEtef/r1StZ0pfAkRNZcr9tE";
+    };
+  };
+
+  hostKeys = builtins.filter (k: k != null)
+    (map (m: m.host or null) (builtins.attrValues machines));
+  userKeys = map (m: m.user) (builtins.attrValues machines);
+  allKeys = hostKeys ++ userKeys;
 in
 {
   "git-identity.age".publicKeys = allKeys;
