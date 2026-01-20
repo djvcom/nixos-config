@@ -16,7 +16,10 @@
       _module.args.username = username;
       _module.args.darwinTarget = "macbook-personal";
 
-      home.packages = [ pkgs.jellyfin ];
+      home.packages = [
+        pkgs.jellyfin
+        pkgs.rqbit
+      ];
 
       home.activation.createJellyfinDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         $DRY_RUN_CMD mkdir -p ~/.local/share/jellyfin/log
