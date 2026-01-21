@@ -41,6 +41,11 @@
       url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
+
+    sidereal = {
+      url = "github:djvcom/sidereal";
+      # Don't follow nixpkgs - sidereal needs rust-overlay
+    };
   };
 
   outputs =
@@ -54,6 +59,7 @@
       disko,
       dagger,
       djv,
+      sidereal,
       ...
     }@inputs:
     let
@@ -63,6 +69,7 @@
         (import ./overlays/kanidm-csp.nix)
         (import ./overlays/opentelemetry-collector.nix)
         (import ./overlays/garage-v2.nix)
+        sidereal.overlays.default
       ];
 
       # Helper for creating NixOS configurations
@@ -77,6 +84,7 @@
             agenix.nixosModules.default
             disko.nixosModules.disko
             djv.nixosModules.default
+            sidereal.nixosModules.sidereal
             (
               { pkgs, ... }:
               {

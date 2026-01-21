@@ -9,8 +9,7 @@ let
     };
   };
 
-  hostKeys = builtins.filter (k: k != null)
-    (map (m: m.host or null) (builtins.attrValues machines));
+  hostKeys = builtins.filter (k: k != null) (map (m: m.host or null) (builtins.attrValues machines));
   userKeys = map (m: m.user) (builtins.attrValues machines);
   allKeys = hostKeys ++ userKeys;
 in
@@ -66,4 +65,6 @@ in
   # Roundcube OIDC
   "kanidm-oauth2-roundcube.age".publicKeys = allKeys;
   "roundcube-oauth2-env.age".publicKeys = allKeys;
+
+  "sidereal-s3-credentials.age".publicKeys = allKeys;
 }

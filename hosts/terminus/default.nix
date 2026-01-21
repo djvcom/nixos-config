@@ -29,6 +29,7 @@
     ./services/datadog.nix
     ./services/roundcube.nix
     ./services/dashboard.nix
+    ./services/sidereal.nix
   ];
 
   networking = {
