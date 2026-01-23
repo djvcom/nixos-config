@@ -23,10 +23,12 @@
         awscli2
       ];
 
-      # Work-specific shell config for GitLab token
+      # Work-specific shell config
       home.file.".config/shell/work.sh" = {
         executable = true;
         text = ''
+          export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+
           # Export GitLab token for API and npm registry access
           # glab config location varies - check both possible paths
           _glab_config=""
