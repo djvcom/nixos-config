@@ -35,6 +35,7 @@ in
         glab
         rustup
         gcc
+        libiconv
         nodejs_24
         yarn
         nodePackages.typescript-language-server
@@ -62,6 +63,10 @@ in
       ];
     sessionVariables = {
       EDITOR = "nvim";
+    }
+    // lib.optionalAttrs isDarwin {
+      LIBRARY_PATH = "${pkgs.libiconv}/lib";
+      NIX_LDFLAGS = "-L${pkgs.libiconv}/lib";
     };
     stateVersion = "25.05";
   };
