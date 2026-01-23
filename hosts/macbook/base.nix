@@ -3,6 +3,7 @@
   pkgs,
   username,
   extraBrewCasks ? [ ],
+  extraBrews ? [ ],
   ...
 }:
 
@@ -83,6 +84,7 @@
       upgrade = true;
       cleanup = "uninstall";
     };
+    brews = extraBrews;
     casks = [
       "ghostty"
       "google-chrome"

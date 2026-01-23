@@ -6,6 +6,7 @@
     (import ../macbook/base.nix {
       inherit pkgs username;
       extraBrewCasks = [ ];
+      extraBrews = [ "opencode" ];
     })
   ];
 
@@ -17,7 +18,6 @@
       _module.args.darwinTarget = "macbook-work";
 
       home.packages = with pkgs; [
-        opencode
         uv
         aws-sam-cli
         awscli2
