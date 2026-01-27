@@ -72,4 +72,12 @@ in
   };
 
   programs.home-manager.enable = true;
+
+  programs.ssh = {
+    enable = true;
+    addKeysToAgent = "yes";
+    extraConfig = ''
+      UseKeychain yes
+    '';
+  };
 }
