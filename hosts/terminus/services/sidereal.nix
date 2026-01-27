@@ -34,7 +34,11 @@
       backend = "s3";
       endpoint = "http://127.0.0.1:3900";
       bucket = "sidereal";
+      region = "garage";
       credentialsFile = config.age.secrets.sidereal-s3-credentials.path;
     };
+
+    build.vm.useFirecracker = true;
+    control.provisioner = "firecracker";
   };
 }
