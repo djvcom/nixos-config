@@ -75,9 +75,12 @@ in
 
   programs.ssh = {
     enable = true;
-    addKeysToAgent = "yes";
-    extraConfig = ''
-      UseKeychain yes
-    '';
+    enableDefaultConfig = false;
+    matchBlocks."*" = {
+      extraOptions = {
+        UseKeychain = "yes";
+        AddKeysToAgent = "yes";
+      };
+    };
   };
 }
