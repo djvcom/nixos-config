@@ -78,8 +78,10 @@ in
     enableDefaultConfig = false;
     matchBlocks."*" = {
       extraOptions = {
-        UseKeychain = "yes";
         AddKeysToAgent = "yes";
+      }
+      // lib.optionalAttrs isDarwin {
+        UseKeychain = "yes";
       };
     };
   };
