@@ -27,7 +27,10 @@
       home.file.".config/shell/work.sh" = {
         executable = true;
         text = ''
-          export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+          export NODE_EXTRA_CA_CERTS=$HOME/certs/zscaler.pem
+          export SSL_CERT_FILE=$HOME/certs/zscaler.pem
+          export REQUESTS_CA_BUNDLE=$HOME/certs/zscaler.pem
+          export AWS_CA_BUNDLE=$HOME/certs/zscaler.pem
 
           # Export GitLab token for API and npm registry access
           # glab config location varies - check both possible paths
