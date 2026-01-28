@@ -43,6 +43,8 @@ in
       ctrl-alt-k = "focus up"
       ctrl-alt-l = "focus right"
 
+      alt-n = "exec-and-forget aerospace move-node-to-workspace next"
+
       # Move windows
       ctrl-alt-shift-h = "move left"
       ctrl-alt-shift-j = "move down"
