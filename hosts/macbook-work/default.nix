@@ -32,6 +32,10 @@
           export REQUESTS_CA_BUNDLE=$HOME/certs/zscaler.pem
           export AWS_CA_BUNDLE=$HOME/certs/zscaler.pem
 
+          # Use system clang for cargo builds (nix gcc doesn't find macOS frameworks)
+          export CC=/usr/bin/clang
+          export RUSTFLAGS="-C linker=/usr/bin/clang"
+
           # Export GitLab token for API and npm registry access
           # glab config location varies - check both possible paths
           _glab_config=""
