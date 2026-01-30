@@ -218,7 +218,7 @@ modules.wireguard = {
 };
 ```
 
-Rebuild: `sudo nixos-rebuild switch --flake /etc/nixos#terminus`
+Rebuild: `sudo nixos-rebuild switch --flake ~/.config/nixos#terminus`
 
 #### 3. Configure the new device
 

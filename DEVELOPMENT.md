@@ -18,7 +18,7 @@ just clean    # Garbage collect
 ## Project Structure
 
 ```
-/etc/nixos/
+~/.config/nixos/
 ├── flake.nix                 # Flake definition and inputs
 ├── flake.lock                # Pinned dependency versions
 ├── hosts/
@@ -123,7 +123,7 @@ Secrets are managed with [agenix](https://github.com/ryantm/agenix).
 1. Create the secret file:
 
 ```bash
-cd /etc/nixos/secrets
+cd ~/.config/nixos/secrets
 echo "my-secret-value" | agenix -e myservice-secret.age
 ```
 
@@ -156,7 +156,7 @@ services.myservice.secretFile = config.age.secrets.myservice-secret.path;
 ### Editing existing secrets
 
 ```bash
-cd /etc/nixos/secrets
+cd ~/.config/nixos/secrets
 agenix -e myservice-secret.age
 ```
 
@@ -165,7 +165,7 @@ agenix -e myservice-secret.age
 If keys change (new host, rotated user key):
 
 ```bash
-cd /etc/nixos/secrets
+cd ~/.config/nixos/secrets
 agenix --rekey
 ```
 
@@ -174,7 +174,7 @@ agenix --rekey
 **Individual service secrets:**
 
 ```bash
-cd /etc/nixos/secrets
+cd ~/.config/nixos/secrets
 # Generate new value and encrypt
 echo "new-secret-value" | agenix -e myservice-secret.age
 # Or for random values:
@@ -206,7 +206,7 @@ in
 3. Re-encrypt all secrets:
 
 ```bash
-cd /etc/nixos/secrets
+cd ~/.config/nixos/secrets
 # Keep old key available for decryption
 SSH_AUTH_SOCK="" ssh-add ~/.ssh/id_ed25519
 agenix --rekey
@@ -223,7 +223,7 @@ Client secrets are managed declaratively via `basicSecretFile`. To rotate:
 head -c 32 /dev/urandom | base64
 
 # Encrypt for Kanidm
-cd /etc/nixos/secrets
+cd ~/.config/nixos/secrets
 echo "<new-secret>" | agenix -e kanidm-oauth2-myservice.age
 
 # For Vaultwarden, also update the SSO env file
@@ -241,7 +241,7 @@ sudo systemctl restart kanidm vaultwarden
 head -c 32 /dev/urandom | base64
 
 # Update encrypted file
-cd /etc/nixos/secrets
+cd ~/.config/nixos/secrets
 echo "<new-password>" | agenix -e kanidm-admin-password.age
 
 # Rebuild - provisioning will update the password
@@ -545,7 +545,7 @@ After rebuild, update the secret:
 kanidm system oauth2 show-basic-secret vaultwarden
 
 # Update the secret (creates new encrypted file)
-cd /etc/nixos/secrets
+cd ~/.config/nixos/secrets
 echo "SSO_CLIENT_SECRET=<secret-from-above>" | agenix -e vaultwarden-sso.age
 
 # Restart Vaultwarden to pick up new secret

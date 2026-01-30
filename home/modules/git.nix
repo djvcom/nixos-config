@@ -1,8 +1,11 @@
 /**
   Git configuration with identity from agenix-managed secret.
 */
-_:
+{ pkgs, ... }:
 
+let
+  inherit (pkgs.stdenv) isDarwin isLinux;
+in
 {
   programs.git = {
     enable = true;
@@ -15,7 +18,13 @@ _:
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
-      safe.directory = "/etc/nixos";
+      safe.directory =
+        if isLinux then
+          "~/.config/nixos"
+        else if isDarwin then
+          "~/.config/nix-darwin"
+        else
+          null;
       core.pager = "delta";
       interactive.diffFilter = "delta --color-only";
       delta = {
