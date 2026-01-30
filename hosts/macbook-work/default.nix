@@ -6,7 +6,10 @@
     (import ../macbook/base.nix {
       inherit pkgs username;
       extraBrewCasks = [ ];
-      extraBrews = [ "opencode" ];
+      extraBrews = [
+        "opencode"
+        "dagger"
+      ];
     })
   ];
 
