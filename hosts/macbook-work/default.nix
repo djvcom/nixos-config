@@ -29,6 +29,7 @@
         uv
         aws-sam-cli
         awscli2
+        zig
       ];
 
       # Work-specific shell config
