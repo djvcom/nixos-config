@@ -13,6 +13,11 @@
     })
   ];
 
+  # Merge Zscaler cert into system CA bundle
+  security.pki.certificateFiles = [
+    /Users/${username}/certs/zscaler.pem
+  ];
+
   home-manager.users.${username} =
     { pkgs, ... }:
     {
@@ -30,10 +35,11 @@
       home.file.".config/shell/work.sh" = {
         executable = true;
         text = ''
-          export NODE_EXTRA_CA_CERTS=$HOME/certs/zscaler.pem
-          export SSL_CERT_FILE=$HOME/certs/zscaler.pem
-          export REQUESTS_CA_BUNDLE=$HOME/certs/zscaler.pem
-          export AWS_CA_BUNDLE=$HOME/certs/zscaler.pem
+          # Use merged system CA bundle (includes Zscaler cert + Mozilla certs)
+          export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+          export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+          export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+          export AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
           # Use system clang for cargo builds (nix gcc doesn't find macOS frameworks)
           export CC=/usr/bin/clang
