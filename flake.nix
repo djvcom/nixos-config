@@ -124,6 +124,15 @@
           modules = [
             ./hosts/${hostname}
             home-manager.darwinModules.home-manager
+            agenix.darwinModules.default
+            (
+              { pkgs, ... }:
+              {
+                environment.systemPackages = [
+                  agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
+                ];
+              }
+            )
             {
               home-manager = {
                 useGlobalPkgs = true;
@@ -181,6 +190,7 @@
               packages = with pkgs; [
                 nil
                 nixfmt
+                agenix.packages.aarch64-darwin.default
               ];
             };
           };

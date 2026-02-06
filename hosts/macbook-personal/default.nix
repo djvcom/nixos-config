@@ -9,6 +9,15 @@
     })
   ];
 
+  age.identityPaths = [ "/Users/${username}/.ssh/id_ed25519" ];
+  age.secrets.git-identity = {
+    file = ../../secrets/git-identity.age;
+    path = "/Users/${username}/.config/git/identity";
+    owner = username;
+    group = "staff";
+    mode = "0400";
+  };
+
   home-manager.users.${username} =
     { pkgs, lib, ... }:
     {
