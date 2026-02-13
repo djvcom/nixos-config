@@ -30,6 +30,8 @@
         p.javascript
         p.typescript
         p.tsx
+        p.hcl
+        p.terraform
       ]))
 
       catppuccin-nvim
@@ -157,11 +159,29 @@
 
       vim.lsp.enable("nil_ls")
 
+      vim.lsp.config("terraformls", {
+        cmd = { "terraform-ls", "serve" },
+        filetypes = { "terraform", "terraform-vars", "hcl" },
+        root_markers = { ".terraform", ".git" },
+        capabilities = capabilities,
+      })
+
+      vim.lsp.enable("terraformls")
+
+      -- Custom formatter for OpenTofu
+      require("conform").formatters.tofu_fmt = {
+        command = "tofu",
+        args = { "fmt", "-" },
+        stdin = true,
+      }
+
       -- Formatting with conform.nvim
       require("conform").setup({
         formatters_by_ft = {
           nix = { "nixfmt" },
           rust = { "rustfmt" },
+          terraform = { "tofu_fmt" },
+          hcl = { "tofu_fmt" },
         },
         format_on_save = {
           timeout_ms = 500,
@@ -172,6 +192,7 @@
       -- Linting with nvim-lint
       require("lint").linters_by_ft = {
         nix = { "statix", "deadnix" },
+        terraform = { "tflint" },
       }
 
       vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost" }, {

@@ -30,6 +30,9 @@
         aws-sam-cli
         awscli2
         zig
+        opentofu
+        terraform-ls
+        tflint
       ];
 
       # Work-specific shell config
