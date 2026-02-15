@@ -1,0 +1,134 @@
+# Automated backup module using restic with optional PostgreSQL support
+_:
+
+{
+  flake.modules.nixos.backup =
+    {
+      config,
+      lib,
+      ...
+    }:
+    let
+      cfg = config.modules.backup;
+    in
+    {
+      options.modules.backup = {
+        enable = lib.mkEnableOption "automated backups with restic";
+
+        repository = lib.mkOption {
+          type = lib.types.str;
+          description = "Restic repository URL (S3, B2, local path, etc.)";
+          example = "s3:https://s3.example.com/bucket-name";
+        };
+
+        paths = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = "Filesystem paths to include in backup";
+        };
+
+        exclude = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [
+            "**/.cache"
+            "**/node_modules"
+            "**/target/debug"
+            "**/target/release"
+            "**/.git"
+          ];
+          description = "Glob patterns to exclude from backup";
+        };
+
+        postgresqlDatabases = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = "PostgreSQL databases to dump before backup";
+        };
+
+        schedule = lib.mkOption {
+          type = lib.types.str;
+          default = "daily";
+          description = "Backup schedule in systemd.time calendar format";
+        };
+
+        retention = lib.mkOption {
+          description = "Backup retention policy";
+          type = lib.types.submodule {
+            options = {
+              daily = lib.mkOption {
+                type = lib.types.int;
+                default = 7;
+              };
+              weekly = lib.mkOption {
+                type = lib.types.int;
+                default = 4;
+              };
+              monthly = lib.mkOption {
+                type = lib.types.int;
+                default = 6;
+              };
+            };
+          };
+          default = { };
+        };
+
+        environmentFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          description = "Path to environment file with RESTIC_PASSWORD and cloud credentials";
+        };
+      };
+
+      config = lib.mkIf cfg.enable {
+        assertions = [
+          {
+            assertion = cfg.environmentFile != null;
+            message = "modules.backup.environmentFile must be set";
+          }
+          {
+            assertion = cfg.paths != [ ] || cfg.postgresqlDatabases != [ ];
+            message = "modules.backup: either paths or postgresqlDatabases must be set";
+          }
+        ];
+
+        services.postgresqlBackup = lib.mkIf (cfg.postgresqlDatabases != [ ]) {
+          enable = true;
+          databases = cfg.postgresqlDatabases;
+          location = "/var/backup/postgresql";
+          startAt = "*-*-* 03:00:00";
+        };
+
+        services.restic.backups.main = {
+          initialize = true;
+          paths = cfg.paths ++ lib.optional (cfg.postgresqlDatabases != [ ]) "/var/backup/postgresql";
+          inherit (cfg) repository environmentFile;
+
+          timerConfig = {
+            OnCalendar = cfg.schedule;
+            Persistent = true;
+            RandomizedDelaySec = "30min";
+          };
+
+          pruneOpts = [
+            "--keep-daily ${toString cfg.retention.daily}"
+            "--keep-weekly ${toString cfg.retention.weekly}"
+            "--keep-monthly ${toString cfg.retention.monthly}"
+          ];
+
+          backupPrepareCommand = ''
+            echo "Starting backup at $(date)"
+          '';
+
+          backupCleanupCommand = ''
+            echo "Backup completed at $(date)"
+          '';
+
+          inherit (cfg) exclude;
+        };
+
+        systemd.tmpfiles.rules = lib.mkIf (cfg.postgresqlDatabases != [ ]) [
+          "d /var/backup/postgresql 0700 postgres postgres -"
+        ];
+      };
+    };
+}

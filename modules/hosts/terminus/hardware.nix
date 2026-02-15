@@ -1,0 +1,53 @@
+# Hardware configuration for terminus server
+_:
+
+{
+  flake.modules.nixos.terminus =
+    {
+      config,
+      lib,
+      modulesPath,
+      ...
+    }:
+    {
+      imports = [
+        (modulesPath + "/installer/scan/not-detected.nix")
+      ];
+
+      boot = {
+        initrd = {
+          availableKernelModules = [
+            "nvme"
+            "ahci"
+          ];
+          kernelModules = [ ];
+        };
+        kernelModules = [ "kvm-amd" ];
+        extraModulePackages = [ ];
+        swraid.enable = true;
+      };
+
+      fileSystems = {
+        "/" = {
+          device = "/dev/disk/by-uuid/3c4c26ae-bc1c-4ef5-ba56-dbedb4cd6ed6";
+          fsType = "ext4";
+        };
+        "/boot" = {
+          device = "/dev/disk/by-uuid/F635-821C";
+          fsType = "vfat";
+          options = [
+            "fmask=0077"
+            "dmask=0077"
+          ];
+        };
+      };
+
+      swapDevices = [
+        { device = "/dev/disk/by-uuid/a0c9bc62-0958-4f20-96b4-62ae91b5b090"; }
+      ];
+
+      networking.useDHCP = lib.mkDefault true;
+      nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+      hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+    };
+}

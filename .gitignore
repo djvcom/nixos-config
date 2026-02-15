@@ -1,5 +1,5 @@
 # Old unencrypted secrets (can be removed after confirming agenix works)
-secrets.nix
+/secrets.nix
 
 # Build output
 result
