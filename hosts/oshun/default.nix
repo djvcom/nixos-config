@@ -31,7 +31,7 @@
     enable = true;
     settings = {
       default_session = {
-        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
         user = "greeter";
       };
     };
@@ -61,7 +61,7 @@
     dedicatedServer.openFirewall = false;
     gamescopeSession.enable = true;
     extraCompatPackages = with pkgs; [
-      proton-ge-custom
+      proton-ge-bin
     ];
   };
 
