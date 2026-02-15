@@ -75,16 +75,16 @@ lib.mkIf isLinux {
         vrr = 1;
       };
 
-      windowrulev2 = [
-        "immediate, class:^(steam_app_.*)$"
-        "immediate, class:^(gamescope)$"
-        "float, class:^(pavucontrol)$"
-        "float, class:^(blueman-manager)$"
-        "float, class:^(.blueman-manager-wrapped)$"
-        "float, title:^(Steam - News)$"
-        "float, title:^(Friends List)$"
-        "workspace 5, class:^(steam)$"
-        "workspace 5, title:^(Steam)$"
+      windowrule = [
+        "immediate on, match:class ^(steam_app_.*)$"
+        "immediate on, match:class ^(gamescope)$"
+        "float on, match:class ^(pavucontrol)$"
+        "float on, match:class ^(blueman-manager)$"
+        "float on, match:class ^(.blueman-manager-wrapped)$"
+        "float on, match:title ^(Steam - News)$"
+        "float on, match:title ^(Friends List)$"
+        "workspace 5, match:class ^(steam)$"
+        "workspace 5, match:title ^(Steam)$"
       ];
 
       "$mod" = "SUPER";
