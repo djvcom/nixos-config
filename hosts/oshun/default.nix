@@ -7,7 +7,7 @@
 {
   imports = [
     ./hardware.nix
-    ./disko.nix
+    # ./disko.nix  # Disabled - using existing partitions (Windows dual-boot)
     ./nvidia.nix
     ../../modules/base.nix
   ];
@@ -165,5 +165,5 @@
       };
   };
 
-  system.stateVersion = "25.05";
+  system.stateVersion = "25.11";
 }

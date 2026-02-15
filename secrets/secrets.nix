@@ -7,6 +7,9 @@ let
     macbookPersonal = {
       user = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICKGGvADTZrv8lir6I2mTEtef/r1StZ0pfAkRNZcr9tE";
     };
+    oshun = {
+      user = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEbuNAs2R2clu+9Xd37pWsQblShESDYejJAGfgCxSKG/";
+    };
   };
 
   hostKeys = builtins.filter (k: k != null) (map (m: m.host or null) (builtins.attrValues machines));
