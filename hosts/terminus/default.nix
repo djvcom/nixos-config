@@ -186,6 +186,7 @@
         openssh.authorizedKeys.keys = [
           "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICKGGvADTZrv8lir6I2mTEtef/r1StZ0pfAkRNZcr9tE dan@macbook-personal"
           "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN3DO7MvH49txkJjxZDZb4S3IWdeuEvN3UzPGbkvEtbE dan@macbook-work"
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEbuNAs2R2clu+9Xd37pWsQblShESDYejJAGfgCxSKG/ dan@oshun"
         ];
       };
     };
