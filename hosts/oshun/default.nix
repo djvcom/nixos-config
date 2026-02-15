@@ -7,7 +7,7 @@
 {
   imports = [
     ./hardware.nix
-    # ./disko.nix  # Disabled - using existing partitions (Windows dual-boot)
+    ./disko.nix
     ./nvidia.nix
     ../../modules/base.nix
   ];

@@ -65,6 +65,9 @@
     };
   };
 
+  # Required by home-manager when useUserPackages = true
+  environment.pathsToLink = [ "/share/applications" "/share/xdg-desktop-portal" ];
+
   environment.systemPackages = with pkgs; [
     git
     vim
