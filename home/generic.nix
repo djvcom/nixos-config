@@ -71,6 +71,13 @@ in
       NIX_LDFLAGS = "-L${pkgs.libiconv}/lib";
     };
     stateVersion = "25.05";
+
+    pointerCursor = lib.mkIf isLinux {
+      name = "Bibata-Modern-Classic";
+      package = pkgs.bibata-cursors;
+      size = 24;
+      gtk.enable = true;
+    };
   };
 
   programs.home-manager.enable = true;
