@@ -11,16 +11,16 @@ lint:
 check: fmt lint
 
 # Build without switching
-build:
-    nixos-rebuild build --flake .#terminus
+build host="terminus":
+    nixos-rebuild build --flake .#{{host}}
 
 # Build and switch
-rebuild:
-    sudo nixos-rebuild switch --flake .#terminus
+rebuild host="terminus":
+    sudo nixos-rebuild switch --flake .#{{host}}
 
 # Test configuration (build without activation)
-test:
-    nixos-rebuild test --flake .#terminus
+test host="terminus":
+    nixos-rebuild test --flake .#{{host}}
 
 # Run pre-flight check
 preflight:

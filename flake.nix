@@ -146,6 +146,7 @@
     {
       # NixOS configurations
       nixosConfigurations.terminus = mkNixosHost "terminus";
+      nixosConfigurations.oshun = mkNixosHost "oshun";
 
       # nix-darwin configurations
       darwinConfigurations = {
@@ -164,6 +165,7 @@
       # Checks for CI
       checks.x86_64-linux = {
         terminus = self.nixosConfigurations.terminus.config.system.build.toplevel;
+        oshun = self.nixosConfigurations.oshun.config.system.build.toplevel;
       };
 
       # Development shell for working on this repo

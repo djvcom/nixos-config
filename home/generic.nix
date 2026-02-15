@@ -19,6 +19,8 @@ in
     ./modules/ghostty.nix
     ./modules/firefox.nix
     ./modules/aerospace.nix
+    ./modules/hyprland.nix
+    ./modules/waybar.nix
   ];
 
   home = {

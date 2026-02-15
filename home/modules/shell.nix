@@ -35,7 +35,7 @@ let
     tree = "eza --tree";
   }
   // lib.optionalAttrs isLinux {
-    rebuild = "sudo nixos-rebuild switch --flake ~/.config/nixos#terminus";
+    rebuild = "sudo nixos-rebuild switch --flake ~/.config/nixos#$(hostname)";
   }
   // lib.optionalAttrs isDarwin {
     rebuild = "sudo darwin-rebuild switch --flake ~/.config/nix-darwin#${darwinTarget} --impure";
