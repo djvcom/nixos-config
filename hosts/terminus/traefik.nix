@@ -44,6 +44,35 @@ let
 in
 {
   services = {
+    # Fail2ban jails for Traefik access log
+    # Traefik logs in common format to /var/log/traefik/access.log
+    fail2ban.jails = {
+      # Protect against HTTP authentication failures (401/403)
+      traefik-auth.settings = {
+        enabled = true;
+        filter = "traefik-auth";
+        logpath = "/var/log/traefik/access.log";
+        backend = "auto";
+        maxretry = 5;
+      };
+      # Protect against bots scanning for vulnerabilities (repeated 404s)
+      traefik-botsearch.settings = {
+        enabled = true;
+        filter = "traefik-botsearch";
+        logpath = "/var/log/traefik/access.log";
+        backend = "auto";
+        maxretry = 10;
+      };
+      # Protect against bad requests (400 errors)
+      traefik-badrequest.settings = {
+        enabled = true;
+        filter = "traefik-badrequest";
+        logpath = "/var/log/traefik/access.log";
+        backend = "auto";
+        maxretry = 10;
+      };
+    };
+
     # sslh multiplexes SSH and TLS on port 443
     sslh = {
       listenAddresses = [ ];
@@ -318,6 +347,26 @@ in
         };
       };
     };
+  };
+
+  # Custom fail2ban filters for Traefik (common log format)
+  # See: https://nixos.wiki/wiki/Fail2ban
+  environment.etc = {
+    "fail2ban/filter.d/traefik-auth.conf".text = ''
+      [Definition]
+      failregex = ^<HOST> - - \[.*\] ".*" (401|403) .*$
+      ignoreregex =
+    '';
+    "fail2ban/filter.d/traefik-botsearch.conf".text = ''
+      [Definition]
+      failregex = ^<HOST> - - \[.*\] ".*" 404 .*$
+      ignoreregex = \.(css|js|png|jpg|jpeg|gif|ico|woff|woff2|svg)
+    '';
+    "fail2ban/filter.d/traefik-badrequest.conf".text = ''
+      [Definition]
+      failregex = ^<HOST> - - \[.*\] ".*" 400 .*$
+      ignoreregex =
+    '';
   };
 
   # Create Traefik log directory
