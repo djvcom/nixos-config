@@ -5,7 +5,7 @@ _:
   flake.modules.nixos.stalwart =
     { config, ... }:
     {
-      services.stalwart-mail = {
+      services.stalwart = {
         enable = true;
         # HTTP listener is localhost-only, Traefik handles external; mail ports opened explicitly below
         openFirewall = false;
@@ -181,15 +181,14 @@ _:
       ];
 
       # Restart when secrets change (credentials are cached at startup)
-      systemd.services.stalwart-mail.restartTriggers = [
+      systemd.services.stalwart.restartTriggers = [
         config.age.secrets.dan-mail-password.file
         config.age.secrets.stalwart-admin-password.file
         config.age.secrets.dkim-rsa-key.file
         config.age.secrets.dkim-ed25519-key.file
       ];
 
-      # Systemd hardening for stalwart-mail
-      systemd.services.stalwart-mail.serviceConfig = {
+      systemd.services.stalwart.serviceConfig = {
         NoNewPrivileges = true;
         ProtectSystem = "strict";
         ProtectHome = true;

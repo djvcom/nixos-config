@@ -132,7 +132,7 @@ _:
                   "systemd-*"
                   "nixos-upgrade"
                   "nixos-upgrade-preflight"
-                  "stalwart-mail"
+                  "stalwart"
                   "garage"
                   "oauth2-proxy"
                 ];
