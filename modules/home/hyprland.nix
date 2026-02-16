@@ -150,7 +150,6 @@ _:
 
           exec-once = [
             "waybar"
-            "dunst"
             "swww-daemon"
             "nm-applet --indicator"
             "wl-paste --type text --watch cliphist store"
@@ -158,6 +157,8 @@ _:
           ];
         };
       };
+
+      services.dunst.enable = true;
 
       programs.hyprlock = {
         enable = true;
@@ -199,7 +200,6 @@ _:
       home.packages = with pkgs; [
         waybar
         rofi
-        dunst
         swww
         grim
         slurp
