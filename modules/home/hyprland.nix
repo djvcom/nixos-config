@@ -95,7 +95,7 @@ _:
 
           bind = [
             "$mod, Return, exec, ghostty"
-            "$mod, D, exec, wofi --show drun"
+            "$mod, space, exec, rofi -show drun"
             "$mod, Q, killactive,"
             "$mod, M, exit,"
             "$mod, V, togglefloating,"
@@ -198,7 +198,7 @@ _:
 
       home.packages = with pkgs; [
         waybar
-        wofi
+        rofi
         dunst
         swww
         grim
