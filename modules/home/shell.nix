@@ -39,6 +39,8 @@ _:
       }
       // lib.optionalAttrs isLinux {
         rebuild = "sudo nixos-rebuild switch --flake ~/.config/nixos#$(hostname)";
+        sleep = "systemctl suspend";
+        shutdown = "systemctl poweroff";
       }
       // lib.optionalAttrs isDarwin {
         rebuild = "sudo darwin-rebuild switch --flake ~/.config/nix-darwin#${darwinTarget} --impure";

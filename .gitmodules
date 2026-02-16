@@ -1,0 +1,3 @@
+[submodule "awesome-nix"]
+	path = awesome-nix
+	url = https://github.com/nix-community/awesome-nix

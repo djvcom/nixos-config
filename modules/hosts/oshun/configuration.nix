@@ -28,6 +28,17 @@
         desktop-packages
       ];
 
+      services.hardware.openrgb.enable = true;
+
+      powerManagement = {
+        powerDownCommands = ''
+          ${pkgs.openrgb}/bin/openrgb --device 0 --mode direct --color 0D0D0D --device 1 --mode direct --color 0D0D0D
+        '';
+        resumeCommands = ''
+          ${pkgs.openrgb}/bin/openrgb --device 0 --mode direct --color FFFFFF --device 1 --mode direct --color FFFFFF
+        '';
+      };
+
       networking = {
         hostName = "oshun";
         networkmanager.enable = true;
