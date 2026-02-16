@@ -50,6 +50,11 @@
       url = "github:djvcom/sidereal";
       # Don't follow nixpkgs - sidereal needs rust-overlay
     };
+
+    awww = {
+      url = "git+https://codeberg.org/LGFae/awww";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

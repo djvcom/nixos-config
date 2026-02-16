@@ -17,6 +17,8 @@ _:
           env = [
             "XCURSOR_SIZE,24"
             "HYPRCURSOR_SIZE,24"
+            "QT_QPA_PLATFORM,wayland;xcb"
+            "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
           ];
 
           general = {
@@ -137,8 +139,9 @@ _:
             "$mod SHIFT, 8, movetoworkspace, 8"
             "$mod SHIFT, 9, movetoworkspace, 9"
 
-            '', Print, exec, grim -g "$(slurp)" - | wl-copy''
-            "SHIFT, Print, exec, grim - | wl-copy"
+            ", Print, exec, grimblast --notify copy area"
+            "SHIFT, Print, exec, grimblast --notify copy screen"
+            "$mod, Print, exec, grimblast --notify copy active"
 
             "$mod SHIFT, Escape, exec, hyprlock"
           ];
@@ -150,15 +153,42 @@ _:
 
           exec-once = [
             "waybar"
-            "swww-daemon"
+            "awww-daemon"
             "nm-applet --indicator"
             "wl-paste --type text --watch cliphist store"
             "wl-paste --type image --watch cliphist store"
+            "hyprpolkitagent"
+            "hypridle"
+            "hyprsunset -t 4500"
           ];
         };
       };
 
       services.dunst.enable = true;
+
+      xdg.configFile."hypr/hypridle.conf".text = ''
+        general {
+          lock_cmd = pidof hyprlock || hyprlock
+          before_sleep_cmd = loginctl lock-session
+          after_sleep_cmd = hyprctl dispatch dpms on
+        }
+
+        listener {
+          timeout = 300
+          on-timeout = loginctl lock-session
+        }
+
+        listener {
+          timeout = 600
+          on-timeout = hyprctl dispatch dpms off
+          on-resume = hyprctl dispatch dpms on
+        }
+
+        listener {
+          timeout = 1800
+          on-timeout = systemctl suspend
+        }
+      '';
 
       programs.hyprlock = {
         enable = true;
@@ -200,11 +230,19 @@ _:
       home.packages = with pkgs; [
         waybar
         rofi
-        swww
+        awww
+        grimblast
         grim
         slurp
         hyprpicker
+        hyprpolkitagent
+        hypridle
+        hyprsunset
         wlogout
+        nwg-look
+        yazi
+        libsForQt5.qtwayland
+        kdePackages.qtwayland
       ];
     };
 }

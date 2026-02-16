@@ -49,6 +49,9 @@ in
       (import ../../overlays/opentelemetry-collector.nix)
       (import ../../overlays/garage-v2.nix)
       inputs.sidereal.overlays.default
+      (final: _prev: {
+        inherit (inputs.awww.packages.${final.stdenv.hostPlatform.system}) awww;
+      })
     ];
   };
 }
