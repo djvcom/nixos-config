@@ -199,6 +199,7 @@ _:
           background = [
             {
               monitor = "";
+              path = "~/.wallpapers/current";
               blur_passes = 3;
               blur_size = 8;
             }
@@ -229,7 +230,6 @@ _:
       home.packages = with pkgs; [
         waybar
         rofi
-        awww
         grimblast
         grim
         slurp

@@ -93,6 +93,7 @@
             waybar
             gitlab
             cursor
+            wallpaper
           ];
           home.username = "dan";
           home.homeDirectory = "/home/dan";
