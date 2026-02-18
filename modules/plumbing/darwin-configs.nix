@@ -1,4 +1,3 @@
-# Register all Darwin configurations
 { inputs, ... }:
 
 {

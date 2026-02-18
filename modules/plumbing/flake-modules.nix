@@ -1,4 +1,3 @@
-# Import flake-parts module system and define supported systems
 { inputs, ... }:
 
 {

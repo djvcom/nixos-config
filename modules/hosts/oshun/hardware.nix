@@ -1,4 +1,3 @@
-# Hardware configuration for oshun gaming PC
 _:
 
 {

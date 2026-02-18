@@ -1,4 +1,3 @@
-# Ghostty terminal emulator
 _:
 
 {

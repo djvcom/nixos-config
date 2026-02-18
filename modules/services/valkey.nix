@@ -1,4 +1,3 @@
-# Valkey in-memory data store (Redis-compatible)
 _:
 
 {
@@ -18,7 +17,6 @@ _:
           unixSocket = "/run/redis-default/redis.sock";
           unixSocketPerm = 660;
 
-          # Persistence: RDB snapshots + AOF for durability
           save = [
             [
               900
@@ -34,20 +32,16 @@ _:
             ]
           ];
 
-          # AOF (Append Only File) for better durability
           appendOnly = true;
           appendFsync = "everysec";
 
           settings = {
-            # Memory management
             maxmemory = "256mb";
             maxmemory-policy = "allkeys-lru";
 
-            # Performance tuning
             tcp-keepalive = 300;
             timeout = 0;
 
-            # Logging
             loglevel = "notice";
           };
         };

@@ -1,4 +1,3 @@
-# PipeWire audio stack
 _:
 
 {

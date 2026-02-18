@@ -1,4 +1,3 @@
-# Disko declarative disk partitioning
 { inputs, ... }:
 
 {

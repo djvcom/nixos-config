@@ -1,4 +1,3 @@
-# Roundcube webmail for Stalwart with Kanidm SSO
 _:
 
 {
@@ -89,7 +88,6 @@ _:
           Restart = "on-failure";
           DynamicUser = true;
 
-          # Systemd hardening
           NoNewPrivileges = true;
           ProtectSystem = "strict";
           ProtectHome = true;

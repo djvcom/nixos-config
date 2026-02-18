@@ -1,4 +1,3 @@
-# CI checks
 { self, ... }:
 
 {

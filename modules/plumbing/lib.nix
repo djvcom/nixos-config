@@ -1,4 +1,3 @@
-# Helper functions for creating NixOS and Darwin configurations
 { inputs, ... }:
 
 let

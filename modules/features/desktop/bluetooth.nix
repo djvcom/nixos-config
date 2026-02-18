@@ -1,4 +1,3 @@
-# Bluetooth support with Blueman
 _:
 
 {

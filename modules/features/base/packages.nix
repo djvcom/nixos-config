@@ -1,4 +1,3 @@
-# Base system packages and settings shared across NixOS hosts
 { inputs, ... }:
 
 {

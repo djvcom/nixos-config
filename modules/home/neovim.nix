@@ -1,4 +1,3 @@
-# Neovim configuration
 _:
 
 {

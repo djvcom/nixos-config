@@ -1,4 +1,3 @@
-# Sudo and kernel protection
 _:
 
 {

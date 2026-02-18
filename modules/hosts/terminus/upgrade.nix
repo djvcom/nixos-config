@@ -10,7 +10,6 @@ _:
       ...
     }:
     {
-      # Automatic system upgrades
       system.autoUpgrade = {
         enable = true;
         allowReboot = true;
@@ -26,7 +25,6 @@ _:
         randomizedDelaySec = "5min";
       };
 
-      # Upgrade monitoring and pre-flight checks
       systemd = {
         services = {
           nixos-upgrade = lib.mkIf config.modules.observability.enable {
@@ -95,7 +93,6 @@ _:
                 --refresh \
                 2>&1 | tee /var/tmp/nixos-preflight.log
 
-              # Then build to ensure it actually works
               echo "Building configuration..."
               nix build github:djvcom/nixos-config#nixosConfigurations.terminus.config.system.build.toplevel \
                 --no-link \

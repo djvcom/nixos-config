@@ -1,4 +1,3 @@
-# Waybar status bar
 _:
 
 {

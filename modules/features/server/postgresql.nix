@@ -1,4 +1,3 @@
-# PostgreSQL with secure authentication and monitoring extensions
 _:
 
 {

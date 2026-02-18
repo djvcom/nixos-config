@@ -1,4 +1,3 @@
-# Nix configuration (cross-platform)
 _:
 
 {

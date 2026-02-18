@@ -1,4 +1,3 @@
-# Datadog Agent for PostgreSQL DBM and Valkey monitoring
 _:
 
 {

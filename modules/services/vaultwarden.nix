@@ -1,4 +1,3 @@
-# Vaultwarden password manager (Bitwarden-compatible) with Kanidm SSO
 _:
 
 {
@@ -19,7 +18,6 @@ _:
           ADMIN_TOKEN_FILE = config.age.secrets.vaultwarden-admin-token.path;
           DATABASE_URL = "postgresql://vaultwarden@/vaultwarden?host=/run/postgresql";
 
-          # SSO via Kanidm
           SSO_ENABLED = true;
           SSO_AUTHORITY = "https://auth.djv.sh/oauth2/openid/vaultwarden";
           SSO_CLIENT_ID = "vaultwarden";
@@ -27,7 +25,6 @@ _:
           SSO_PKCE = true;
           # SSO_CLIENT_SECRET loaded from environmentFile
 
-          # SMTP via local Stalwart
           SMTP_HOST = "mail.djv.sh";
           SMTP_PORT = 587;
           SMTP_SECURITY = "starttls";

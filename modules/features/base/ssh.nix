@@ -1,4 +1,3 @@
-# SSH hardening and fail2ban brute-force protection
 _:
 
 {

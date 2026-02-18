@@ -1,4 +1,3 @@
-# Development shell for working on this repo
 { inputs, ... }:
 
 {

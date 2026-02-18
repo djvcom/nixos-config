@@ -1,4 +1,3 @@
-# Personal MacBook - feature selection and host-specific config
 { inputs, ... }:
 
 {

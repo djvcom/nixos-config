@@ -6,32 +6,26 @@
     { pkgs, ... }:
     {
       imports = with inputs.self.modules.nixos; [
-        # Tools
         agenix
         home-manager
 
-        # Base
         boot
         security
         ssh
         nix-settings
         base-packages
 
-        # Server
         hardening
         postgresql
         traefik
         acme
         virtualisation
 
-        # Observability
         observability
         datadog
 
-        # Backup
         backup
 
-        # Services
         djv
         kanidm
         vaultwarden
@@ -92,7 +86,6 @@
         };
       };
 
-      # User and group configuration
       users = {
         # Shared group for services needing mail credentials
         groups.mail-secrets = { };
@@ -120,7 +113,6 @@
         nodejs_24
       ];
 
-      # Host-specific PostgreSQL databases and users
       services.postgresql = {
         ensureDatabases = [
           "djv"
@@ -149,7 +141,6 @@
         ];
       };
 
-      # Nix store optimisation
       nix.optimise = {
         automatic = true;
         dates = [ "weekly" ];

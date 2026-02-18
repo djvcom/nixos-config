@@ -1,4 +1,3 @@
-# WireGuard VPN module with agenix-managed private keys
 _:
 
 {

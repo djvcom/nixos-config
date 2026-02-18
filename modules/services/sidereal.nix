@@ -1,4 +1,3 @@
-# Sidereal service with PostgreSQL, Valkey, and Garage (S3)
 { inputs, ... }:
 
 {
@@ -22,11 +21,9 @@
           url = "postgres:///sidereal?host=/run/postgresql";
         };
 
-        # Use shared Valkey instance
         valkey.createLocally = false;
         valkey.url = "redis://127.0.0.1:6379";
 
-        # Use Garage for S3 storage
         storage = {
           backend = "s3";
           endpoint = "http://127.0.0.1:3900";

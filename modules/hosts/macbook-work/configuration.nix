@@ -1,4 +1,3 @@
-# Work MacBook - feature selection and host-specific config
 { inputs, ... }:
 
 {
@@ -50,17 +49,14 @@
             file.".config/shell/work.sh" = {
               executable = true;
               text = ''
-                # Use merged system CA bundle (includes Zscaler cert + Mozilla certs)
                 export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
                 export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
                 export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
                 export AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
-                # Use system clang for cargo builds (nix gcc doesn't find macOS frameworks)
                 export CC=/usr/bin/clang
                 export RUSTFLAGS="-C linker=/usr/bin/clang"
 
-                # Export GitLab token for API and npm registry access
                 # glab config location varies - check both possible paths
                 _glab_config=""
                 if [ -f "$HOME/.config/glab-cli/config.yml" ]; then

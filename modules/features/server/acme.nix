@@ -1,4 +1,3 @@
-# ACME defaults for certificate management
 _:
 
 {

@@ -1,4 +1,3 @@
-# Hyprland compositor with greetd login manager and XDG portal
 _:
 
 {

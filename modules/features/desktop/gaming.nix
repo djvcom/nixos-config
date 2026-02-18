@@ -1,4 +1,3 @@
-# Gaming: Steam, Gamescope, Gamemode
 _:
 
 {

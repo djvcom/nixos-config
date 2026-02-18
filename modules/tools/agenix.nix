@@ -1,4 +1,3 @@
-# Agenix secret management for NixOS and Darwin
 { inputs, ... }:
 
 {

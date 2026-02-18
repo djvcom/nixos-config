@@ -1,4 +1,3 @@
-# Agenix secrets with proper permissions
 _:
 
 {

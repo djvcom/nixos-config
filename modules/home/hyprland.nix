@@ -1,4 +1,3 @@
-# Hyprland window manager + hyprlock (home-manager config)
 _:
 
 {

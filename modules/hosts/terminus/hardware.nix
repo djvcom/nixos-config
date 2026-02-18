@@ -1,4 +1,3 @@
-# Hardware configuration for terminus server
 _:
 
 {

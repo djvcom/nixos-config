@@ -1,4 +1,3 @@
-# OpenBao secrets management (HashiCorp Vault fork)
 _:
 
 {
@@ -129,7 +128,6 @@ _:
         };
       };
 
-      # Systemd hardening for OpenBao
       systemd.services.openbao.serviceConfig = {
         NoNewPrivileges = true;
         ProtectSystem = "strict";
@@ -170,7 +168,6 @@ _:
             config.age.secrets.openbao-oidc-env.path
           ];
 
-          # Security hardening
           NoNewPrivileges = true;
           ProtectSystem = "strict";
           ProtectHome = true;

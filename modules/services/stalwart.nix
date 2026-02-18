@@ -1,4 +1,3 @@
-# Stalwart all-in-one mail server (SMTP, IMAP, JMAP)
 _:
 
 {
@@ -11,7 +10,6 @@ _:
         openFirewall = false;
 
         settings = {
-          # OpenTelemetry tracing
           tracer.otel = {
             type = "open-telemetry";
             transport = "grpc";
@@ -29,33 +27,28 @@ _:
             };
 
             listener = {
-              # SMTP for incoming mail from other servers (STARTTLS)
               smtp = {
                 bind = [ "[::]:25" ];
                 protocol = "smtp";
               };
 
-              # SMTP submission (authenticated users)
               smtp-submission = {
                 bind = [ "[::]:587" ];
                 protocol = "smtp";
               };
 
-              # SMTPS (implicit TLS)
               smtps = {
                 bind = [ "[::]:465" ];
                 protocol = "smtp";
                 tls.implicit = true;
               };
 
-              # IMAPS (implicit TLS)
               imaps = {
                 bind = [ "[::]:993" ];
                 protocol = "imap";
                 tls.implicit = true;
               };
 
-              # HTTP for JMAP/admin API (behind Traefik)
               http = {
                 bind = [ "127.0.0.1:8082" ];
                 protocol = "http";
@@ -63,7 +56,6 @@ _:
             };
           };
 
-          # Use ACME certificates
           certificate.default = {
             cert = "%{file:/var/lib/acme/mail.djv.sh/fullchain.pem}%";
             private-key = "%{file:/var/lib/acme/mail.djv.sh/key.pem}%";
@@ -103,7 +95,6 @@ _:
             ];
           };
 
-          # DKIM signatures for outgoing mail
           signature."rsa" = {
             private-key = "%{file:${config.age.secrets.dkim-rsa-key.path}}%";
             domain = "djv.sh";
@@ -154,7 +145,6 @@ _:
             directory = "memory";
           };
 
-          # Admin fallback account
           authentication.fallback-admin = {
             user = "admin";
             secret = "%{file:${config.age.secrets.stalwart-admin-password.path}}%";
@@ -165,7 +155,6 @@ _:
       # Add stalwart-mail to mail-secrets group for shared credential access
       users.users.stalwart-mail.extraGroups = [ "mail-secrets" ];
 
-      # ACME certificate for mail server TLS
       security.acme.certs."mail.djv.sh" = {
         dnsProvider = "cloudflare";
         environmentFile = config.age.secrets.cloudflare-dns-token.path;

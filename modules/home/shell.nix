@@ -1,4 +1,3 @@
-# Shell configuration (bash, zsh, starship, direnv, etc.)
 _:
 
 {
@@ -52,12 +51,10 @@ _:
           enable = true;
           enableCompletion = true;
           initExtra = ''
-            # Source home-manager session vars for SSH sessions
             if [ -f "/etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh" ]; then
               . "/etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh"
             fi
 
-            # Homebrew shell environment (macOS)
             if [ -x /opt/homebrew/bin/brew ]; then
               eval "$(/opt/homebrew/bin/brew shellenv)"
             fi
@@ -88,7 +85,6 @@ _:
           autosuggestion.enable = true;
           syntaxHighlighting.enable = true;
           initContent = ''
-            # Homebrew shell environment (macOS)
             if [ -x /opt/homebrew/bin/brew ]; then
               eval "$(/opt/homebrew/bin/brew shellenv)"
             fi
@@ -151,7 +147,6 @@ _:
         readline = {
           enable = true;
           extraConfig = ''
-            # Up/down arrows search history based on typed prefix
             "\e[A": history-search-backward
             "\e[B": history-search-forward
           '';

@@ -1,4 +1,3 @@
-# Kanidm identity provider with passkey support and OIDC clients
 _:
 
 {
@@ -14,11 +13,9 @@ _:
           origin = "https://auth.djv.sh";
           bindaddress = "127.0.0.1:8444";
 
-          # TLS certificates from ACME
           tls_chain = "/var/lib/acme/auth.djv.sh/fullchain.pem";
           tls_key = "/var/lib/acme/auth.djv.sh/key.pem";
 
-          # Online backups
           online_backup = {
             path = "/var/backup/kanidm";
             schedule = "00 22 * * *";
@@ -26,13 +23,11 @@ _:
           };
         };
 
-        # Declarative provisioning
         provision = {
           enable = true;
           adminPasswordFile = config.age.secrets.kanidm-admin-password.path;
           idmAdminPasswordFile = config.age.secrets.kanidm-idm-admin-password.path;
 
-          # Groups for service access
           groups = {
             vaultwarden_users = { };
             openbao_admins = { };
@@ -42,7 +37,6 @@ _:
             mail_users = { };
           };
 
-          # Initial admin user
           persons.dan = {
             displayName = "Dan";
             mailAddresses = [ "dan@djv.sh" ];
@@ -56,7 +50,6 @@ _:
             ];
           };
 
-          # OAuth2/OIDC clients for SSO
           systems.oauth2 = {
             openbao = {
               displayName = "OpenBao Secrets";
@@ -143,7 +136,6 @@ _:
         };
       };
 
-      # Backup directory for Kanidm online backups
       systemd.tmpfiles.rules = [
         "d /var/backup/kanidm 0750 kanidm kanidm -"
       ];
@@ -155,7 +147,6 @@ _:
         group = "kanidm";
       };
 
-      # Systemd hardening for Kanidm
       systemd.services.kanidm.serviceConfig = {
         ProtectSystem = "strict";
         ProtectHome = true;

@@ -1,4 +1,3 @@
-# Register oshun as a NixOS configuration
 { inputs, ... }:
 
 {

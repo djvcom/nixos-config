@@ -1,4 +1,3 @@
-# Bibata cursor theme (Linux only)
 _:
 
 {

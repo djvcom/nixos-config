@@ -1,4 +1,3 @@
-# Home-manager integration for NixOS and Darwin
 { inputs, ... }:
 
 {

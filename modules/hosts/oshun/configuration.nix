@@ -6,19 +6,16 @@
     { pkgs, ... }:
     {
       imports = with inputs.self.modules.nixos; [
-        # Tools
         disko
         agenix
         home-manager
 
-        # Base
         boot
         security
         ssh
         nix-settings
         base-packages
 
-        # Desktop
         hyprland
         pipewire
         bluetooth

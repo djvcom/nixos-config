@@ -1,11 +1,9 @@
-# Garage S3-compatible object storage with web UI and SSO
 _:
 
 {
   flake.modules.nixos.garage =
     { config, pkgs, ... }:
     {
-      # Dedicated user for garage-webui
       users.users.garage-webui = {
         isSystemUser = true;
         group = "garage-webui";
@@ -41,7 +39,6 @@ _:
         environmentFile = config.age.secrets.garage-env.path;
       };
 
-      # garage-webui for admin interface
       systemd.services.garage-webui = {
         description = "Garage Web UI";
         after = [ "garage.service" ];
@@ -59,7 +56,6 @@ _:
           ];
           EnvironmentFile = config.age.secrets.garage-webui-env.path;
 
-          # Systemd hardening
           NoNewPrivileges = true;
           ProtectSystem = "strict";
           ProtectHome = true;
@@ -75,7 +71,6 @@ _:
         };
       };
 
-      # oauth2-proxy for SSO on web UI
       services.oauth2-proxy = {
         enable = true;
 

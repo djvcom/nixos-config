@@ -1,4 +1,3 @@
-# NVIDIA GPU configuration for Wayland/Hyprland
 _:
 
 {

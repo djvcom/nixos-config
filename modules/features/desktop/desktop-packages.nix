@@ -1,4 +1,3 @@
-# Desktop system packages
 _:
 
 {

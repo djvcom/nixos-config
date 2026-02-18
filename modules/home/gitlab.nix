@@ -45,7 +45,6 @@ _:
 
         log "Rotating GitLab token, new expiry: $NEW_EXPIRY"
 
-        # Call GitLab API to rotate token
         RESPONSE=$(${pkgs.curl}/bin/curl -sf -X POST \
             -H "PRIVATE-TOKEN: $CURRENT_TOKEN" \
             -H "Content-Type: application/json" \
@@ -57,7 +56,6 @@ _:
             exit 1
         fi
 
-        # Extract new token from response
         NEW_TOKEN=$(echo "$RESPONSE" | ${pkgs.jq}/bin/jq -r '.token')
 
         if [[ -z "$NEW_TOKEN" || "$NEW_TOKEN" == "null" ]]; then
@@ -65,12 +63,10 @@ _:
             exit 1
         fi
 
-        # Update glab config with new token
         ${pkgs.gnused}/bin/sed -i "s|token: .*|token: $NEW_TOKEN|" "$CONFIG_FILE"
 
         log "Token rotated successfully, expires: $NEW_EXPIRY"
 
-        # Verify new token works
         if ${pkgs.glab}/bin/glab auth status &>/dev/null; then
             log "New token verified successfully"
         else

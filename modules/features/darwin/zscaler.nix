@@ -1,4 +1,3 @@
-# Merge Zscaler cert into system CA bundle
 _:
 
 {

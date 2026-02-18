@@ -1,4 +1,3 @@
-# Declarative disk partitioning for oshun gaming PC
 _:
 
 {

@@ -1,4 +1,3 @@
-# Docker and libvirtd virtualisation
 _:
 
 {

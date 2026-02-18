@@ -1,4 +1,3 @@
-# Firefox/LibreWolf with extensions
 { inputs, ... }:
 
 {

@@ -1,4 +1,3 @@
-# Terminus-specific observability pipeline and Datadog PostgreSQL monitoring
 _:
 
 {
@@ -9,7 +8,6 @@ _:
       ...
     }:
     {
-      # Observability pipeline to Datadog
       modules.observability = {
         enable = true;
         tokenSecretPath = config.age.secrets.datadog-api-key.path;
@@ -69,7 +67,6 @@ _:
         };
       };
 
-      # Configure PostgreSQL datadog user for Database Monitoring
       systemd.services.postgresql-datadog-setup = {
         description = "Configure PostgreSQL datadog user for DBM";
         after = [ "postgresql.service" ];

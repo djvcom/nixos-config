@@ -1,4 +1,3 @@
-# Dashboard (Homepage) with Kanidm SSO
 _:
 
 {
@@ -95,7 +94,6 @@ _:
           };
         };
 
-        # Create config directory with default configuration
         tmpfiles.rules = [
           "d ${configDir} 0755 root root -"
           "d ${configDir}/images 0755 root root -"
@@ -104,7 +102,6 @@ _:
       };
 
       environment.etc = {
-        # Default settings.yaml
         "homepage-dashboard/settings.yaml" = {
           target = "homepage-dashboard/settings.yaml";
           text = ''
@@ -119,7 +116,6 @@ _:
           '';
         };
 
-        # Default services.yaml
         "homepage-dashboard/services.yaml" = {
           target = "homepage-dashboard/services.yaml";
           text = ''
@@ -151,7 +147,6 @@ _:
           '';
         };
 
-        # Default widgets.yaml
         "homepage-dashboard/widgets.yaml" = {
           target = "homepage-dashboard/widgets.yaml";
           text = ''

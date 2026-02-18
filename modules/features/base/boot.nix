@@ -1,4 +1,3 @@
-# Systemd-boot with secure defaults
 _:
 
 {

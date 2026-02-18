@@ -1,4 +1,3 @@
-# Base home-manager configuration shared across all machines
 _:
 
 {

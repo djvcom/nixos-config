@@ -1,4 +1,3 @@
-# Expose overlays as a flake output
 { inputs, ... }:
 
 {

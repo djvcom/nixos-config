@@ -5,7 +5,6 @@ _:
   flake.modules.nixos.traefik =
     { config, ... }:
     let
-      # Domain configuration for routing
       domains = {
         djv = {
           host = "djv.sh";
@@ -17,7 +16,7 @@ _:
         };
         garageAdmin = {
           host = "garage.djv.sh";
-          backend = "http://127.0.0.1:4180"; # oauth2-proxy
+          backend = "http://127.0.0.1:4180";
         };
         kanidm = {
           host = "auth.djv.sh";
@@ -37,11 +36,11 @@ _:
         };
         roundcube = {
           host = "webmail.djv.sh";
-          backend = "http://127.0.0.1:4182"; # oauth2-proxy
+          backend = "http://127.0.0.1:4182";
         };
         dashboard = {
           host = "dash.djv.sh";
-          backend = "http://127.0.0.1:4181"; # oauth2-proxy
+          backend = "http://127.0.0.1:4181";
         };
       };
     in
@@ -207,7 +206,6 @@ _:
                 };
               };
 
-              # Routers for each domain
               routers = {
                 djv = {
                   rule = "Host(`${domains.djv.host}`)";
@@ -315,7 +313,6 @@ _:
 
               };
 
-              # Backend services
               services = {
                 djv.loadBalancer.servers = [ { url = domains.djv.backend; } ];
 
@@ -373,7 +370,6 @@ _:
         '';
       };
 
-      # Create Traefik log directory
       systemd.tmpfiles.rules = [
         "d /var/log/traefik 0750 traefik traefik -"
       ];

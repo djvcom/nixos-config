@@ -1,4 +1,3 @@
-# Terminus-specific backup paths and schedule
 _:
 
 {

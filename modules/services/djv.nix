@@ -1,4 +1,3 @@
-# djv portfolio site with PostgreSQL database
 { inputs, ... }:
 
 {

@@ -1,4 +1,3 @@
-# Register terminus as a NixOS configuration
 { inputs, ... }:
 
 {

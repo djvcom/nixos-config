@@ -1,4 +1,3 @@
-# Formatter for `nix fmt`
 { inputs, ... }:
 
 {
