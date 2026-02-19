@@ -14,6 +14,7 @@
       homebrew.brews = [
         "opencode"
         "dagger"
+        "pulumi"
       ];
 
       home-manager.users.${username} =
