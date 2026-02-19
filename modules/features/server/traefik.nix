@@ -3,7 +3,12 @@ _:
 
 {
   flake.modules.nixos.traefik =
-    { config, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     let
       domains = {
         djv = {
@@ -370,6 +375,25 @@ _:
         '';
       };
 
+      # Workaround: upstream ExecStartPre passes '>' as a literal argument
+      # to envsubst instead of using a shell redirect, so the config file
+      # is never written. Fixed on nixpkgs master but not yet on nixos-unstable.
+      # TODO: remove once nixpkgs includes the writeShellScript wrapper
+      systemd.services.traefik.serviceConfig.ExecStartPre = lib.mkForce (
+        lib.optional config.services.traefik.useEnvSubst (
+          pkgs.writeShellScript "traefik-pre-start" ''
+            umask 077
+            ${lib.getExe pkgs.envsubst} \
+              -i "${
+                if config.services.traefik.static.file == null then
+                  (pkgs.formats.json { }).generate "static_config.json" config.services.traefik.static.settings
+                else
+                  config.services.traefik.static.file
+              }" \
+              > "/run/traefik/config.json"
+          ''
+        )
+      );
       systemd.tmpfiles.rules = [
         "d /var/log/traefik 0750 traefik traefik -"
       ];
