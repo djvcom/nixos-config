@@ -18,6 +18,7 @@ _:
         pciutils
         usbutils
         lm_sensors
+        qbittorrent
       ];
     };
 }

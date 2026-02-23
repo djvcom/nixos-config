@@ -21,6 +21,7 @@
         bluetooth
         nvidia
         gaming
+        jellyfin
         fonts
         desktop-packages
       ];
