@@ -102,6 +102,7 @@ _:
             "$mod, V, togglefloating,"
             "$mod, F, fullscreen, 0"
             "$mod, P, pseudo,"
+            "$mod, E, exec, nautilus"
 
             "$mod, H, movefocus, l"
             "$mod, J, movefocus, d"
