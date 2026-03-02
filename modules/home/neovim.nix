@@ -42,7 +42,15 @@ _:
           nvim-web-devicons
 
           conform-nvim
-          nvim-lint
+          (pkgs.vimUtils.buildVimPlugin {
+            name = "nvim-lint";
+            src = pkgs.fetchFromGitHub {
+              owner = "mfussenegger";
+              repo = "nvim-lint";
+              rev = "486474c2ace8d78d28995074dbdbe29011bc63d0";
+              hash = "sha256-aK7iQMJJfUJO6KsafSHgDvGQXkf1V6jbNlLz0MNdM34=";
+            };
+          })
 
           vim-fugitive
 

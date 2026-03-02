@@ -38,7 +38,6 @@
 
             packages = with pkgs; [
               uv
-              aws-sam-cli
               awscli2
               zig
               opentofu
