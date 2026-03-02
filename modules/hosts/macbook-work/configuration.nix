@@ -44,6 +44,7 @@
               opentofu
               terraform-ls
               tflint
+              poetry
             ];
 
             # Work-specific shell config
