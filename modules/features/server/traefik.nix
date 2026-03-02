@@ -3,12 +3,7 @@ _:
 
 {
   flake.modules.nixos.traefik =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
+    { config, ... }:
     let
       domains = {
         djv = {
@@ -51,10 +46,7 @@ _:
     in
     {
       services = {
-        # Fail2ban jails for Traefik access log
-        # Traefik logs in common format to /var/log/traefik/access.log
         fail2ban.jails = {
-          # Protect against HTTP authentication failures (401/403)
           traefik-auth.settings = {
             enabled = true;
             filter = "traefik-auth";
@@ -62,7 +54,6 @@ _:
             backend = "auto";
             maxretry = 5;
           };
-          # Protect against bots scanning for vulnerabilities (repeated 404s)
           traefik-botsearch.settings = {
             enabled = true;
             filter = "traefik-botsearch";
@@ -70,7 +61,6 @@ _:
             backend = "auto";
             maxretry = 10;
           };
-          # Protect against bad requests (400 errors)
           traefik-badrequest.settings = {
             enabled = true;
             filter = "traefik-badrequest";
@@ -80,7 +70,6 @@ _:
           };
         };
 
-        # sslh multiplexes SSH and TLS on port 443
         sslh = {
           listenAddresses = [ ];
           enable = true;
@@ -102,7 +91,6 @@ _:
                 name = "tls";
                 host = "127.0.0.1";
                 port = "8443";
-                # Send PROXY protocol header so Traefik knows original client IP/port
                 send_proxy = true;
               }
             ];
@@ -112,29 +100,22 @@ _:
         traefik = {
           enable = true;
 
-          dynamic.dir = "/var/lib/traefik/dynamic";
           environmentFiles = [ config.age.secrets.cloudflare-dns-token.path ];
 
-          static.settings = {
-            # Enable experimental OTLP logging
+          staticConfigOptions = {
             experimental.otlpLogs = true;
 
-            # Entry point for TLS traffic from sslh
             entryPoints.websecure = {
               address = "127.0.0.1:8443";
-              # Accept PROXY protocol from sslh to get real client IP and port
               proxyProtocol.trustedIPs = [ "127.0.0.1/32" ];
-              # Trust X-Forwarded-* headers from trusted sources
               forwardedHeaders.trustedIPs = [ "127.0.0.1/32" ];
             };
 
-            # ACME certificate resolver using Cloudflare DNS-01
             certificatesResolvers.letsencrypt.acme = {
               email = "admin@djv.sh";
               storage = "/var/lib/traefik/acme.json";
               dnsChallenge = {
                 provider = "cloudflare";
-                # Use Hetzner DNS servers (external DNS blocked on this host)
                 resolvers = [
                   "185.12.64.1:53"
                   "185.12.64.2:53"
@@ -142,7 +123,6 @@ _:
               };
             };
 
-            # OpenTelemetry tracing
             tracing = {
               otlp.http.endpoint = "http://127.0.0.1:4318/v1/traces";
               resourceAttributes = {
@@ -151,30 +131,24 @@ _:
               };
             };
 
-            # OpenTelemetry metrics
             metrics.otlp.http.endpoint = "http://127.0.0.1:4318/v1/metrics";
 
-            # Access logging - dual output for observability and Fail2ban
             accessLog = {
-              # OTLP export for Datadog observability
               otlp.http.endpoint = "http://127.0.0.1:4318/v1/logs";
-              # File output for Fail2ban parsing
               filePath = "/var/log/traefik/access.log";
               format = "common";
             };
           };
 
-          dynamic.files.routing.settings = {
+          dynamicConfigOptions = {
             http = {
               middlewares = {
-                # Redirect unknown subdomains to main site 404
                 redirect-to-404.redirectRegex = {
                   regex = ".*";
                   replacement = "https://djv.sh/404";
                   permanent = false;
                 };
 
-                # Security headers middleware
                 security-headers.headers = {
                   stsSeconds = 31536000;
                   stsIncludeSubdomains = true;
@@ -186,7 +160,6 @@ _:
                   };
                 };
 
-                # Security headers for Roundcube (allows same-origin framing for email preview)
                 security-headers-roundcube.headers = {
                   stsSeconds = 31536000;
                   stsIncludeSubdomains = true;
@@ -198,13 +171,11 @@ _:
                   };
                 };
 
-                # Rate limiting for general traffic (100 req/s average, burst of 50)
                 rate-limit.rateLimit = {
                   average = 100;
                   burst = 50;
                 };
 
-                # Stricter rate limiting for authentication endpoints
                 auth-rate-limit.rateLimit = {
                   average = 10;
                   burst = 20;
@@ -220,7 +191,6 @@ _:
                   entryPoints = [ "websecure" ];
                 };
 
-                # Garage S3 API (access key auth)
                 garage-s3 = {
                   rule = "Host(`${domains.garage.host}`)";
                   service = "garage-s3";
@@ -229,7 +199,6 @@ _:
                   entryPoints = [ "websecure" ];
                 };
 
-                # Garage Admin UI (SSO via oauth2-proxy)
                 garage-admin = {
                   rule = "Host(`${domains.garageAdmin.host}`)";
                   service = "garage-admin";
@@ -298,10 +267,9 @@ _:
                   entryPoints = [ "websecure" ];
                 };
 
-                # Catch-all for unknown subdomains - redirect to main site 404 page
                 catch-all = {
                   rule = "HostRegexp(`^.+\\.djv\\.sh$`)";
-                  service = "djv"; # Redirect happens before reaching backend
+                  service = "djv";
                   middlewares = [ "redirect-to-404" ];
                   entryPoints = [ "websecure" ];
                   priority = 1;
@@ -329,7 +297,6 @@ _:
 
                 garage-admin.loadBalancer.servers = [ { url = domains.garageAdmin.backend; } ];
 
-                # Kanidm handles TLS itself, so we need serversTransport
                 kanidm.loadBalancer = {
                   servers = [ { url = domains.kanidm.backend; } ];
                   serversTransport = "kanidm-transport";
@@ -346,17 +313,12 @@ _:
                 dashboard.loadBalancer.servers = [ { url = domains.dashboard.backend; } ];
               };
 
-              # Server transport for Kanidm backend TLS
-              # Kanidm uses ACME cert for auth.djv.sh but listens on 127.0.0.1
-              # serverName tells Traefik which hostname to verify in the certificate
               serversTransports.kanidm-transport.serverName = "auth.djv.sh";
             };
           };
         };
       };
 
-      # Custom fail2ban filters for Traefik (common log format)
-      # See: https://nixos.wiki/wiki/Fail2ban
       environment.etc = {
         "fail2ban/filter.d/traefik-auth.conf".text = ''
           [Definition]
@@ -375,25 +337,6 @@ _:
         '';
       };
 
-      # Workaround: upstream ExecStartPre passes '>' as a literal argument
-      # to envsubst instead of using a shell redirect, so the config file
-      # is never written. Fixed on nixpkgs master but not yet on nixos-unstable.
-      # TODO: remove once nixpkgs includes the writeShellScript wrapper
-      systemd.services.traefik.serviceConfig.ExecStartPre = lib.mkForce (
-        lib.optional config.services.traefik.useEnvSubst (
-          pkgs.writeShellScript "traefik-pre-start" ''
-            umask 077
-            ${lib.getExe pkgs.envsubst} \
-              -i "${
-                if config.services.traefik.static.file == null then
-                  (pkgs.formats.json { }).generate "static_config.json" config.services.traefik.static.settings
-                else
-                  config.services.traefik.static.file
-              }" \
-              > "/run/traefik/config.json"
-          ''
-        )
-      );
       systemd.tmpfiles.rules = [
         "d /var/log/traefik 0750 traefik traefik -"
       ];
