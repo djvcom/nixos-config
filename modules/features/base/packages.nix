@@ -19,6 +19,7 @@
           age
           gnumake
           just
+          ghostty.terminfo
         ]
         ++ [
           inputs.dagger.packages.${pkgs.stdenv.hostPlatform.system}.dagger
