@@ -180,12 +180,12 @@ _:
         }
 
         listener {
-          timeout = 300
+          timeout = 900
           on-timeout = loginctl lock-session
         }
 
         listener {
-          timeout = 1800
+          timeout = 7200
           on-timeout = systemctl suspend
         }
       '';
