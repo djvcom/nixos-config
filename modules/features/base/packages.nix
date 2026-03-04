@@ -20,6 +20,7 @@
           gnumake
           just
           ghostty.terminfo
+          fastfetch
         ]
         ++ [
           inputs.dagger.packages.${pkgs.stdenv.hostPlatform.system}.dagger
