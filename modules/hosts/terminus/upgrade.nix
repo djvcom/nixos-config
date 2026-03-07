@@ -106,10 +106,10 @@ _:
                 done
               fi
 
-              # Check for deprecation warnings and echo them (so they appear in journal)
-              if grep -qi "warning\|deprecated" /var/tmp/nixos-preflight.log; then
+              # Check for Nix-level warnings (ignore upstream package build warnings)
+              if grep -q "^warning:" /var/tmp/nixos-preflight.log; then
                 echo "Warnings detected in build output:"
-                grep -i "warning\|deprecated" /var/tmp/nixos-preflight.log | while read -r line; do
+                grep "^warning:" /var/tmp/nixos-preflight.log | while read -r line; do
                   echo "BUILD WARNING: $line"
                 done
               fi

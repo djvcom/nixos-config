@@ -3,10 +3,13 @@ _:
 {
   flake.modules.nixos.nix-settings = {
     nix = {
-      settings.experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
+      settings = {
+        experimental-features = [
+          "nix-command"
+          "flakes"
+        ];
+        download-buffer-size = 268435456;
+      };
       gc = {
         automatic = true;
         dates = "weekly";
