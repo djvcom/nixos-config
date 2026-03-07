@@ -90,6 +90,7 @@ _:
             "float on, match:title ^(Friends List)$"
             "workspace 5, match:class ^(steam)$"
             "workspace 5, match:title ^(Steam)$"
+            "fullscreen on, match:class \.exe$"
           ];
 
           "$mod" = "SUPER";
