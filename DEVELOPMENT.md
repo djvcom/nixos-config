@@ -1,16 +1,17 @@
 # Development Guide
 
-This document covers common development tasks for the NixOS configuration.
+Common development tasks for the NixOS configuration.
 
 ## Quick Reference
 
 ```bash
 just check    # Format and lint
-just rebuild  # Build and switch
+just rebuild  # Build and switch (via nh)
 just test     # Test without activation
 just preflight # Upgrade pre-flight check
 just update   # Update flake inputs
-just clean    # Garbage collect
+just clean    # Garbage collect (keeps 7d + 3 recent)
+nix develop   # Enter dev shell (installs pre-commit hooks)
 ```
 
 ---
@@ -19,68 +20,78 @@ just clean    # Garbage collect
 
 ```
 ~/.config/nixos/
-├── flake.nix                 # Flake definition and inputs
-├── flake.lock                # Pinned dependency versions
-├── hosts/
-│   └── terminus/
-│       ├── default.nix       # Main host config (networking, users, systemd)
-│       ├── hardware.nix      # Hardware-specific config
-│       ├── disko.nix         # Disk partitioning
-│       ├── host-secrets.nix  # Agenix secret declarations
-│       ├── hardening.nix     # Kernel and network security
-│       ├── traefik.nix       # Reverse proxy configuration
-│       └── services/
-│           ├── djv.nix       # Portfolio site
-│           ├── kanidm.nix    # Identity provider
-│           ├── vaultwarden.nix # Password manager
-│           ├── openbao.nix   # Secrets management
-│           ├── stalwart.nix  # Mail server
-│           └── minio.nix     # Object storage
+├── flake.nix                              # Flake definition and inputs
+├── flake.lock                             # Pinned dependency versions
+├── justfile                               # Common tasks (nh-powered)
 ├── modules/
-│   ├── base.nix              # Common settings for all hosts
-│   ├── observability.nix     # OTEL collector and Datadog export
-│   └── backup.nix            # Restic backup configuration
-├── home/
-│   └── dan.nix               # Home-manager configuration
+│   ├── features/
+│   │   ├── base/                          # boot, packages, security, ssh, nix-settings
+│   │   ├── server/                        # traefik, postgresql, acme, hardening, virtualisation
+│   │   ├── desktop/                       # hyprland, nvidia, gaming, pipewire, fonts, jellyfin
+│   │   ├── networking/wireguard.nix       # VPN configuration
+│   │   ├── observability/                 # otel-collector, datadog-agent
+│   │   ├── backup/restic.nix             # Restic backup to Garage S3
+│   │   └── darwin/                        # macOS: homebrew, zscaler
+│   ├── services/                          # kanidm, vaultwarden, stalwart, garage, openbao,
+│   │                                      # valkey, roundcube, dashboard, djv, sidereal
+│   ├── home/                              # base, shell, git, neovim/, ghostty, firefox,
+│   │                                      # gitlab, aerospace, hyprland, waybar, cursor, wallpaper
+│   ├── hosts/
+│   │   ├── terminus/                      # Server: configuration, secrets, backup, observability, upgrade
+│   │   ├── oshun/                         # Desktop: configuration, hardware, disko
+│   │   ├── macbook-personal/              # macOS personal
+│   │   └── macbook-work/                  # macOS work
+│   ├── plumbing/                          # lib, overlays, checks, dev-shell, formatter,
+│   │                                      # flake-modules, git-hooks, darwin-configs
+│   └── tools/                             # agenix, disko, home-manager
+├── overlays/                              # vaultwarden-sso, opentelemetry-collector, garage-v2
 └── secrets/
-    ├── secrets.nix           # Secret key declarations
-    └── *.age                  # Encrypted secrets
+    ├── secrets.nix                        # Secret key declarations
+    └── *.age                              # Encrypted secrets
 ```
+
+All `.nix` files under `modules/` are auto-discovered by import-tree and imported as flake-parts modules.
 
 ---
 
 ## Adding a New Service
 
-### 1. Create service file
+### 1. Create service module
 
-Create a new file in `hosts/terminus/services/`:
+Create a new file in `modules/services/`:
 
 ```nix
-# hosts/terminus/services/myservice.nix
-{ config, pkgs, ... }:
+# modules/services/myservice.nix
+_:
 
 {
-  services.myservice = {
-    enable = true;
-    # Configuration here
-  };
+  flake.modules.nixos.myservice =
+    { config, pkgs, ... }:
+    {
+      services.myservice = {
+        enable = true;
+        # Configuration here
+      };
+    };
 }
 ```
 
-### 2. Import in default.nix
+The module is auto-discovered by import-tree — no manual import needed.
 
-Add to the imports list in `hosts/terminus/default.nix`:
+### 2. Import in host configuration
+
+Add the module to the host's imports in `modules/hosts/terminus/configuration.nix`:
 
 ```nix
-imports = [
+imports = with inputs.self.modules.nixos; [
   # ... existing imports
-  ./services/myservice.nix
+  myservice
 ];
 ```
 
 ### 3. Add Traefik routing
 
-In `hosts/terminus/traefik.nix`, add the domain to the `domains` let binding:
+In `modules/features/server/traefik.nix`, add the domain to the `domains` let binding:
 
 ```nix
 domains = {
@@ -136,7 +147,7 @@ echo "my-secret-value" | agenix -e myservice-secret.age
 }
 ```
 
-3. Declare in `hosts/terminus/host-secrets.nix`:
+3. Declare in `modules/hosts/terminus/secrets.nix`:
 
 ```nix
 age.secrets.myservice-secret = {
@@ -175,134 +186,79 @@ agenix --rekey
 
 ```bash
 cd ~/.config/nixos/secrets
-# Generate new value and encrypt
-echo "new-secret-value" | agenix -e myservice-secret.age
-# Or for random values:
 head -c 32 /dev/urandom | base64 | agenix -e myservice-secret.age
-
-# Rebuild to deploy
 just rebuild
-
-# Restart affected service
 sudo systemctl restart myservice
 ```
-
-**Rotating agenix master keys:**
-
-1. Generate new SSH key:
-
-```bash
-ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_new -C "dan@terminus"
-```
-
-2. Update `secrets/secrets.nix` with new public key:
-
-```nix
-let
-  dan = "ssh-ed25519 AAAA...new-key...";
-in
-```
-
-3. Re-encrypt all secrets:
-
-```bash
-cd ~/.config/nixos/secrets
-# Keep old key available for decryption
-SSH_AUTH_SOCK="" ssh-add ~/.ssh/id_ed25519
-agenix --rekey
-```
-
-4. Replace old key with new key, rebuild.
 
 **OAuth2 client secrets (Kanidm):**
 
 Client secrets are managed declaratively via `basicSecretFile`. To rotate:
 
 ```bash
-# Generate new secret
 head -c 32 /dev/urandom | base64
-
-# Encrypt for Kanidm
 cd ~/.config/nixos/secrets
 echo "<new-secret>" | agenix -e kanidm-oauth2-myservice.age
-
-# For Vaultwarden, also update the SSO env file
-echo "SSO_CLIENT_SECRET=<new-secret>" | agenix -e vaultwarden-sso.age
-
-# Rebuild and restart
 just rebuild
-sudo systemctl restart kanidm vaultwarden
-```
-
-**Kanidm admin passwords:**
-
-```bash
-# Generate new password
-head -c 32 /dev/urandom | base64
-
-# Update encrypted file
-cd ~/.config/nixos/secrets
-echo "<new-password>" | agenix -e kanidm-admin-password.age
-
-# Rebuild - provisioning will update the password
-just rebuild
+sudo systemctl restart kanidm
 ```
 
 ---
 
 ## Adding a New Host
 
+### NixOS
+
 1. Create host directory structure:
 
 ```bash
-mkdir -p hosts/newhostname/services
+mkdir -p modules/hosts/newhostname
 ```
 
-2. Create minimal `default.nix`:
+2. Create `modules/hosts/newhostname/configuration.nix`:
 
 ```nix
-{ config, lib, pkgs, ... }:
+_:
 
 {
-  imports = [
-    ./hardware.nix
-    ../../modules/base.nix
-  ];
+  flake.modules.nixos.newhostname =
+    { config, lib, pkgs, ... }:
+    {
+      imports = with inputs.self.modules.nixos; [
+        base-packages
+        nix-settings
+        ssh
+        security
+      ];
 
-  networking.hostName = "newhostname";
-
-  # Host-specific configuration
-
-  system.stateVersion = "25.05";
+      networking.hostName = "newhostname";
+      system.stateVersion = "25.05";
+    };
 }
 ```
 
-3. Generate `hardware.nix`:
+3. Create `modules/hosts/newhostname/flake-config.nix`:
+
+```nix
+{ inputs, ... }:
+
+{
+  flake.nixosConfigurations.newhostname = inputs.self.lib.mkNixos {
+    hostname = "newhostname";
+  };
+}
+```
+
+4. Generate `hardware.nix` and add host key to `secrets/secrets.nix`.
+
+5. Deploy with `nixos-anywhere` (new server) or `nh os switch` (existing):
 
 ```bash
-nixos-generate-config --show-hardware-config > hosts/newhostname/hardware.nix
-```
+# New server with disko
+nixos-anywhere --flake .#newhostname root@<ip>
 
-4. Add to `flake.nix`:
-
-```nix
-nixosConfigurations.newhostname = nixpkgs.lib.nixosSystem {
-  system = "x86_64-linux";
-  modules = [
-    ./hosts/newhostname
-    # ... other modules
-  ];
-};
-```
-
-5. Add host key to `secrets/secrets.nix`:
-
-```nix
-let
-  newhostname = "ssh-ed25519 AAAA...";
-  allKeys = [ terminus dan newhostname ];
-in
-# ...
+# Existing server
+nh os switch . -H newhostname
 ```
 
 ---
@@ -352,39 +308,24 @@ systemctl status servicename
 ### Traefik routing issues
 
 ```bash
-# Check Traefik logs
 journalctl -u traefik -f
-
-# Check certificate status
 ls -la /var/lib/traefik/acme.json
 ```
 
 ### Agenix secrets not decrypting
 
 ```bash
-# Check if secret file exists
 ls -la /run/agenix/
-
-# Verify age identity
 ssh-add -l
-
-# Manual decrypt test
 age -d -i ~/.ssh/id_ed25519 secrets/test.age
 ```
 
 ### PostgreSQL issues
 
 ```bash
-# Connect as postgres superuser
 sudo -u postgres psql
-
-# List databases
-\l
-
-# List users
-\du
-
-# Connect to specific database
+\l    # list databases
+\du   # list users
 sudo -u dan psql djv
 ```
 
@@ -401,13 +342,7 @@ just update
 ### Update specific input
 
 ```bash
-nix flake lock --update-input nixpkgs
-```
-
-### Check for updates without applying
-
-```bash
-nix flake update --dry-run
+nix flake update nixpkgs
 ```
 
 ---
@@ -416,11 +351,11 @@ nix flake update --dry-run
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
-- `feat(scope):` - New feature
-- `fix(scope):` - Bug fix
-- `docs(scope):` - Documentation
-- `refactor(scope):` - Code restructuring
-- `chore(scope):` - Maintenance tasks
+- `feat(scope):` — New feature
+- `fix(scope):` — Bug fix
+- `docs(scope):` — Documentation
+- `refactor(scope):` — Code restructuring
+- `chore(scope):` — Maintenance tasks
 
 Examples:
 
@@ -428,7 +363,7 @@ Examples:
 feat(kanidm): add OIDC client for new service
 fix(stalwart): correct DKIM signature algorithm
 refactor(traefik): extract middleware configuration
-docs: add disaster recovery guide
+docs: update disaster recovery guide
 ```
 
 ---
@@ -446,7 +381,6 @@ docs: add disaster recovery guide
     database.url = "postgresql://myservice@/myservice?host=/run/postgresql";
   };
 
-  # Ensure database exists
   services.postgresql = {
     ensureDatabases = [ "myservice" ];
     ensureUsers = [
@@ -504,18 +438,17 @@ Use a shared group:
 
 ## SSO with Kanidm
 
-Kanidm provides OIDC authentication for services. OIDC clients are configured declaratively in `services/kanidm.nix`.
+Kanidm provides OIDC authentication for services. OIDC clients are configured declaratively in `modules/services/kanidm.nix`.
 
 ### Adding an OIDC client
 
 ```nix
-# In services/kanidm.nix
+# In modules/services/kanidm.nix
 systems.oauth2.myservice = {
   displayName = "My Service";
   originUrl = "https://myservice.djv.sh/";
   originLanding = "https://myservice.djv.sh/";
   preferShortUsername = true;
-  # PKCE is enabled by default in Kanidm
   scopeMaps.infrastructure_admins = [
     "openid"
     "profile"
@@ -533,58 +466,6 @@ kanidm system oauth2 show-basic-secret myservice
 ```
 
 Store in agenix and reference via environment file.
-
-### Vaultwarden SSO
-
-Vaultwarden uses environment variables for SSO. The Kanidm client is already configured.
-
-After rebuild, update the secret:
-
-```bash
-# Get the client secret
-kanidm system oauth2 show-basic-secret vaultwarden
-
-# Update the secret (creates new encrypted file)
-cd ~/.config/nixos/secrets
-echo "SSO_CLIENT_SECRET=<secret-from-above>" | agenix -e vaultwarden-sso.age
-
-# Restart Vaultwarden to pick up new secret
-sudo systemctl restart vaultwarden
-```
-
-### OpenBao OIDC
-
-OpenBao requires CLI configuration after unsealing (cannot be declarative).
-
-```bash
-# Ensure OpenBao is unsealed first
-bao status
-
-# Enable OIDC auth method
-bao auth enable oidc
-
-# Get client secret from Kanidm
-kanidm system oauth2 show-basic-secret openbao
-
-# Configure OIDC
-bao write auth/oidc/config \
-    oidc_discovery_url="https://auth.djv.sh/oauth2/openid/openbao" \
-    oidc_client_id="openbao" \
-    oidc_client_secret="<secret-from-kanidm>" \
-    default_role="admin"
-
-# Create admin role
-bao write auth/oidc/role/admin \
-    role_type="oidc" \
-    user_claim="preferred_username" \
-    groups_claim="groups" \
-    policies="admin,default" \
-    oidc_scopes="openid,profile,email,groups" \
-    allowed_redirect_uris="https://bao.djv.sh/ui/vault/auth/oidc/oidc/callback"
-
-# Test login via UI at https://bao.djv.sh
-# Select "OIDC" method and click "Sign in with OIDC Provider"
-```
 
 ---
 
@@ -605,6 +486,9 @@ nix flake check
 
 # Enter nix shell with tools
 nix develop
+
+# Browse dependency tree
+nix-tree .#nixosConfigurations.terminus.config.system.build.toplevel
 
 # Query installed packages
 nix-store -q --references /run/current-system

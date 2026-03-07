@@ -1,11 +1,10 @@
 # Security Hardening Reference
 
-This document provides authoritative references for the security measures
-implemented in this NixOS configuration.
+Authoritative references for the security measures implemented in this NixOS configuration.
 
 ## Kernel Hardening (CIS Benchmarks)
 
-The kernel sysctls in `hosts/terminus/default.nix` follow CIS Benchmark
+The kernel sysctls in `modules/features/server/hardening.nix` follow CIS Benchmark
 recommendations and Linux kernel security best practices.
 
 ### Network Stack
@@ -30,7 +29,7 @@ recommendations and Linux kernel security best practices.
 
 ## SSH Hardening
 
-Configuration in `modules/base.nix` follows NIST and CIS guidelines.
+Configuration in `modules/features/base/ssh.nix` follows NIST and CIS guidelines.
 
 | Setting | Value | Purpose | Reference |
 |---------|-------|---------|-----------|
@@ -40,7 +39,7 @@ Configuration in `modules/base.nix` follows NIST and CIS guidelines.
 
 ## PostgreSQL Authentication
 
-Configuration in `hosts/terminus/default.nix` uses secure authentication methods.
+Configuration in `modules/features/server/postgresql.nix` uses secure authentication methods.
 
 | Method | Scope | Purpose | Reference |
 |--------|-------|---------|-----------|
@@ -52,7 +51,7 @@ providing protection against password sniffing and using secure hash storage.
 
 ## HTTP Security Headers
 
-nginx configuration includes OWASP-recommended security headers.
+Traefik middleware in `modules/features/server/traefik.nix` applies OWASP-recommended security headers.
 
 | Header | Value | Purpose | Reference |
 |--------|-------|---------|-----------|
@@ -61,11 +60,9 @@ nginx configuration includes OWASP-recommended security headers.
 | `X-XSS-Protection` | 1; mode=block | Legacy XSS filter | [OWASP](https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html) |
 | `Referrer-Policy` | strict-origin-when-cross-origin | Control referrer leakage | [OWASP](https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html) |
 
-Note: Consider adding `Content-Security-Policy` for additional XSS protection.
-
 ## Brute Force Protection
 
-fail2ban in `modules/base.nix` provides automated intrusion prevention.
+fail2ban in `modules/features/base/security.nix` provides automated intrusion prevention.
 
 - Monitors authentication logs for failed attempts
 - Dynamically blocks attacking IPs via firewall

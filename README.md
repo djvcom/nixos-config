@@ -5,90 +5,124 @@ NixOS and nix-darwin configuration for personal development infrastructure.
 ## Structure
 
 ```
-├── flake.nix                    # Entry point, defines all hosts
-├── flake.lock                   # Pinned dependencies
-├── hosts/
-│   ├── terminus/                # NixOS server
-│   │   ├── default.nix          # Host-specific configuration
-│   │   ├── hardware.nix         # Hardware settings (nixos-generate-config)
-│   │   └── disko.nix            # Disk partitioning (for nixos-anywhere)
-│   ├── macbook/                 # Shared macOS base
-│   │   └── base.nix             # Common darwin configuration
-│   ├── macbook-personal/        # Personal MacBook
-│   │   └── default.nix          # Imports base + personal apps (GOG, Jellyfin)
-│   └── macbook-work/            # Work MacBook
-│       └── default.nix          # Imports base, work-only config
+├── flake.nix                           # Entry point, defines all inputs
+├── flake.lock                          # Pinned dependencies
+├── justfile                            # Common tasks (nh-powered)
 ├── modules/
-│   ├── base.nix                 # Security, SSH, fail2ban, nix settings
-│   ├── observability.nix        # OpenTelemetry metrics/traces/logs
-│   └── wireguard.nix            # VPN configuration
-├── home/
-│   ├── generic.nix              # Shared home-manager config
-│   └── dan/                     # User-specific modules
-│       ├── shell.nix            # Bash/Zsh, aliases, starship, direnv
-│       ├── git.nix              # Git config with delta
-│       ├── neovim.nix           # Neovim with LSP, treesitter, catppuccin
-│       ├── ghostty.nix          # Ghostty terminal config
-│       ├── firefox.nix          # LibreWolf with extensions
-│       ├── aerospace.nix        # Tiling window manager (macOS)
-│       └── gitlab.nix           # GitLab token rotation
+│   ├── features/
+│   │   ├── base/                       # Boot, packages, security, SSH, nix settings
+│   │   ├── server/                     # Traefik, PostgreSQL, ACME, hardening, virtualisation
+│   │   ├── desktop/                    # Hyprland, Nvidia, gaming, audio, fonts, Jellyfin
+│   │   ├── networking/                 # WireGuard VPN
+│   │   ├── observability/              # OTEL collector, Datadog agent
+│   │   ├── backup/                     # Restic backup to Garage S3
+│   │   └── darwin/                     # macOS (Homebrew, Zscaler)
+│   ├── services/
+│   │   ├── kanidm.nix                  # Identity provider (OIDC)
+│   │   ├── vaultwarden.nix             # Password manager (SSO)
+│   │   ├── stalwart.nix                # Mail server (SMTP/IMAP)
+│   │   ├── garage.nix                  # S3 object storage
+│   │   ├── openbao.nix                 # Secrets management
+│   │   ├── valkey.nix                  # Cache/queue store
+│   │   ├── roundcube.nix               # Webmail (OAuth2)
+│   │   ├── dashboard.nix              # Homepage dashboard (OAuth2)
+│   │   ├── djv.nix                     # Portfolio site
+│   │   └── sidereal.nix               # Build/container service
+│   ├── home/
+│   │   ├── base.nix                    # Shared packages and session config
+│   │   ├── shell.nix                   # Bash/Zsh, aliases, starship, direnv
+│   │   ├── git.nix                     # Git config with delta
+│   │   ├── neovim/                     # NixVim config (split by concern)
+│   │   ├── ghostty.nix                 # Ghostty terminal config
+│   │   ├── firefox.nix                 # LibreWolf with extensions
+│   │   ├── aerospace.nix              # Tiling window manager (macOS)
+│   │   └── gitlab.nix                  # GitLab token rotation
+│   ├── hosts/
+│   │   ├── terminus/                   # NixOS server (Hetzner)
+│   │   ├── oshun/                      # NixOS desktop (local)
+│   │   ├── macbook-personal/           # nix-darwin personal laptop
+│   │   └── macbook-work/               # nix-darwin work laptop
+│   ├── plumbing/                       # Flake infrastructure
+│   │   ├── lib.nix                     # mkNixos, mkDarwin helpers
+│   │   ├── overlays.nix                # Nixpkgs overlay registry
+│   │   ├── dev-shell.nix               # nix develop environment
+│   │   ├── git-hooks.nix               # Pre-commit hooks (nixfmt, statix, deadnix)
+│   │   ├── checks.nix                  # CI build checks
+│   │   └── formatter.nix               # nix fmt configuration
+│   └── tools/                          # agenix, disko, home-manager
+├── overlays/                           # Nixpkgs package overlays
 └── secrets/
-    ├── secrets.nix              # Defines who can decrypt
-    └── *.age                    # Encrypted secrets (agenix)
+    ├── secrets.nix                     # Defines who can decrypt
+    └── *.age                           # Encrypted secrets (agenix)
 ```
 
-## Modules
+## Hosts
 
-| Module | Purpose | Options |
-|--------|---------|---------|
-| `base.nix` | Security baseline for all servers | Imported by all hosts |
-| `observability.nix` | OTEL collector with configurable backend | `modules.observability.enable`, `exporters`, `pipelines` |
-| `wireguard.nix` | VPN with configurable IP and peers | `modules.wireguard.enable`, `address`, `peers` |
+| Name | Platform | Purpose |
+|------|----------|---------|
+| terminus | NixOS (x86_64) | Primary server — identity, mail, storage, secrets, web |
+| oshun | NixOS (x86_64) | Desktop — gaming, media, development |
+| macbook-personal | macOS (aarch64) | Personal laptop |
+| macbook-work | macOS (aarch64) | Work laptop |
 
 ## Adding a New Host
 
-1. Create the host directory:
-   ```bash
-   mkdir -p hosts/newhost
-   ```
+### NixOS
 
-2. Create `hosts/newhost/default.nix`:
+1. Create `modules/hosts/newhost/configuration.nix`:
    ```nix
-   { config, pkgs, ... }:
+   _:
+
    {
-     imports = [
-       ./hardware.nix
-       ../../modules/base.nix
-       # Add other modules as needed
-     ];
+     flake.modules.nixos.newhost = {
+       imports = with inputs.self.modules.nixos; [
+         base-packages
+         nix-settings
+         ssh
+         security
+       ];
 
-     networking.hostName = "newhost";
-     # Host-specific configuration...
-
-     system.stateVersion = "25.05";
+       networking.hostName = "newhost";
+       system.stateVersion = "25.05";
+     };
    }
    ```
 
-3. Add to `flake.nix`:
+2. Create `modules/hosts/newhost/flake-config.nix`:
    ```nix
-   nixosConfigurations.newhost = nixpkgs.lib.nixosSystem {
-     system = "x86_64-linux";
-     modules = [
-       ./hosts/newhost
-       home-manager.nixosModules.home-manager
-       agenix.nixosModules.default
-       disko.nixosModules.disko
-     ];
-   };
+   { inputs, ... }:
+
+   {
+     flake.nixosConfigurations.newhost = inputs.self.lib.mkNixos {
+       hostname = "newhost";
+     };
+   }
    ```
 
-4. Deploy with nixos-anywhere (new server) or nixos-rebuild (existing):
+3. Add host key to `secrets/secrets.nix`
+
+4. Deploy:
    ```bash
-   # New server with disko partitioning
+   # New server with disko
    nixos-anywhere --flake .#newhost root@<ip>
 
    # Existing server
-   nixos-rebuild switch --flake .#newhost
+   nh os switch . -H newhost
+   ```
+
+### macOS (nix-darwin)
+
+1. Create `modules/hosts/macbook-new/configuration.nix` (see existing macbook configs)
+
+2. Bootstrap:
+   ```bash
+   nix --extra-experimental-features "nix-command flakes" run nix-darwin -- \
+     switch --flake ~/.config/nixos#macbook-new --impure
+   ```
+
+3. Subsequent rebuilds:
+   ```bash
+   rebuild
    ```
 
 ## Secrets Management
@@ -103,64 +137,13 @@ agenix -e secrets/secret-name.age
 To add a new secret:
 1. Add the secret definition to `secrets/secrets.nix`
 2. Create the encrypted file: `agenix -e secrets/new-secret.age`
-3. Reference in your host config via `age.secrets`
+3. Declare in the host's secrets module
+4. Reference in service config via `config.age.secrets.<name>.path`
 
-## Hosts
-
-| Name | Platform | Purpose |
-|------|----------|---------|
-| terminus | NixOS | Primary development and hosting server |
-| macbook-personal | macOS (nix-darwin) | Personal laptop with gaming apps |
-| macbook-work | macOS (nix-darwin) | Work laptop, no personal apps |
-
-## macOS Setup (nix-darwin)
-
-### Initial Setup
-
-1. Install Nix (official installer):
-   ```bash
-   sh <(curl -L https://nixos.org/nix/install)
-   ```
-
-2. Clone this repo:
-   ```bash
-   git clone <repo-url> ~/.config/nix-darwin
-   ```
-
-3. Bootstrap nix-darwin:
-   ```bash
-   nix --extra-experimental-features "nix-command flakes" run nix-darwin -- \
-     switch --flake ~/.config/nix-darwin#macbook-personal --impure
-   ```
-
-4. Set up git identity (not tracked):
-   ```bash
-   mkdir -p ~/.config/git
-   cat > ~/.config/git/identity << 'EOF'
-   [user]
-       name = Your Name
-       email = your@email.com
-   EOF
-   ```
-
-5. Set up GitLab CLI:
-   ```bash
-   glab auth login
-   ```
-
-### Daily Usage
-
-Rebuild after config changes:
-```bash
-rebuild
-```
-
-The `rebuild` alias automatically targets the correct flake configuration based on which machine you're on.
-
-### What's Included (macOS)
+## What's Included (macOS)
 
 **System:**
-- Homebrew managed declaratively (Ghostty, GOG Galaxy on personal)
+- Homebrew managed declaratively (Ghostty, Chrome)
 - Touch ID for sudo
 - Passwordless `darwin-rebuild`
 
@@ -171,7 +154,7 @@ The `rebuild` alias automatically targets the correct flake configuration based 
 - Modern CLI tools: eza, bat, delta, fzf, ripgrep, fd, bottom, dust, procs
 
 **Development:**
-- Neovim with LSP (Rust, TypeScript, Nix), treesitter, telescope
+- Neovim via NixVim with LSP (Rust, TypeScript, Nix, Terraform), treesitter, telescope
 - Git with delta for diffs
 - direnv with nix-direnv
 - Node.js 24, Rust (via rustup)
@@ -183,7 +166,7 @@ The `rebuild` alias automatically targets the correct flake configuration based 
 **Automation:**
 - GitLab token rotation (Monday 09:00)
 
-## Wireguard VPN
+## WireGuard VPN
 
 Private encrypted communication between hosts.
 
@@ -195,52 +178,41 @@ Private encrypted communication between hosts.
 
 ### Adding a New Peer
 
-#### 1. Generate keys on the new device
+1. Generate keys on the new device:
+   ```bash
+   wg genkey | tee privatekey | wg pubkey > publickey
+   ```
 
-```bash
-wg genkey | tee privatekey | wg pubkey > publickey
-```
+2. Add the peer to terminus in `modules/hosts/terminus/configuration.nix`:
+   ```nix
+   modules.wireguard = {
+     enable = true;
+     address = "10.100.0.1/24";
+     peers = [
+       {
+         publicKey = "<new-device-public-key>";
+         allowedIPs = [ "10.100.0.X/32" ];
+       }
+     ];
+   };
+   ```
 
-#### 2. Add the peer to terminus
+3. Rebuild: `nh os switch . -H terminus`
 
-Edit `hosts/terminus/default.nix` and add to `modules.wireguard.peers`:
+4. Configure the new device with `/etc/wireguard/wg0.conf`:
+   ```ini
+   [Interface]
+   PrivateKey = <new-device-private-key>
+   Address = 10.100.0.X/24
 
-```nix
-modules.wireguard = {
-  enable = true;
-  address = "10.100.0.1/24";
-  peers = [
-    {
-      publicKey = "<new-device-public-key>";
-      allowedIPs = [ "10.100.0.X/32" ];
-    }
-  ];
-};
-```
+   [Peer]
+   PublicKey = NsJCELWk3QQ+331ZlsZZGDnA5J30yGpAbatORFHrWzs=
+   Endpoint = 88.99.1.188:51820
+   AllowedIPs = 10.100.0.0/24
+   PersistentKeepalive = 25
+   ```
 
-Rebuild: `sudo nixos-rebuild switch --flake ~/.config/nixos#terminus`
-
-#### 3. Configure the new device
-
-Create `/etc/wireguard/wg0.conf`:
-
-```ini
-[Interface]
-PrivateKey = <new-device-private-key>
-Address = 10.100.0.X/24
-
-[Peer]
-PublicKey = NsJCELWk3QQ+331ZlsZZGDnA5J30yGpAbatORFHrWzs=
-Endpoint = 88.99.1.188:51820
-AllowedIPs = 10.100.0.0/24
-PersistentKeepalive = 25
-```
-
-#### 4. Connect
-
-```bash
-sudo wg-quick up wg0
-```
+5. Connect: `sudo wg-quick up wg0`
 
 ### IP Allocation
 

@@ -1,22 +1,20 @@
 # Disaster Recovery Guide
 
-This document covers full system recovery from scratch, including restoring data from backups.
+Full system recovery from scratch, including restoring data from backups.
 
 ## Pre-requisites
 
 Before starting recovery, ensure you have:
 
-1. **SSH private key** matching one of the authorised keys:
-   - `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHifaRXUcEaoTkf8dJF4qB7V9+VTjYX++fRbOKoCCpC2`
-   - `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN3DO7MvH49txkJjxZDZb4S3IWdeuEvN3UzPGbkvEtbE`
+1. **SSH private key** matching one of the authorised keys in `secrets/secrets.nix`
 
-2. **Age identity file** for decrypting agenix secrets (typically at `~/.config/sops/age/keys.txt`)
+2. **Age identity file** for decrypting agenix secrets
 
 3. **Hetzner Cloud access** for firewall configuration
 
 4. **Cloudflare access** for DNS management
 
-5. **Backup credentials** (MinIO access, restic password) - stored in `secrets/backup-credentials.age`
+5. **Backup credentials** (Garage S3 access, restic password) — stored in `secrets/backup-credentials.age`
 
 ---
 
@@ -29,10 +27,12 @@ Ensure these DNS records exist in Cloudflare for `djv.sh`:
 | A     | @        | 88.99.1.188         |
 | A     | auth     | 88.99.1.188         |
 | A     | bao      | 88.99.1.188         |
+| A     | dash     | 88.99.1.188         |
+| A     | garage   | 88.99.1.188         |
 | A     | mail     | 88.99.1.188         |
-| A     | minio    | 88.99.1.188         |
-| A     | state    | 88.99.1.188         |
+| A     | s3       | 88.99.1.188         |
 | A     | vault    | 88.99.1.188         |
+| A     | webmail  | 88.99.1.188         |
 | AAAA  | @        | 2a01:4f8:173:28ab::2|
 | MX    | @        | mail.djv.sh (10)    |
 | TXT   | @        | v=spf1 mx ~all      |
@@ -67,7 +67,6 @@ From Hetzner Cloud console, boot the server into rescue mode.
 ### 3.2 Install using nixos-anywhere
 
 ```bash
-# From your local machine with nix installed
 nix run github:nix-community/nixos-anywhere -- \
   --flake github:djvcom/nixos-config#terminus \
   --target-host root@88.99.1.188
@@ -78,7 +77,7 @@ nix run github:nix-community/nixos-anywhere -- \
 After reboot, SSH in as `dan`:
 
 ```bash
-ssh dan@88.99.1.188 -p 443
+ssh dan@djv.sh -p 443
 ```
 
 Verify basic services are running:
@@ -96,7 +95,6 @@ systemctl status kanidm
 OpenBao uses Raft storage and needs initialisation on first boot:
 
 ```bash
-# Check if already initialised
 bao status
 
 # If not initialised (exit code 2):
@@ -110,10 +108,7 @@ The unseal key is stored encrypted in `secrets/openbao-keys.age`.
 ### Unsealing after reboot
 
 ```bash
-# Get unseal key
 sudo cat /run/agenix/openbao-keys
-
-# Unseal
 bao operator unseal <unseal-key>
 ```
 
@@ -121,7 +116,7 @@ bao operator unseal <unseal-key>
 
 ## 5. Restore from Backup
 
-Backups are stored in MinIO at `s3://backups` using restic.
+Backups are stored in Garage at `s3://backups` using restic.
 
 ### 5.1 Get backup credentials
 
@@ -134,7 +129,7 @@ sudo cat /run/agenix/backup-credentials
 
 ```bash
 source <(sudo cat /run/agenix/backup-credentials)
-export RESTIC_REPOSITORY="s3:http://127.0.0.1:9000/backups"
+export RESTIC_REPOSITORY="s3:http://127.0.0.1:3900/backups"
 
 restic snapshots
 ```
@@ -175,6 +170,9 @@ sudo -u postgres psql djv < /tmp/restore/var/backup/postgresql/djv.sql
 # Restore vaultwarden database
 sudo -u postgres psql vaultwarden < /tmp/restore/var/backup/postgresql/vaultwarden.sql
 
+# Restore roundcube database
+sudo -u postgres psql roundcube < /tmp/restore/var/backup/postgresql/roundcube.sql
+
 # Clean up
 rm -rf /tmp/restore
 ```
@@ -188,10 +186,7 @@ rm -rf /tmp/restore
 After restore, verify:
 
 ```bash
-# Check service status
 systemctl status kanidm
-
-# Test authentication (from local machine)
 curl -v https://auth.djv.sh
 ```
 
@@ -214,13 +209,7 @@ sudo cat /run/agenix/dkim-ed25519-key
 Test mail delivery:
 
 ```bash
-# Send test email
 echo "Test" | mail -s "Recovery test" dan@djv.sh
-```
-
-Check mail logs:
-
-```bash
 journalctl -u stalwart-mail -f
 ```
 
@@ -230,24 +219,30 @@ Vaultwarden data is in PostgreSQL. After database restore:
 
 ```bash
 systemctl restart vaultwarden
-
-# Verify access
 curl -v https://vault.djv.sh
 ```
 
-### 6.4 MinIO
+### 6.4 Garage
 
-MinIO data lives at `/var/lib/minio/data`. If restoring from external backup:
+Garage data lives at `/var/lib/garage/data`. After a fresh install, Garage needs its cluster layout configured:
 
 ```bash
-# Restore data directory
-restic restore latest --target / --include /var/lib/minio/data
+# Check node ID
+garage status
 
-# Fix permissions
-sudo chown -R minio:minio /var/lib/minio
+# Assign capacity
+garage layout assign -z dc1 -c 1T <node-id>
 
-# Restart
-sudo systemctl restart minio
+# Apply layout
+garage layout apply --version 1
+```
+
+If restoring from external backup:
+
+```bash
+restic restore latest --target / --include /var/lib/garage/data
+sudo chown -R garage:garage /var/lib/garage
+sudo systemctl restart garage
 ```
 
 ---
@@ -262,8 +257,10 @@ After recovery, verify each service:
 - [ ] **Vaultwarden**: Can log in at https://vault.djv.sh
 - [ ] **OpenBao**: Unsealed and UI accessible at https://bao.djv.sh
 - [ ] **Mail**: Can send/receive email via IMAP/SMTP
+- [ ] **Webmail**: Roundcube accessible at https://webmail.djv.sh
 - [ ] **djv.sh**: Portfolio site loads correctly
-- [ ] **MinIO**: Console accessible at https://minio.djv.sh
+- [ ] **Garage**: Web UI at https://garage.djv.sh, S3 API at https://s3.djv.sh
+- [ ] **Dashboard**: Homepage at https://dash.djv.sh
 - [ ] **Backups**: Timer running (`systemctl status restic-backup.timer`)
 - [ ] **Observability**: Logs appearing in Datadog
 
@@ -290,6 +287,6 @@ To verify backup integrity:
 
 ```bash
 source <(sudo cat /run/agenix/backup-credentials)
-export RESTIC_REPOSITORY="s3:http://127.0.0.1:9000/backups"
+export RESTIC_REPOSITORY="s3:http://127.0.0.1:3900/backups"
 restic check
 ```
