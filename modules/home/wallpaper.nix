@@ -36,9 +36,6 @@ _:
           --transition-fps 60
 
         ${pkgs.coreutils}/bin/ln -sf "$REAL_PATH" "$HOME/.wallpapers/current"
-
-        # matugen integration point:
-        # matugen image "$REAL_PATH"
       '';
 
       pick-wallpaper = pkgs.writeShellScriptBin "pick-wallpaper" ''

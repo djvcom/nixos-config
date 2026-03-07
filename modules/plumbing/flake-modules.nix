@@ -3,6 +3,7 @@
 {
   imports = [
     inputs.flake-parts.flakeModules.modules
+    inputs.git-hooks.flakeModule
   ];
 
   systems = [

@@ -19,6 +19,7 @@
           age
           gnumake
           just
+          nh
           ghostty.terminfo
           fastfetch
         ]

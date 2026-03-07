@@ -37,7 +37,7 @@ _:
         tree = "eza --tree";
       }
       // lib.optionalAttrs isLinux {
-        rebuild = "sudo nixos-rebuild switch --flake ~/.config/nixos#$(hostname)";
+        rebuild = "nh os switch ~/.config/nixos -H $(hostname)";
         sleep = "systemctl suspend";
         shutdown = "systemctl poweroff";
       }

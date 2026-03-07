@@ -12,15 +12,15 @@ check: fmt lint
 
 # Build without switching
 build host="terminus":
-    nixos-rebuild build --flake .#{{host}}
+    nh os build . -H {{host}}
 
 # Build and switch
 rebuild host="terminus":
-    sudo nixos-rebuild switch --flake .#{{host}}
+    nh os switch . -H {{host}}
 
 # Test configuration (build without activation)
 test host="terminus":
-    nixos-rebuild test --flake .#{{host}}
+    nh os test . -H {{host}}
 
 # Run pre-flight check
 preflight:
@@ -36,4 +36,4 @@ update:
 
 # Garbage collect old generations
 clean:
-    sudo nix-collect-garbage -d
+    nh clean all --keep-since 7d --keep 3
