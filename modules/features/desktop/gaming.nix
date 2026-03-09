@@ -41,6 +41,7 @@ _:
         protonup-qt
         wine
         winetricks
+        xenia-canary
       ];
     };
 }

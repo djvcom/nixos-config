@@ -90,7 +90,7 @@ _:
             "float on, match:title ^(Friends List)$"
             "workspace 5, match:class ^(steam)$"
             "workspace 5, match:title ^(Steam)$"
-            "fullscreen on, match:class \.exe$"
+            "fullscreen on, match:class ^(.*\.exe)$"
           ];
 
           "$mod" = "SUPER";
@@ -145,6 +145,16 @@ _:
             "$mod, Print, exec, grimblast --notify copy active"
 
             "$mod SHIFT, Escape, exec, hyprlock"
+
+          ];
+
+          bindel = [
+            ", XF86AudioRaiseVolume, exec, wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 2%+"
+            ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-"
+          ];
+
+          bindl = [
+            ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
           ];
 
           bindm = [
