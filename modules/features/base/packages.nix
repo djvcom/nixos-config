@@ -27,6 +27,11 @@
           inputs.dagger.packages.${pkgs.stdenv.hostPlatform.system}.dagger
         ];
 
-      programs.nix-ld.enable = true;
+      programs.nix-ld = {
+        enable = true;
+        libraries = with pkgs; [
+          stdenv.cc.cc.lib
+        ];
+      };
     };
 }
