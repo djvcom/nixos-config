@@ -35,7 +35,6 @@
         valkey
         roundcube
         dashboard
-        sidereal
       ];
 
       networking = {
