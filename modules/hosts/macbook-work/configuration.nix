@@ -59,7 +59,7 @@
                 export AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
                 export CC=/usr/bin/clang
-                export RUSTFLAGS="-C linker=/usr/bin/clang"
+                # export RUSTFLAGS="-C linker=/usr/bin/clang"
 
                 # glab config location varies - check both possible paths
                 _glab_config=""
