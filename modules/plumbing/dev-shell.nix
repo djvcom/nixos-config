@@ -21,6 +21,7 @@
             nixfmt
             nix-tree
             nh
+            just
             inputs.agenix.packages.${system}.default
           ]
           ++ config.pre-commit.settings.enabledPackages;

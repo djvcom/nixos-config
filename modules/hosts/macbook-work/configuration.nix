@@ -11,10 +11,13 @@
         zscaler
       ];
 
+      homebrew.taps = [ "cargo-lambda/tap" ];
+
       homebrew.brews = [
         "opencode"
         "dagger"
         "pulumi"
+        "cargo-lambda/tap/cargo-lambda"
       ];
 
       home-manager.users.${username} =
