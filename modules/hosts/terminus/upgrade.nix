@@ -28,9 +28,7 @@ _:
       systemd = {
         services = {
           nixos-upgrade = lib.mkIf config.modules.observability.enable {
-            serviceConfig = {
-              OnFailure = [ "nixos-upgrade-notify-failure.service" ];
-            };
+            unitConfig.OnFailure = [ "nixos-upgrade-notify-failure.service" ];
           };
 
           nixos-upgrade-notify-failure = lib.mkIf config.modules.observability.enable {
