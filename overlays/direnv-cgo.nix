@@ -1,12 +1,7 @@
 _: prev: {
-  direnv = prev.direnv.override {
-    buildGoModule =
-      args:
-      prev.buildGoModule (
-        args
-        // {
-          CGO_ENABLED = 1;
-        }
-      );
-  };
+  direnv = prev.direnv.overrideAttrs (old: {
+    env = (old.env or { }) // {
+      CGO_ENABLED = 1;
+    };
+  });
 }
