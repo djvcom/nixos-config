@@ -37,6 +37,8 @@
         '';
       };
 
+      time.timeZone = "Europe/London";
+
       networking = {
         hostName = "oshun";
         networkmanager.enable = true;
