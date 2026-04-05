@@ -159,6 +159,7 @@ _:
         dnsProvider = "cloudflare";
         environmentFile = config.age.secrets.cloudflare-dns-token.path;
         group = "stalwart-mail";
+        reloadServices = [ "stalwart" ];
       };
 
       # Open mail ports explicitly (HTTP 8082 stays localhost-only behind Traefik)

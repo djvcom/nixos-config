@@ -19,7 +19,10 @@
         mode = "0400";
       };
 
-      homebrew.casks = [ "gog-galaxy" "vlc" ];
+      homebrew.casks = [
+        "gog-galaxy"
+        "vlc"
+      ];
 
       home-manager.users.${username} =
         { pkgs, lib, ... }:

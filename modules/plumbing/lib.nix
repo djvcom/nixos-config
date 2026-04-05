@@ -45,6 +45,7 @@ in
 
     linuxOverlays = [
       (import ../../overlays/vaultwarden-sso.nix)
+      (import ../../overlays/opentelemetry-collector.nix)
       (import ../../overlays/garage-v2.nix)
       inputs.sidereal.overlays.default
       (final: _prev: {

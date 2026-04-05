@@ -145,6 +145,7 @@ _:
         dnsProvider = "cloudflare";
         environmentFile = config.age.secrets.cloudflare-dns-token.path;
         group = "kanidm";
+        reloadServices = [ "kanidm" ];
       };
 
       systemd.services.kanidm.serviceConfig = {
