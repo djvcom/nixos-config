@@ -96,20 +96,20 @@ _:
       };
       stalwart-admin-password = {
         file = ../../../secrets/stalwart-admin-password.age;
-        owner = "stalwart-mail";
-        group = "stalwart-mail";
+        owner = "stalwart";
+        group = "stalwart";
         mode = "0400";
       };
       dkim-rsa-key = {
         file = ../../../secrets/dkim-rsa-key.age;
-        owner = "stalwart-mail";
-        group = "stalwart-mail";
+        owner = "stalwart";
+        group = "stalwart";
         mode = "0400";
       };
       dkim-ed25519-key = {
         file = ../../../secrets/dkim-ed25519-key.age;
-        owner = "stalwart-mail";
-        group = "stalwart-mail";
+        owner = "stalwart";
+        group = "stalwart";
         mode = "0400";
       };
       dan-mail-password = {

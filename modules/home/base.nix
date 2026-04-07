@@ -26,7 +26,7 @@ _:
             libiconv
             nodejs_24
             yarn
-            nodePackages.typescript-language-server
+            typescript-language-server
             dnsutils
 
             bat

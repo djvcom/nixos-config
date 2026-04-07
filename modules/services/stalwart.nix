@@ -6,6 +6,7 @@ _:
     {
       services.stalwart = {
         enable = true;
+        stateVersion = "26.05";
         # HTTP listener is localhost-only, Traefik handles external; mail ports opened explicitly below
         openFirewall = false;
 
@@ -65,7 +66,7 @@ _:
           # Storage configuration - single RocksDB store for all data
           store.data = {
             type = "rocksdb";
-            path = "/var/lib/stalwart-mail/data";
+            path = "/var/lib/stalwart/data";
           };
 
           storage = {
@@ -152,13 +153,13 @@ _:
         };
       };
 
-      # Add stalwart-mail to mail-secrets group for shared credential access
-      users.users.stalwart-mail.extraGroups = [ "mail-secrets" ];
+      # Add stalwart to mail-secrets group for shared credential access
+      users.users.stalwart.extraGroups = [ "mail-secrets" ];
 
       security.acme.certs."mail.djv.sh" = {
         dnsProvider = "cloudflare";
         environmentFile = config.age.secrets.cloudflare-dns-token.path;
-        group = "stalwart-mail";
+        group = "stalwart";
         reloadServices = [ "stalwart" ];
       };
 
@@ -192,7 +193,7 @@ _:
         RestrictSUIDSGID = true;
         LockPersonality = true;
         ReadWritePaths = [
-          "/var/lib/stalwart-mail"
+          "/var/lib/stalwart"
           "/var/lib/acme"
         ];
       };

@@ -13,7 +13,7 @@ _:
         paths = [
           "/var/lib/kanidm"
           "/var/backup/kanidm"
-          "/var/lib/stalwart-mail/data"
+          "/var/lib/stalwart/data"
           "/var/lib/openbao"
         ];
 
