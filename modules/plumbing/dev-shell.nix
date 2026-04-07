@@ -3,7 +3,6 @@
 {
   perSystem =
     {
-      config,
       pkgs,
       system,
       ...
@@ -14,18 +13,20 @@
     in
     {
       devShells.default = basePkgs.mkShell {
-        packages =
-          with basePkgs;
-          [
-            nil
-            nixfmt
-            nix-tree
-            nh
-            just
-            inputs.agenix.packages.${system}.default
-          ]
-          ++ config.pre-commit.settings.enabledPackages;
-        shellHook = config.pre-commit.installationScript;
+        packages = with basePkgs; [
+          nil
+          nixfmt
+          deadnix
+          statix
+          nix-tree
+          nh
+          just
+          pre-commit
+          inputs.agenix.packages.${system}.default
+        ];
+        shellHook = ''
+          pre-commit install --allow-missing-config
+        '';
       };
     };
 }

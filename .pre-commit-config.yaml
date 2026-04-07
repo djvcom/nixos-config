@@ -1,1 +1,9 @@
-/nix/store/7id0fqdcb42axlszbddm9jv0ixvigi97-pre-commit-config.json
+repos:
+  - repo: local
+    hooks:
+      - id: check
+        name: format and lint
+        entry: just check
+        language: system
+        pass_filenames: false
+        files: '\.nix$'

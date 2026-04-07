@@ -1,11 +1,11 @@
 # Format all Nix files
 fmt:
-    find . -name "*.nix" -type f -exec nixfmt {} \;
+    fd -e nix -E .direnv --exec nixfmt
 
 # Run linters (statix + deadnix)
 lint:
-    statix check .
-    deadnix .
+    statix check . --ignore .direnv/
+    deadnix --exclude .direnv .
 
 # Format and lint
 check: fmt lint

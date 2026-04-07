@@ -1,4 +1,2 @@
-/secrets.nix
-
-# Build output
 result
+.direnv/
