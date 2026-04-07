@@ -61,9 +61,7 @@ _:
 
             export PATH="$HOME/.local/bin:$PATH"
 
-            if [ -f "$HOME/.cargo/env" ]; then
-              . "$HOME/.cargo/env"
-            fi
+            export PATH="$HOME/.cargo/bin:$PATH"
 
             # Source local config (not tracked by git)
             if [ -f "$HOME/.localrc" ]; then
@@ -91,9 +89,7 @@ _:
 
             export PATH="$HOME/.local/bin:$PATH"
 
-            if [ -f "$HOME/.cargo/env" ]; then
-              . "$HOME/.cargo/env"
-            fi
+            export PATH="$HOME/.cargo/bin:$PATH"
 
             # Source local config (not tracked by git)
             if [ -f "$HOME/.localrc" ]; then

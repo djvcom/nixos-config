@@ -19,6 +19,7 @@
       homebrew.brews = [
         "anomalyco/tap/opencode"
         "dagger"
+        "openssl"
         "pulumi"
         "cargo-lambda/tap/cargo-lambda"
       ];
