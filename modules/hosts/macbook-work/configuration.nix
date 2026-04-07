@@ -11,10 +11,13 @@
         zscaler
       ];
 
-      homebrew.taps = [ "cargo-lambda/tap" ];
+      homebrew.taps = [
+        "anomalyco/tap"
+        "cargo-lambda/tap"
+      ];
 
       homebrew.brews = [
-        "opencode"
+        "anomalyco/tap/opencode"
         "dagger"
         "pulumi"
         "cargo-lambda/tap/cargo-lambda"
