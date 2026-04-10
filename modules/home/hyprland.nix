@@ -11,7 +11,7 @@ _:
         enable = true;
         systemd.enable = true;
         settings = {
-          monitor = [ ",preferred,auto,1" ];
+          monitor = [ ",3440x1440@165,auto,1" ];
 
           env = [
             "XCURSOR_SIZE,24"
