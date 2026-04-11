@@ -77,7 +77,7 @@ _:
           misc = {
             force_default_wallpaper = 0;
             vfr = true;
-            vrr = 1;
+            vrr = 2;
           };
 
           windowrule = [
