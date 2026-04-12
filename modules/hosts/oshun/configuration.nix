@@ -30,10 +30,10 @@
 
       powerManagement = {
         powerDownCommands = ''
-          ${pkgs.openrgb}/bin/openrgb --device 0 --mode direct --color 0D0D0D --device 1 --mode direct --color 0D0D0D --device 3 --mode direct --color 000000
+          ${pkgs.openrgb}/bin/openrgb --noautoconnect --device "Corsair Dominator Platinum" --mode direct --color 000000
         '';
         resumeCommands = ''
-          ${pkgs.openrgb}/bin/openrgb --device 0 --mode direct --color FFFFFF --device 1 --mode direct --color FFFFFF --device 3 --mode direct --color 9B59B6
+          ${pkgs.openrgb}/bin/openrgb --noautoconnect --device "Corsair Dominator Platinum" --mode direct --color FFFFFF
         '';
       };
 
