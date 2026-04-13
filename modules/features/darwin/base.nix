@@ -74,6 +74,7 @@ _:
           upgrade = true;
           cleanup = "uninstall";
         };
+        brews = [ "zlib" ];
         casks = [
           "ghostty"
           "google-chrome"

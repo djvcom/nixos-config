@@ -63,6 +63,7 @@
                 export AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
                 export CC=/usr/bin/clang
+                export LIBRARY_PATH="$(brew --prefix zlib)/lib:$LIBRARY_PATH"
                 # export RUSTFLAGS="-C linker=/usr/bin/clang"
 
                 # glab config location varies - check both possible paths
