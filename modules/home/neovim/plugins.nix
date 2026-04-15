@@ -11,6 +11,7 @@ _:
             filters.dotfiles = false;
           };
         };
+        dap.enable = true;
         fugitive.enable = true;
         neogen = {
           enable = true;

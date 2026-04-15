@@ -24,7 +24,7 @@ _:
                 '';
               };
             };
-            rust.enable = true;
+            rustaceanvim.enable = true;
           };
         };
 

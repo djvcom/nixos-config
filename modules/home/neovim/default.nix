@@ -10,6 +10,7 @@ in
       imports = [
         inputs.nixvim.homeModules.nixvim
         nm.neovim-lsp
+        nm.neovim-rust
         nm.neovim-completion
         nm.neovim-telescope
         nm.neovim-treesitter
