@@ -24,6 +24,8 @@
         jellyfin
         fonts
         desktop-packages
+
+        mullvad
       ];
 
       services.hardware.openrgb.enable = true;
