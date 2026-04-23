@@ -2,12 +2,12 @@ _:
 
 {
   flake.modules.homeManager.neovim-treesitter =
-    { pkgs, ... }:
+    { config, ... }:
     {
       programs.nixvim.plugins.treesitter = {
         enable = true;
-        settings.highlight.enable = true;
-        grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+        highlight.enable = true;
+        grammarPackages = with config.programs.nixvim.plugins.treesitter.package.builtGrammars; [
           bash
           hcl
           javascript
