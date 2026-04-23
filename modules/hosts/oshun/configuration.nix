@@ -100,8 +100,11 @@
             cursor
             wallpaper
           ];
-          home.username = "dan";
-          home.homeDirectory = "/home/dan";
+          home = {
+            username = "dan";
+            homeDirectory = "/home/dan";
+            packages = [ pkgs.chromium ];
+          };
         };
     };
 }

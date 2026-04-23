@@ -8,45 +8,40 @@ _:
       ...
     }:
     let
-      inherit (pkgs.stdenv) isDarwin isLinux;
+      inherit (pkgs.stdenv) isDarwin;
     in
     {
       home = {
-        packages =
-          with pkgs;
-          [
-            ripgrep
-            fd
-            eza
-            jq
-            gh
-            glab
-            rustup
-            gcc
-            libiconv
-            nodejs_24
-            yarn
-            typescript-language-server
-            dnsutils
+        packages = with pkgs; [
+          ripgrep
+          fd
+          eza
+          jq
+          gh
+          glab
+          rustup
+          gcc
+          libiconv
+          nodejs_24
+          yarn
+          typescript-language-server
+          dnsutils
 
-            bat
-            delta
-            fzf
-            bottom
-            dust
-            procs
-            sd
-            hyperfine
-            tokei
+          bat
+          delta
+          fzf
+          bottom
+          dust
+          procs
+          sd
+          hyperfine
+          tokei
 
-            nil
-            nixfmt
-            statix
-            deadnix
-          ]
-          ++ lib.optionals isLinux [
-            chromium
-          ];
+          nil
+          nixfmt
+          statix
+          deadnix
+        ];
         sessionVariables = {
           EDITOR = "nvim";
         }
