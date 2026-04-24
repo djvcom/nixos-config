@@ -34,7 +34,6 @@
         openbao
         valkey
         roundcube
-        dashboard
       ];
 
       networking = {

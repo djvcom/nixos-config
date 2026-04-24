@@ -7,8 +7,6 @@ _:
       kernelModules = [
         "kvm-intel"
         "kvm-amd"
-        "iptable_nat"
-        "iptable_filter"
       ];
       swraid.mdadmConf = "MAILADDR root";
       kernel.sysctl = {

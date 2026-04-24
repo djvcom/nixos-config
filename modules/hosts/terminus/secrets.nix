@@ -148,18 +148,6 @@ _:
         group = "roundcube";
         mode = "0400";
       };
-      kanidm-oauth2-dashboard = {
-        file = ../../../secrets/kanidm-oauth2-dashboard.age;
-        owner = "kanidm";
-        group = "kanidm";
-        mode = "0400";
-      };
-      dashboard-oauth2-env = {
-        file = ../../../secrets/dashboard-oauth2-env.age;
-        owner = "root";
-        group = "root";
-        mode = "0400";
-      };
       kanidm-oauth2-roundcube = {
         file = ../../../secrets/kanidm-oauth2-roundcube.age;
         owner = "kanidm";

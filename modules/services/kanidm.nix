@@ -33,7 +33,6 @@ _:
             openbao_admins = { };
             infrastructure_admins = { };
             garage_users = { };
-            dashboard_users = { };
             mail_users = { };
           };
 
@@ -45,7 +44,6 @@ _:
               "openbao_admins"
               "infrastructure_admins"
               "garage_users"
-              "dashboard_users"
               "mail_users"
             ];
           };
@@ -95,22 +93,6 @@ _:
               basicSecretFile = config.age.secrets.kanidm-oauth2-garage.path;
               preferShortUsername = true;
               scopeMaps.garage_users = [
-                "openid"
-                "profile"
-                "email"
-              ];
-            };
-
-            dashboard = {
-              displayName = "Dashboard";
-              originUrl = [
-                "https://dash.djv.sh/"
-                "https://dash.djv.sh/oauth2/callback"
-              ];
-              originLanding = "https://dash.djv.sh/";
-              basicSecretFile = config.age.secrets.kanidm-oauth2-dashboard.path;
-              preferShortUsername = true;
-              scopeMaps.dashboard_users = [
                 "openid"
                 "profile"
                 "email"

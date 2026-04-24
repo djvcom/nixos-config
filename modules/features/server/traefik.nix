@@ -38,10 +38,6 @@ _:
           host = "webmail.djv.sh";
           backend = "http://127.0.0.1:4182";
         };
-        dashboard = {
-          host = "dash.djv.sh";
-          backend = "http://127.0.0.1:4181";
-        };
       };
     in
     {
@@ -256,17 +252,6 @@ _:
                   entryPoints = [ "websecure" ];
                 };
 
-                dashboard = {
-                  rule = "Host(`${domains.dashboard.host}`)";
-                  service = "dashboard";
-                  middlewares = [
-                    "rate-limit"
-                    "security-headers"
-                  ];
-                  tls.certResolver = "letsencrypt";
-                  entryPoints = [ "websecure" ];
-                };
-
                 catch-all = {
                   rule = "HostRegexp(`^.+\\.djv\\.sh$`)";
                   service = "djv";
@@ -309,8 +294,6 @@ _:
                 stalwart.loadBalancer.servers = [ { url = domains.stalwart.backend; } ];
 
                 roundcube.loadBalancer.servers = [ { url = domains.roundcube.backend; } ];
-
-                dashboard.loadBalancer.servers = [ { url = domains.dashboard.backend; } ];
               };
 
               serversTransports.kanidm-transport.serverName = "auth.djv.sh";
