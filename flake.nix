@@ -31,11 +31,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    dagger = {
-      url = "github:djvcom/dagger-nix/fix/deprecated-system-attribute";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     djv = {
       url = "github:djvcom/djv/stable";
       # Don't follow nixpkgs - djv needs specific wasm-bindgen-cli version

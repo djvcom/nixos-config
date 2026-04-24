@@ -75,27 +75,6 @@
         "type": "github"
       }
     },
-    "dagger": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1766404754,
-        "narHash": "sha256-HtNeFqpl2hz58RaqTFoE1IFRh+86xA1bno85KQjgnN8=",
-        "owner": "djvcom",
-        "repo": "dagger-nix",
-        "rev": "b36bddc7dee54d66016c8d4ac46a08046823df6f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "djvcom",
-        "ref": "fix/deprecated-system-attribute",
-        "repo": "dagger-nix",
-        "type": "github"
-      }
-    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -439,7 +418,6 @@
       "inputs": {
         "agenix": "agenix",
         "awww": "awww",
-        "dagger": "dagger",
         "disko": "disko",
         "djv": "djv",
         "firefox-addons": "firefox-addons",

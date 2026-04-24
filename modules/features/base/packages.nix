@@ -1,4 +1,4 @@
-{ inputs, ... }:
+_:
 
 {
   flake.modules.nixos.base-packages =
@@ -9,23 +9,18 @@
         "/share/xdg-desktop-portal"
       ];
 
-      environment.systemPackages =
-        with pkgs;
-        [
-          git
-          vim
-          curl
-          wget
-          age
-          gnumake
-          just
-          nh
-          ghostty.terminfo
-          fastfetch
-        ]
-        ++ [
-          inputs.dagger.packages.${pkgs.stdenv.hostPlatform.system}.dagger
-        ];
+      environment.systemPackages = with pkgs; [
+        git
+        vim
+        curl
+        wget
+        age
+        gnumake
+        just
+        nh
+        ghostty.terminfo
+        fastfetch
+      ];
 
       programs.nix-ld = {
         enable = true;
