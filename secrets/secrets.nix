@@ -20,7 +20,6 @@ in
   "git-identity.age".publicKeys = allKeys;
   "wireguard-private.age".publicKeys = allKeys;
   "datadog-api-key.age".publicKeys = allKeys;
-  "datadog-app-key.age".publicKeys = allKeys;
   "cloudflare-dns-token.age".publicKeys = allKeys;
 
   # Garage S3-compatible storage
@@ -54,9 +53,6 @@ in
 
   # Backup system
   "backup-credentials.age".publicKeys = allKeys;
-
-  # Datadog monitoring
-  "datadog-postgres-password.age".publicKeys = allKeys;
 
   # Roundcube webmail
   "roundcube-des-key.age".publicKeys = allKeys;

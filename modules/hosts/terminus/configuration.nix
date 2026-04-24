@@ -22,7 +22,6 @@
         virtualisation
 
         observability
-        datadog
 
         backup
 

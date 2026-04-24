@@ -5,20 +5,8 @@ _:
     age.secrets = {
       datadog-api-key = {
         file = ../../../secrets/datadog-api-key.age;
-        owner = "datadog";
-        group = "datadog";
-        mode = "0400";
-      };
-      datadog-app-key = {
-        file = ../../../secrets/datadog-app-key.age;
-        owner = "datadog";
-        group = "datadog";
-        mode = "0400";
-      };
-      datadog-postgres-password = {
-        file = ../../../secrets/datadog-postgres-password.age;
-        owner = "datadog";
-        group = "datadog";
+        owner = "root";
+        group = "root";
         mode = "0400";
       };
       cloudflare-dns-token = {
