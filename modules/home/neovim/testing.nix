@@ -11,7 +11,8 @@ _:
             vitest = {
               enable = true;
               package = pkgs.vimUtils.buildVimPlugin {
-                name = "neotest-vitest";
+                pname = "neotest-vitest";
+                version = "0-unstable-f01addc";
                 src = pkgs.fetchFromGitHub {
                   owner = "marilari88";
                   repo = "neotest-vitest";
