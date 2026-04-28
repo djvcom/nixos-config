@@ -61,12 +61,9 @@ _:
                 completion = true;
                 hover = true;
               };
-              completion = {
-                cmp.enabled = true;
-                crates = {
-                  enabled = true;
-                  min_chars = 3;
-                };
+              completion.crates = {
+                enabled = true;
+                min_chars = 3;
               };
             };
           };
