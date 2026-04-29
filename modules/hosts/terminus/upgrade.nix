@@ -13,6 +13,7 @@ _:
       system.autoUpgrade = {
         enable = true;
         allowReboot = true;
+        upgrade = false;
         dates = "04:00";
         flake = "github:djvcom/nixos-config#terminus";
         flags = [
