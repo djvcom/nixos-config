@@ -37,7 +37,6 @@ in
       nix-darwin.lib.darwinSystem {
         inherit system;
         modules = [
-          { nixpkgs.overlays = [ inputs.self.overlays.direnv-cgo ]; }
           { _module.args.username = username; }
           inputs.self.modules.darwin.${hostname}
         ];
