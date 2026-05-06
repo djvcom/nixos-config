@@ -38,9 +38,15 @@ in
         inherit system;
         modules = [
           { _module.args.username = username; }
+          { nixpkgs.overlays = inputs.self.lib.darwinOverlays; }
           inputs.self.modules.darwin.${hostname}
         ];
       };
+
+    darwinOverlays = [
+      (import ../../overlays/chromaprint-darwin-fix.nix)
+      (import ../../overlays/kvazaar-darwin-fix.nix)
+    ];
 
     linuxOverlays = [
       (import ../../overlays/vaultwarden-sso.nix)
