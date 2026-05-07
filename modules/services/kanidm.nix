@@ -34,6 +34,7 @@ _:
             infrastructure_admins = { };
             garage_users = { };
             mail_users = { };
+            sidereal_users = { };
           };
 
           persons.dan = {
@@ -45,6 +46,7 @@ _:
               "infrastructure_admins"
               "garage_users"
               "mail_users"
+              "sidereal_users"
             ];
           };
 
@@ -93,6 +95,19 @@ _:
               basicSecretFile = config.age.secrets.kanidm-oauth2-garage.path;
               preferShortUsername = true;
               scopeMaps.garage_users = [
+                "openid"
+                "profile"
+                "email"
+              ];
+            };
+
+            sidereal = {
+              displayName = "Sidereal";
+              originUrl = [ "https://sidereal.djv.sh/" ];
+              originLanding = "https://sidereal.djv.sh/";
+              public = true;
+              preferShortUsername = true;
+              scopeMaps.sidereal_users = [
                 "openid"
                 "profile"
                 "email"
