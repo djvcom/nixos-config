@@ -34,10 +34,6 @@ _:
           host = "mail.djv.sh";
           backend = "http://127.0.0.1:8082";
         };
-        roundcube = {
-          host = "webmail.djv.sh";
-          backend = "http://127.0.0.1:4182";
-        };
       };
     in
     {
@@ -156,17 +152,6 @@ _:
                   };
                 };
 
-                security-headers-roundcube.headers = {
-                  stsSeconds = 31536000;
-                  stsIncludeSubdomains = true;
-                  customFrameOptionsValue = "SAMEORIGIN";
-                  contentTypeNosniff = true;
-                  referrerPolicy = "strict-origin-when-cross-origin";
-                  customResponseHeaders = {
-                    Permissions-Policy = "geolocation=(), microphone=(), camera=()";
-                  };
-                };
-
                 rate-limit.rateLimit = {
                   average = 100;
                   burst = 50;
@@ -244,14 +229,6 @@ _:
                   entryPoints = [ "websecure" ];
                 };
 
-                roundcube = {
-                  rule = "Host(`${domains.roundcube.host}`)";
-                  service = "roundcube";
-                  middlewares = [ "security-headers-roundcube" ];
-                  tls.certResolver = "letsencrypt";
-                  entryPoints = [ "websecure" ];
-                };
-
                 catch-all = {
                   rule = "HostRegexp(`^.+\\.djv\\.sh$`)";
                   service = "djv";
@@ -292,8 +269,6 @@ _:
                 openbao.loadBalancer.servers = [ { url = domains.openbao.backend; } ];
 
                 stalwart.loadBalancer.servers = [ { url = domains.stalwart.backend; } ];
-
-                roundcube.loadBalancer.servers = [ { url = domains.roundcube.backend; } ];
               };
 
               serversTransports.kanidm-transport.serverName = "auth.djv.sh";

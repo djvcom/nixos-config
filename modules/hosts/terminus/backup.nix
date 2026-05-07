@@ -20,7 +20,6 @@ _:
         postgresqlDatabases = [
           "djv"
           "vaultwarden"
-          "roundcube"
         ];
 
         schedule = "daily";

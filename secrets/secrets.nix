@@ -54,12 +54,5 @@ in
   # Backup system
   "backup-credentials.age".publicKeys = allKeys;
 
-  # Roundcube webmail
-  "roundcube-des-key.age".publicKeys = allKeys;
-
-  # Roundcube OIDC
-  "kanidm-oauth2-roundcube.age".publicKeys = allKeys;
-  "roundcube-oauth2-env.age".publicKeys = allKeys;
-
   "sidereal-s3-credentials.age".publicKeys = allKeys;
 }

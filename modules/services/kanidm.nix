@@ -99,21 +99,6 @@ _:
               ];
             };
 
-            roundcube = {
-              displayName = "Webmail";
-              originUrl = [
-                "https://webmail.djv.sh/"
-                "https://webmail.djv.sh/oauth2/callback"
-              ];
-              originLanding = "https://webmail.djv.sh/";
-              basicSecretFile = config.age.secrets.kanidm-oauth2-roundcube.path;
-              preferShortUsername = true;
-              scopeMaps.mail_users = [
-                "openid"
-                "profile"
-                "email"
-              ];
-            };
           };
         };
       };
