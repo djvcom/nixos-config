@@ -6,7 +6,7 @@ _:
     {
       services.kanidm = {
         server.enable = true;
-        package = pkgs.kanidm_1_9.withSecretProvisioning;
+        package = pkgs.kanidm_1_10.withSecretProvisioning;
 
         server.settings = {
           domain = "auth.djv.sh";
