@@ -111,6 +111,7 @@ _:
                 "openid"
                 "profile"
                 "email"
+                "offline_access"
               ];
             };
 
