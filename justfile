@@ -14,11 +14,21 @@ check: fmt lint
 build host="terminus":
     nh os build . -H {{host}}
 
-# Build and switch
-rebuild host="terminus":
-    nh os switch . -H {{host}}
+# Build and switch — detects platform, defaults to current host
+rebuild host=`hostname -s`:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "{{host}}" in
+        Mac-2)   config="macbook-personal" ;;
+        *)       config="{{host}}" ;;
+    esac
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        sudo darwin-rebuild switch --flake .#"$config" --impure
+    else
+        nh os switch . -H "$config"
+    fi
 
-# Test configuration (build without activation)
+# Test configuration (build without activation, NixOS)
 test host="terminus":
     nh os test . -H {{host}}
 
