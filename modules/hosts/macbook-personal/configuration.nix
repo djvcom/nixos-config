@@ -44,6 +44,11 @@
             enable = true;
             package = inputs.sidereal.packages.${pkgs.stdenv.hostPlatform.system}.sidereal-ai;
             sidereal.url = "https://sidereal.djv.sh";
+            auth.oidc = {
+              enable = true;
+              issuer = "https://auth.djv.sh/oauth2/openid/sidereal";
+              clientId = "sidereal";
+            };
           };
           _module.args.darwinTarget = "macbook-personal";
 
