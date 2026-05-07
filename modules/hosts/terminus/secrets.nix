@@ -130,6 +130,12 @@ _:
         group = "root";
         mode = "0400";
       };
+      sidereal-s3-credentials = {
+        file = ../../../secrets/sidereal-s3-credentials.age;
+        owner = "sidereal";
+        group = "sidereal";
+        mode = "0400";
+      };
     };
   };
 }

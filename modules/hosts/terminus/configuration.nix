@@ -32,6 +32,7 @@
         garage
         openbao
         valkey
+        sidereal
       ];
 
       networking = {

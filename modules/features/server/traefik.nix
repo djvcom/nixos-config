@@ -34,6 +34,10 @@ _:
           host = "mail.djv.sh";
           backend = "http://127.0.0.1:8082";
         };
+        sidereal = {
+          host = "sidereal.djv.sh";
+          backend = "http://127.0.0.1:3100";
+        };
       };
     in
     {
@@ -229,6 +233,17 @@ _:
                   entryPoints = [ "websecure" ];
                 };
 
+                sidereal = {
+                  rule = "Host(`${domains.sidereal.host}`)";
+                  service = "sidereal";
+                  middlewares = [
+                    "security-headers"
+                    "rate-limit"
+                  ];
+                  tls.certResolver = "letsencrypt";
+                  entryPoints = [ "websecure" ];
+                };
+
                 catch-all = {
                   rule = "HostRegexp(`^.+\\.djv\\.sh$`)";
                   service = "djv";
@@ -269,6 +284,8 @@ _:
                 openbao.loadBalancer.servers = [ { url = domains.openbao.backend; } ];
 
                 stalwart.loadBalancer.servers = [ { url = domains.stalwart.backend; } ];
+
+                sidereal.loadBalancer.servers = [ { url = domains.sidereal.backend; } ];
               };
 
               serversTransports.kanidm-transport.serverName = "auth.djv.sh";

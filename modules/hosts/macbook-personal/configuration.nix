@@ -27,16 +27,24 @@
       home-manager.users.${username} =
         { pkgs, lib, ... }:
         {
-          imports = with inputs.self.modules.homeManager; [
-            base
-            shell
-            git
-            neovim
-            firefox
-            ghostty
-            aerospace
-            gitlab
-          ];
+          imports =
+            (with inputs.self.modules.homeManager; [
+              base
+              shell
+              git
+              neovim
+              firefox
+              ghostty
+              aerospace
+              gitlab
+            ])
+            ++ [ inputs.sidereal.homeManagerModules.sidereal-ai ];
+
+          services.sidereal-ai = {
+            enable = true;
+            package = inputs.sidereal.packages.${pkgs.stdenv.hostPlatform.system}.sidereal-ai;
+            sidereal.url = "https://sidereal.djv.sh";
+          };
           _module.args.darwinTarget = "macbook-personal";
 
           home = {
