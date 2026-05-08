@@ -168,11 +168,11 @@
       },
       "locked": {
         "dir": "pkgs/firefox-addons",
-        "lastModified": 1778126577,
-        "narHash": "sha256-t6hAW8FsMNOxtaSxyC/PsxOBlFh37WDQKKcGh8wFS7A=",
+        "lastModified": 1778212976,
+        "narHash": "sha256-ejjsKuq6MOSXRmDCzT/y+lMQm7oNvn+Lv3FmMlhOf0g=",
         "owner": "rycee",
         "repo": "nur-expressions",
-        "rev": "6a9c13d91f7a44606dae05edd53f00b43b9d7748",
+        "rev": "b3b011df4f9be7848124081577d2ca8f6a3e2c82",
         "type": "gitlab"
       },
       "original": {
@@ -497,11 +497,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1778190909,
-        "narHash": "sha256-m7k1N8jcLSj/d0z7nzrD0V4tbpTD+IbAjaSszkErip8=",
+        "lastModified": 1778224550,
+        "narHash": "sha256-vudpZwlU6ft021bCQv2E5pSEBOsIbfaDSKSCRQW69Q4=",
         "owner": "djvcom",
         "repo": "sidereal",
-        "rev": "9d3612823725557cf589293797fdb68a6cbb4392",
+        "rev": "c313eb65cf848719b70ce4cab611180341aa530c",
         "type": "github"
       },
       "original": {
