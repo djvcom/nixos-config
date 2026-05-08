@@ -106,6 +106,7 @@ _:
               originUrl = [ "https://sidereal.djv.sh/" ];
               originLanding = "https://sidereal.djv.sh/";
               public = true;
+              enableLocalhostRedirects = true;
               preferShortUsername = true;
               scopeMaps.sidereal_users = [
                 "openid"
