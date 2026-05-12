@@ -33,6 +33,18 @@ _:
           options.desc = "Generate doc comment";
           mode = "n";
         }
+        {
+          key = "<leader>th";
+          action = ":split | terminal<CR>";
+          options.desc = "Terminal horizontal split";
+          mode = "n";
+        }
+        {
+          key = "<leader>tv";
+          action = ":vsplit | terminal<CR>";
+          options.desc = "Terminal vertical split";
+          mode = "n";
+        }
       ];
     };
   };

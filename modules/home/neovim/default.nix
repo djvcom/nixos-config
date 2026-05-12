@@ -17,6 +17,7 @@ in
         nm.neovim-formatting
         nm.neovim-testing
         nm.neovim-plugins
+        nm.neovim-claudecode
       ];
 
       programs.nixvim = {
