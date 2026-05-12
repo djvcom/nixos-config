@@ -24,8 +24,6 @@ NixOS and nix-darwin configuration for personal development infrastructure.
 │   │   ├── garage.nix                  # S3 object storage
 │   │   ├── openbao.nix                 # Secrets management
 │   │   ├── valkey.nix                  # Cache/queue store
-│   │   ├── roundcube.nix               # Webmail (OAuth2)
-│   │   ├── dashboard.nix              # Homepage dashboard (OAuth2)
 │   │   ├── djv.nix                     # Portfolio site
 │   │   └── sidereal.nix               # Build/container service
 │   ├── home/
@@ -35,7 +33,11 @@ NixOS and nix-darwin configuration for personal development infrastructure.
 │   │   ├── neovim/                     # NixVim config (split by concern)
 │   │   ├── ghostty.nix                 # Ghostty terminal config
 │   │   ├── firefox.nix                 # LibreWolf with extensions
-│   │   ├── aerospace.nix              # Tiling window manager (macOS)
+│   │   ├── aerospace.nix               # Tiling window manager (macOS)
+│   │   ├── cursor.nix                  # Cursor editor config
+│   │   ├── hyprland.nix                # Hyprland compositor config
+│   │   ├── wallpaper.nix               # Wallpaper config
+│   │   ├── waybar.nix                  # Waybar status bar config
 │   │   └── gitlab.nix                  # GitLab token rotation
 │   ├── hosts/
 │   │   ├── terminus/                   # NixOS server (Hetzner)

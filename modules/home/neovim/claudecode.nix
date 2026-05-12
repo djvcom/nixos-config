@@ -21,6 +21,7 @@ _:
         extraConfigLua = ''
           require("claudecode").setup({
             terminal = { provider = "native" },
+            diff_opts = { layout = "vertical" },
           })
         '';
 

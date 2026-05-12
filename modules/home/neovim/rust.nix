@@ -94,6 +94,24 @@ _:
             options.desc = "Go to parent module";
             mode = "n";
           }
+          {
+            key = "<leader>rh";
+            action = ":RustLsp hover actions<CR>";
+            options.desc = "Rust hover actions";
+            mode = "n";
+          }
+          {
+            key = "<leader>rc";
+            action = ":RustLsp openCargo<CR>";
+            options.desc = "Open Cargo.toml";
+            mode = "n";
+          }
+          {
+            key = "<leader>rf";
+            action = ":RustLsp flyCheck<CR>";
+            options.desc = "Run fly check";
+            mode = "n";
+          }
         ];
       };
     };

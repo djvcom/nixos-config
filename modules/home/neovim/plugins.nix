@@ -34,6 +34,12 @@ _:
           mode = "n";
         }
         {
+          key = "<leader>fr";
+          action = ":checktime<CR>";
+          options.desc = "Reload file from disk";
+          mode = "n";
+        }
+        {
           key = "<leader>th";
           action = ":split | terminal<CR>";
           options.desc = "Terminal horizontal split";
