@@ -26,6 +26,7 @@ in
         viAlias = true;
         vimAlias = true;
         byteCompileLua.enable = true;
+        nixpkgs.source = inputs.nixpkgs;
 
         globals.mapleader = " ";
 

@@ -10,6 +10,7 @@ _:
       wayland.windowManager.hyprland = {
         enable = true;
         systemd.enable = true;
+        configType = "hyprlang";
         settings = {
           monitor = [ ",3440x1440@165,auto,1" ];
 
@@ -63,7 +64,6 @@ _:
           };
 
           dwindle = {
-            pseudotile = true;
             preserve_split = true;
           };
 
@@ -76,7 +76,6 @@ _:
 
           misc = {
             force_default_wallpaper = 0;
-            vfr = true;
             vrr = 2;
           };
 

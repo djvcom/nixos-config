@@ -35,7 +35,6 @@
 
       programs.firefox = {
         enable = true;
-        package = pkgs.librewolf;
         profiles.default = {
           isDefault = true;
           extensions.packages = with addons; [

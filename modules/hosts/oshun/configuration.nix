@@ -24,8 +24,6 @@
         jellyfin
         fonts
         desktop-packages
-
-        mullvad
       ];
 
       services.hardware.openrgb.enable = true;
@@ -92,7 +90,6 @@
             shell
             git
             neovim
-            firefox
             ghostty
             hyprland
             waybar
