@@ -17,7 +17,6 @@ in
         nm.neovim-formatting
         nm.neovim-testing
         nm.neovim-plugins
-        nm.neovim-claudecode
       ];
 
       programs.nixvim = {
@@ -27,6 +26,7 @@ in
         vimAlias = true;
         performance.byteCompileLua.enable = true;
         nixpkgs.source = inputs.nixpkgs;
+        enableMan = false;
 
         globals.mapleader = " ";
 
