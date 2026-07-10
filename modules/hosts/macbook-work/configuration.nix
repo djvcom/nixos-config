@@ -38,6 +38,8 @@
           ];
           _module.args.darwinTarget = "macbook-work";
 
+          programs.ssh.settings."djv.sh".Port = 443;
+
           home = {
             inherit username;
             homeDirectory = "/Users/${username}";

@@ -134,7 +134,6 @@ _:
                   "nixos-upgrade-preflight"
                   "stalwart"
                   "garage"
-                  "oauth2-proxy"
                 ];
                 priority = "info";
               };

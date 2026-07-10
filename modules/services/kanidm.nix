@@ -32,7 +32,6 @@ _:
             vaultwarden_users = { };
             openbao_admins = { };
             infrastructure_admins = { };
-            garage_users = { };
             mail_users = { };
             sidereal_users = { };
           };
@@ -44,7 +43,6 @@ _:
               "vaultwarden_users"
               "openbao_admins"
               "infrastructure_admins"
-              "garage_users"
               "mail_users"
               "sidereal_users"
             ];
@@ -79,22 +77,6 @@ _:
               preferShortUsername = true;
               # PKCE is enabled by default in Kanidm; Vaultwarden uses SSO_PKCE=true
               scopeMaps.vaultwarden_users = [
-                "openid"
-                "profile"
-                "email"
-              ];
-            };
-
-            garage = {
-              displayName = "Garage Storage";
-              originUrl = [
-                "https://garage.djv.sh/"
-                "https://garage.djv.sh/oauth2/callback"
-              ];
-              originLanding = "https://garage.djv.sh/";
-              basicSecretFile = config.age.secrets.kanidm-oauth2-garage.path;
-              preferShortUsername = true;
-              scopeMaps.garage_users = [
                 "openid"
                 "profile"
                 "email"

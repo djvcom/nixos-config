@@ -46,26 +46,8 @@ _:
         group = "kanidm";
         mode = "0400";
       };
-      kanidm-oauth2-garage = {
-        file = ../../../secrets/kanidm-oauth2-garage.age;
-        owner = "kanidm";
-        group = "kanidm";
-        mode = "0400";
-      };
       garage-env = {
         file = ../../../secrets/garage-env.age;
-        owner = "root";
-        group = "root";
-        mode = "0400";
-      };
-      garage-webui-env = {
-        file = ../../../secrets/garage-webui-env.age;
-        owner = "garage-webui";
-        group = "garage-webui";
-        mode = "0400";
-      };
-      oauth2-proxy-env = {
-        file = ../../../secrets/oauth2-proxy-env.age;
         owner = "root";
         group = "root";
         mode = "0400";

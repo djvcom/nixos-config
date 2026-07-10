@@ -25,8 +25,8 @@ _:
                 '';
               };
             };
-            rustaceanvim.enable = true;
           };
+          settings.adapters = [ "require('rustaceanvim.neotest')" ];
         };
 
         extraConfigLua = ''

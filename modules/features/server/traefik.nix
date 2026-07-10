@@ -14,10 +14,6 @@ _:
           host = "s3.djv.sh";
           s3Backend = "http://127.0.0.1:3900";
         };
-        garageAdmin = {
-          host = "garage.djv.sh";
-          backend = "http://127.0.0.1:4180";
-        };
         kanidm = {
           host = "auth.djv.sh";
           backend = "https://127.0.0.1:8444";
@@ -184,17 +180,6 @@ _:
                   entryPoints = [ "websecure" ];
                 };
 
-                garage-admin = {
-                  rule = "Host(`${domains.garageAdmin.host}`)";
-                  service = "garage-admin";
-                  middlewares = [
-                    "rate-limit"
-                    "security-headers"
-                  ];
-                  tls.certResolver = "letsencrypt";
-                  entryPoints = [ "websecure" ];
-                };
-
                 kanidm = {
                   rule = "Host(`${domains.kanidm.host}`)";
                   service = "kanidm";
@@ -271,8 +256,6 @@ _:
                   passHostHeader = true;
                   responseForwarding.flushInterval = "100ms";
                 };
-
-                garage-admin.loadBalancer.servers = [ { url = domains.garageAdmin.backend; } ];
 
                 kanidm.loadBalancer = {
                   servers = [ { url = domains.kanidm.backend; } ];
