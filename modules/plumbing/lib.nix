@@ -46,12 +46,14 @@ in
     darwinOverlays = [
       (import ../../overlays/chromaprint-darwin-fix.nix)
       (import ../../overlays/kvazaar-darwin-fix.nix)
+      (import ../../overlays/glab.nix)
     ];
 
     linuxOverlays = [
       (import ../../overlays/opentelemetry-collector.nix)
       (import ../../overlays/garage-v2.nix)
       (import ../../overlays/uvloop-skip-ssl-test.nix)
+      (import ../../overlays/glab.nix)
       inputs.sidereal.overlays.default
       (final: _prev: {
         inherit (inputs.awww.packages.${final.stdenv.hostPlatform.system}) awww;
