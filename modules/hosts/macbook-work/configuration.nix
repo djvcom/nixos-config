@@ -11,17 +11,22 @@
         zscaler
       ];
 
-      homebrew.taps = [
-        "anomalyco/tap"
-        "cargo-lambda/tap"
-      ];
+      homebrew = {
+        taps = [
+          "cargo-lambda/tap"
+        ];
 
-      homebrew.brews = [
-        "anomalyco/tap/opencode"
-        "openssl"
-        "pulumi"
-        "cargo-lambda/tap/cargo-lambda"
-      ];
+        brews = [
+          "openssl"
+          "pulumi"
+          "cargo-lambda/tap/cargo-lambda"
+        ];
+
+        casks = [
+          "kiro"
+          "kiro-cli"
+        ];
+      };
 
       home-manager.users.${username} =
         { pkgs, ... }:
