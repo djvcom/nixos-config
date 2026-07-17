@@ -57,6 +57,7 @@
               terraform-ls
               tflint
               poetry
+              jira-cli-go
             ];
 
             # Work-specific shell config
