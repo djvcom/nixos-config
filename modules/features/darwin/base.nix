@@ -43,6 +43,9 @@ _:
 
         etc."sudoers.d/darwin-rebuild".text = ''
           ${username} ALL=(ALL) NOPASSWD: /run/current-system/sw/bin/darwin-rebuild
+          ${username} ALL=(ALL) NOPASSWD: /nix/store/*/activate
+          ${username} ALL=(ALL) NOPASSWD: /nix/store/*/activate-user
+          ${username} ALL=(ALL) NOPASSWD: /nix/store/*/sw/bin/darwin-rebuild *
         '';
 
         shells = with pkgs; [

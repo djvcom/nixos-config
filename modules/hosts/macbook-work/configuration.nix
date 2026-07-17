@@ -12,6 +12,8 @@
       ];
 
       homebrew = {
+        caskArgs.appdir = "~/Applications";
+
         taps = [
           "cargo-lambda/tap"
         ];
