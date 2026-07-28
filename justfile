@@ -23,7 +23,7 @@ rebuild host=`hostname -s`:
         *)       config="{{host}}" ;;
     esac
     if [[ "$(uname -s)" == "Darwin" ]]; then
-        sudo darwin-rebuild switch --flake .#"$config" --impure
+        sudo /run/current-system/sw/bin/darwin-rebuild switch --flake .#"$config" --impure
     else
         nh os switch . -H "$config"
     fi
