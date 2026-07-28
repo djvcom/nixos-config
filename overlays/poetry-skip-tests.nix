@@ -5,11 +5,7 @@ _: prev:
 # updates the package or patches the tests.
 # Remove once poetry builds cleanly after a future flake update.
 {
-  python3Packages = prev.python3Packages.override {
-    overrides = _pyFinal: pyPrev: {
-      poetry = pyPrev.poetry.overridePythonAttrs (_old: {
-        doCheck = false;
-      });
-    };
-  };
+  poetry = prev.poetry.overridePythonAttrs (_old: {
+    doCheck = false;
+  });
 }

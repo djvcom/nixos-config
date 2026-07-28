@@ -47,6 +47,7 @@ in
       (import ../../overlays/chromaprint-darwin-fix.nix)
       (import ../../overlays/kvazaar-darwin-fix.nix)
       (import ../../overlays/glab.nix)
+      (import ../../overlays/poetry-skip-tests.nix)
     ];
 
     linuxOverlays = [
