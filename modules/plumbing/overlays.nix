@@ -8,6 +8,7 @@
     uvloop-skip-ssl-test = import ../../overlays/uvloop-skip-ssl-test.nix;
     chromaprint-darwin-fix = import ../../overlays/chromaprint-darwin-fix.nix;
     kvazaar-darwin-fix = import ../../overlays/kvazaar-darwin-fix.nix;
+    poetry-skip-tests = import ../../overlays/poetry-skip-tests.nix;
     sidereal = inputs.sidereal.overlays.default;
   };
 }
