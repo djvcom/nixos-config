@@ -25,14 +25,17 @@ Ensure these DNS records exist in Cloudflare for `djv.sh`:
 | Type  | Name     | Target              |
 |-------|----------|---------------------|
 | A     | @        | 88.99.1.188         |
-| A     | auth     | 88.99.1.188         |
+| A     | *        | 88.99.1.188         |
 | A     | s3       | 88.99.1.188         |
-| A     | sidereal | 88.99.1.188         |
-| A     | vault    | 88.99.1.188         |
-| AAAA  | @        | 2a01:4f8:173:28ab::2|
 
-Mail for `djv.sh` is handled by Cloudflare Email Routing rather than terminus, so its
-MX and SPF records are managed from the Cloudflare dashboard.
+The wildcard record covers every service subdomain (`auth`, `vault`, `sidereal`), so new
+services behind Traefik need no DNS changes. All records are DNS-only (not proxied), as
+Traefik obtains certificates itself via the DNS-01 challenge. There is no AAAA record:
+sslh only listens on IPv4, so one should not be added until that changes.
+
+Mail for `djv.sh` is forwarded by Cloudflare Email Routing rather than handled on
+terminus. Its MX, SPF and DKIM records are created and managed by Cloudflare when
+Email Routing is enabled, alongside the `_dmarc` TXT record.
 
 ---
 
