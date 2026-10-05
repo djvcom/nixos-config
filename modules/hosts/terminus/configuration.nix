@@ -30,7 +30,6 @@
         vaultwarden
         stalwart
         garage
-        openbao
         valkey
         sidereal
       ];

@@ -22,10 +22,6 @@ _:
           host = "vault.djv.sh";
           backend = "http://127.0.0.1:8222";
         };
-        openbao = {
-          host = "bao.djv.sh";
-          backend = "http://127.0.0.1:8200";
-        };
         stalwart = {
           host = "mail.djv.sh";
           backend = "http://127.0.0.1:8082";
@@ -202,14 +198,6 @@ _:
                   entryPoints = [ "websecure" ];
                 };
 
-                openbao = {
-                  rule = "Host(`${domains.openbao.host}`)";
-                  service = "openbao";
-                  middlewares = [ "security-headers" ];
-                  tls.certResolver = "letsencrypt";
-                  entryPoints = [ "websecure" ];
-                };
-
                 stalwart = {
                   rule = "Host(`${domains.stalwart.host}`)";
                   service = "stalwart";
@@ -263,8 +251,6 @@ _:
                 };
 
                 vaultwarden.loadBalancer.servers = [ { url = domains.vaultwarden.backend; } ];
-
-                openbao.loadBalancer.servers = [ { url = domains.openbao.backend; } ];
 
                 stalwart.loadBalancer.servers = [ { url = domains.stalwart.backend; } ];
 

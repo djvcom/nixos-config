@@ -30,7 +30,6 @@ _:
 
           groups = {
             vaultwarden_users = { };
-            openbao_admins = { };
             infrastructure_admins = { };
             mail_users = { };
             sidereal_users = { };
@@ -41,7 +40,6 @@ _:
             mailAddresses = [ "dan@djv.sh" ];
             groups = [
               "vaultwarden_users"
-              "openbao_admins"
               "infrastructure_admins"
               "mail_users"
               "sidereal_users"
@@ -49,23 +47,6 @@ _:
           };
 
           systems.oauth2 = {
-            openbao = {
-              displayName = "OpenBao Secrets";
-              originUrl = [
-                "https://bao.djv.sh/"
-                "https://bao.djv.sh/ui/vault/auth/oidc/oidc/callback"
-              ];
-              originLanding = "https://bao.djv.sh/ui/";
-              basicSecretFile = config.age.secrets.kanidm-oauth2-openbao.path;
-              preferShortUsername = true;
-              scopeMaps.openbao_admins = [
-                "openid"
-                "profile"
-                "email"
-                "groups"
-              ];
-            };
-
             vaultwarden = {
               displayName = "Vaultwarden";
               originUrl = [

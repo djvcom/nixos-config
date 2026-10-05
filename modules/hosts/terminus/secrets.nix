@@ -40,12 +40,6 @@ _:
         group = "kanidm";
         mode = "0400";
       };
-      kanidm-oauth2-openbao = {
-        file = ../../../secrets/kanidm-oauth2-openbao.age;
-        owner = "kanidm";
-        group = "kanidm";
-        mode = "0400";
-      };
       garage-env = {
         file = ../../../secrets/garage-env.age;
         owner = "root";
@@ -87,24 +81,6 @@ _:
         owner = "root";
         group = "mail-secrets";
         mode = "0440";
-      };
-      openbao-keys = {
-        file = ../../../secrets/openbao-keys.age;
-        owner = "root";
-        group = "root";
-        mode = "0400";
-      };
-      openbao-oidc-secret = {
-        file = ../../../secrets/openbao-oidc-secret.age;
-        owner = "root";
-        group = "root";
-        mode = "0400";
-      };
-      openbao-oidc-env = {
-        file = ../../../secrets/openbao-oidc-env.age;
-        owner = "root";
-        group = "root";
-        mode = "0400";
       };
       backup-credentials = {
         file = ../../../secrets/backup-credentials.age;

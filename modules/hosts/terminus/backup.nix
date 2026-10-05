@@ -14,7 +14,6 @@ _:
           "/var/lib/kanidm"
           "/var/backup/kanidm"
           "/var/lib/stalwart/data"
-          "/var/lib/openbao"
         ];
 
         postgresqlDatabases = [

@@ -35,18 +35,12 @@ in
 
   # Kanidm OAuth2 client secrets
   "kanidm-oauth2-vaultwarden.age".publicKeys = allKeys;
-  "kanidm-oauth2-openbao.age".publicKeys = allKeys;
 
   # Stalwart mail server
   "stalwart-admin-password.age".publicKeys = allKeys;
   "dkim-rsa-key.age".publicKeys = allKeys;
   "dkim-ed25519-key.age".publicKeys = allKeys;
   "dan-mail-password.age".publicKeys = allKeys;
-
-  # OpenBao secrets management
-  "openbao-keys.age".publicKeys = allKeys;
-  "openbao-oidc-secret.age".publicKeys = allKeys;
-  "openbao-oidc-env.age".publicKeys = allKeys;
 
   # Backup system
   "backup-credentials.age".publicKeys = allKeys;
