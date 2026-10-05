@@ -63,5 +63,9 @@ _:
         };
       };
 
+      services.opentelemetry-collector.validateConfigOverrides = [
+        "exporters::datadog::api::key=stub"
+        "extensions::datadog::api::key=stub"
+      ];
     };
 }
