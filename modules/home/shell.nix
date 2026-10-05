@@ -9,7 +9,7 @@ _:
       ...
     }:
     let
-      inherit (pkgs.stdenv) isDarwin isLinux;
+      inherit (pkgs.stdenv.hostPlatform) isDarwin isLinux;
 
       sharedAliases = {
         la = "ls -lah";

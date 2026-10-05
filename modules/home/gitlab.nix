@@ -5,7 +5,7 @@ _:
   flake.modules.homeManager.gitlab =
     { pkgs, lib, ... }:
     let
-      inherit (pkgs.stdenv) isDarwin isLinux;
+      inherit (pkgs.stdenv.hostPlatform) isDarwin isLinux;
 
       rotateScript = ''
         #!/usr/bin/env bash

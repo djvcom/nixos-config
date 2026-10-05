@@ -4,7 +4,7 @@ _:
   flake.modules.homeManager.hyprland =
     { lib, pkgs, ... }:
     let
-      inherit (pkgs.stdenv) isLinux;
+      inherit (pkgs.stdenv.hostPlatform) isLinux;
     in
     lib.mkIf isLinux {
       wayland.windowManager.hyprland = {

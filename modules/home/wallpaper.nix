@@ -4,7 +4,7 @@ _:
   flake.modules.homeManager.wallpaper =
     { lib, pkgs, ... }:
     let
-      inherit (pkgs.stdenv) isLinux;
+      inherit (pkgs.stdenv.hostPlatform) isLinux;
 
       set-wallpaper = pkgs.writeShellScriptBin "set-wallpaper" ''
         WALLPAPER="$1"

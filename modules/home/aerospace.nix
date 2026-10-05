@@ -4,7 +4,7 @@ _:
   flake.modules.homeManager.aerospace =
     { lib, pkgs, ... }:
     let
-      inherit (pkgs.stdenv) isDarwin;
+      inherit (pkgs.stdenv.hostPlatform) isDarwin;
     in
     {
       home.file.".aerospace.toml" = lib.mkIf isDarwin {

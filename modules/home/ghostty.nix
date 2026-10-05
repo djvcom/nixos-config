@@ -4,7 +4,7 @@ _:
   flake.modules.homeManager.ghostty =
     { pkgs, lib, ... }:
     let
-      inherit (pkgs.stdenv) isDarwin;
+      inherit (pkgs.stdenv.hostPlatform) isDarwin;
     in
     {
       programs.ghostty = {

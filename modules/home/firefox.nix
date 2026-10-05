@@ -9,7 +9,7 @@
     }:
     let
       addons = inputs.firefox-addons.packages.${pkgs.stdenv.hostPlatform.system};
-      inherit (pkgs.stdenv) isDarwin;
+      inherit (pkgs.stdenv.hostPlatform) isDarwin;
     in
     {
       home.activation.linkLibreWolfExtensions = lib.mkIf isDarwin (
