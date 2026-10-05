@@ -20,9 +20,7 @@ NixOS and nix-darwin configuration for personal development infrastructure.
 │   ├── services/
 │   │   ├── kanidm.nix                  # Identity provider (OIDC)
 │   │   ├── vaultwarden.nix             # Password manager (SSO)
-│   │   ├── stalwart.nix                # Mail server (SMTP/IMAP)
 │   │   ├── garage.nix                  # S3 object storage
-│   │   ├── openbao.nix                 # Secrets management
 │   │   ├── valkey.nix                  # Cache/queue store
 │   │   ├── djv.nix                     # Portfolio site
 │   │   └── sidereal.nix               # Build/container service
@@ -62,7 +60,7 @@ NixOS and nix-darwin configuration for personal development infrastructure.
 
 | Name | Platform | Purpose |
 |------|----------|---------|
-| terminus | NixOS (x86_64) | Primary server — identity, mail, storage, secrets, web |
+| terminus | NixOS (x86_64) | Primary server — identity, passwords, storage, web |
 | oshun | NixOS (x86_64) | Desktop — gaming, media, development |
 | macbook-personal | macOS (aarch64) | Personal laptop |
 | macbook-work | macOS (aarch64) | Work laptop |
