@@ -24,18 +24,7 @@ _:
           SSO_SCOPES = "openid profile email";
           SSO_PKCE = true;
           # SSO_CLIENT_SECRET loaded from environmentFile
-
-          SMTP_HOST = "mail.djv.sh";
-          SMTP_PORT = 587;
-          SMTP_SECURITY = "starttls";
-          SMTP_FROM = "vault@djv.sh";
-          SMTP_FROM_NAME = "Vaultwarden";
-          SMTP_USERNAME = "dan";
-          SMTP_PASSWORD_FILE = config.age.secrets.dan-mail-password.path;
         };
       };
-
-      # Add vaultwarden to mail-secrets group for shared credential access
-      users.users.vaultwarden.extraGroups = [ "mail-secrets" ];
     };
 }

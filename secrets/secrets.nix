@@ -36,12 +36,6 @@ in
   # Kanidm OAuth2 client secrets
   "kanidm-oauth2-vaultwarden.age".publicKeys = allKeys;
 
-  # Stalwart mail server
-  "stalwart-admin-password.age".publicKeys = allKeys;
-  "dkim-rsa-key.age".publicKeys = allKeys;
-  "dkim-ed25519-key.age".publicKeys = allKeys;
-  "dan-mail-password.age".publicKeys = allKeys;
-
   # Backup system
   "backup-credentials.age".publicKeys = allKeys;
 

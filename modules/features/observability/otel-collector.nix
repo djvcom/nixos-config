@@ -132,7 +132,6 @@ _:
                   "systemd-*"
                   "nixos-upgrade"
                   "nixos-upgrade-preflight"
-                  "stalwart"
                   "garage"
                 ];
                 priority = "info";

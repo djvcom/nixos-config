@@ -22,10 +22,6 @@ _:
           host = "vault.djv.sh";
           backend = "http://127.0.0.1:8222";
         };
-        stalwart = {
-          host = "mail.djv.sh";
-          backend = "http://127.0.0.1:8082";
-        };
         sidereal = {
           host = "sidereal.djv.sh";
           backend = "http://127.0.0.1:3100";
@@ -198,14 +194,6 @@ _:
                   entryPoints = [ "websecure" ];
                 };
 
-                stalwart = {
-                  rule = "Host(`${domains.stalwart.host}`)";
-                  service = "stalwart";
-                  middlewares = [ "security-headers" ];
-                  tls.certResolver = "letsencrypt";
-                  entryPoints = [ "websecure" ];
-                };
-
                 sidereal = {
                   rule = "Host(`${domains.sidereal.host}`)";
                   service = "sidereal";
@@ -251,8 +239,6 @@ _:
                 };
 
                 vaultwarden.loadBalancer.servers = [ { url = domains.vaultwarden.backend; } ];
-
-                stalwart.loadBalancer.servers = [ { url = domains.stalwart.backend; } ];
 
                 sidereal.loadBalancer.servers = [ { url = domains.sidereal.backend; } ];
               };

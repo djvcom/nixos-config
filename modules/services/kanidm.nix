@@ -31,7 +31,6 @@ _:
           groups = {
             vaultwarden_users = { };
             infrastructure_admins = { };
-            mail_users = { };
             sidereal_users = { };
           };
 
@@ -41,7 +40,6 @@ _:
             groups = [
               "vaultwarden_users"
               "infrastructure_admins"
-              "mail_users"
               "sidereal_users"
             ];
           };

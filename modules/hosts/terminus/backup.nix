@@ -13,7 +13,6 @@ _:
         paths = [
           "/var/lib/kanidm"
           "/var/backup/kanidm"
-          "/var/lib/stalwart/data"
         ];
 
         postgresqlDatabases = [

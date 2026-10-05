@@ -58,30 +58,6 @@ _:
         group = "vaultwarden";
         mode = "0400";
       };
-      stalwart-admin-password = {
-        file = ../../../secrets/stalwart-admin-password.age;
-        owner = "stalwart";
-        group = "stalwart";
-        mode = "0400";
-      };
-      dkim-rsa-key = {
-        file = ../../../secrets/dkim-rsa-key.age;
-        owner = "stalwart";
-        group = "stalwart";
-        mode = "0400";
-      };
-      dkim-ed25519-key = {
-        file = ../../../secrets/dkim-ed25519-key.age;
-        owner = "stalwart";
-        group = "stalwart";
-        mode = "0400";
-      };
-      dan-mail-password = {
-        file = ../../../secrets/dan-mail-password.age;
-        owner = "root";
-        group = "mail-secrets";
-        mode = "0440";
-      };
       backup-credentials = {
         file = ../../../secrets/backup-credentials.age;
         owner = "root";

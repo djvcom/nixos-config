@@ -28,7 +28,6 @@
         djv
         kanidm
         vaultwarden
-        stalwart
         garage
         valkey
         sidereal
@@ -81,9 +80,6 @@
       };
 
       users = {
-        # Shared group for services needing mail credentials
-        groups.mail-secrets = { };
-
         users.dan = {
           isNormalUser = true;
           extraGroups = [
